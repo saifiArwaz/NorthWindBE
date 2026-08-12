@@ -1,29 +1,35 @@
 import z from "zod";
 import { prisma } from "../../config/prisma.config.js";
+import { InvestorDocumentType } from "../../generated/prisma/enums.js";
 export const createinvestorDocumentschema = z.object({
   body: z
     .object({
-      inverstorTabId: z.string().optional(),
-      title: z.string().optional(),
-      type: z.string().optional(),
+      title: z.string().min(1, "Title is required"),
+      type: z.nativeEnum(InvestorDocumentType).optional(),
+      dateAt: z.preprocess(
+        (val) =>
+          typeof val === "string" || typeof val === "number"
+            ? new Date(val)
+            : val,
+        z.date().refine((d) => !isNaN(d.getTime()), {
+          message: "Invalid date format",
+        }),
+      ).optional(),
     })
-    .superRefine(async (data, ctx) => {
-      const category = await prisma.inverstorTabs.findUnique({
-        where: { id: data.inverstorTabId },
-      });
-
-      if (!category) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["inverstorTabId"],
-          message: "Inverstor Tab Record not found",
-        });
-      }
-    }),
 });
 
 export const updateinvestorDocumentschema = z.object({
   body: z.object({
     title: z.string().optional(),
+    type: z.nativeEnum(InvestorDocumentType).optional(),
+    dateAt: z.preprocess(
+      (val) =>
+        typeof val === "string" || typeof val === "number"
+          ? new Date(val)
+          : val,
+      z.date().refine((d) => !isNaN(d.getTime()), {
+        message: "Invalid date format",
+      }),
+    ).optional(),
   }),
 });

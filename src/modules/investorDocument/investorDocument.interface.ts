@@ -1,25 +1,17 @@
+export type InvestorDocumentType = "new_release" | "annual" | "quarterly";
+
 export interface IInvestorDocumentsDTO {
-  inverstorTabId: string;
-  title?: string;
-  type?: string;
+  title: string;
+  type?: InvestorDocumentType;
+  dateAt?: string;
   files?: string;
-  alt?: string;
-  watermark?: string;
-  sub_title?: string;
-  label?: string;
-  list?: string;
   createdBy?: string;
 }
 
 export interface IInvestorDocumentsUpdateDTO {
-  inverstorTabId?: string;
   title?: string;
-  type?: string;
+  type?: InvestorDocumentType;
+  dateAt?: string;
   files?: string;
-  alt?: string;
-  watermark?: string;
-  sub_title?: string;
-  label?: string;
-  list?: string;
   updatedBy?: string;
 }

@@ -9,15 +9,10 @@ const slugify = (slugifyPkg as any).default ?? slugifyPkg;
 
 export async function createInvestorDocuments(data: IInvestorDocumentsDTO) {
   const prismaData: any = {
-    inverstorTabId: data.inverstorTabId,
     title: data.title,
     type: data.type,
+    dateAt: data.dateAt,
     files: data.files,
-    alt: data.alt,
-    sub_title: data.sub_title,
-    label: data.label,
-    watermark: data.watermark,
-    list: data.list,
     createdBy: data.createdBy,
   };
 
@@ -28,9 +23,13 @@ export async function getAllList(
   page = 1,
   limit = 10,
   search = "",
-  tabId?: string,
+  type?: string, 
 ) {
-  const where: any = { inverstorTabId: tabId };
+  const where: any = {};
+
+  if (type) {
+    where.type = type;
+  }
 
   if (search) {
     where.OR = [{ title: { contains: search, mode: "insensitive" } }];
@@ -63,12 +62,8 @@ export async function updateInvestorDocuments(
     Object.entries({
       title: data.title,
       type: data.type,
+      dateAt: data.dateAt,
       files: data.files,
-      alt: data.alt,
-      sub_title: data.sub_title,
-      label: data.label,
-      watermark: data.watermark,
-      list: data.list,
       ...(data.updatedBy && {
         updatedUser: { connect: { id: data.updatedBy } },
       }),

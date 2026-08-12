@@ -9,11 +9,10 @@ import { uploadMiddleware } from "../../middlewares/multer-s3.middleware.js";
 
 const router = Router();
 const uploaded = uploadMiddleware("investorDocument").fields([
-  { name: "logo", maxCount: 1 },
   { name: "file", maxCount: 1 },
 ]);
 
-router.get("/:tabId/list", investorDocumentsCtrl.getAll);
+router.get("/", investorDocumentsCtrl.getAll);
 router.post(
   "/",
   uploaded,

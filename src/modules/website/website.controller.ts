@@ -786,17 +786,9 @@ export const getInvestorTabs = asyncHandler(
   },
 );
 
-export const getInvestorDocumentsBySlug = asyncHandler(
+export const getInvestorDocuments = asyncHandler(
   async (req: Request, res: Response) => {
-    const { tabId } = req.params;
-
-    if (!tabId) {
-      throw new ApiError(400, "Tab id is required");
-    }
-
-    const record = await websiteServices.getInvestorDocumentsBySlug(
-      tabId as string,
-    );
+    const record = await websiteServices.getInvestorDocuments();
 
     await Promise.all(
       record.map(async (item: any) => {

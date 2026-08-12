@@ -944,12 +944,10 @@ export async function getInvestorTabs() {
   });
 }
 
-export async function getInvestorDocumentsBySlug(tabId: string) {
+export async function getInvestorDocuments() {
   const where: any = {
     status: true,
     isDeleted: false,
-
-    inverstorTabId: tabId,
   };
 
   return prisma.investorDocuments.findMany({
@@ -960,12 +958,9 @@ export async function getInvestorDocumentsBySlug(tabId: string) {
     select: {
       id: true,
       title: true,
-      sub_title: true,
-      label: true,
       type: true,
+      dateAt: true,
       files: true,
-      alt: true,
-      list: true,
       status: true,
       seq: true,
       createdAt: true,

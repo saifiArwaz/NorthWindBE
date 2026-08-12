@@ -104,6 +104,12 @@ enum PressType {
   offline
 }
 
+enum InvestorDocumentType {
+  new_release
+  annual
+  quarterly
+}
+
 enum FaqTypes {
   faq
   nri
@@ -1190,7 +1196,6 @@ model InverstorTabs {
   creator           User?               @relation("CreatedInverstorTabs", fields: [createdBy], references: [id])
   updatedBy         String?
   updatedUser       User?               @relation("UpdatedInverstorTabs", fields: [updatedBy], references: [id])
-  investorDocuments InvestorDocuments[]
   isDeleted         Boolean             @default(false)
 
   @@unique([slug])
@@ -1198,16 +1203,10 @@ model InverstorTabs {
 
 model InvestorDocuments {
   id             String        @id @default(cuid())
-  inverstorTabId String
-  inverstorTab   InverstorTabs @relation(fields: [inverstorTabId], references: [id])
   title          String
-  sub_title      String?
-  label          String?
-  type           String?
+  type           InvestorDocumentType?
+  dateAt         DateTime?
   files          Json?
-  alt            String?
-  watermark      String?
-  list           Json?
   seq            Int           @default(0)
   status         Boolean       @default(true)
   createdAt      DateTime      @default(now())

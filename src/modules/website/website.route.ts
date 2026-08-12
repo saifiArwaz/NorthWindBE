@@ -60,8 +60,8 @@ router.get("/brands", websiteCtrl.getBrands);
 router.get("/nri-why-us", websiteCtrl.getNriWhyUs);
 router.get("/investor-tabs", websiteCtrl.getInvestorTabs);
 router.get(
-  "/investor-documents/:tabId",
-  websiteCtrl.getInvestorDocumentsBySlug,
+  "/investor-documents",
+  websiteCtrl.getInvestorDocuments,
 );
 router.get("/city/:citySlug", websiteCtrl.getCityBySlug);
 router.get(

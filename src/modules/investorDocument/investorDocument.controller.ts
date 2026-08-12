@@ -21,6 +21,7 @@ export const create = asyncHandler(async (req: Request, res: Response) => {
 
   const record = await investorDocumentService.createInvestorDocuments({
     ...req.body,
+    dateAt: new Date(req.body.dateAt),
     files: filesByFieldname,
     createdBy: user?.id,
   });
@@ -45,13 +46,12 @@ export const getAll = asyncHandler(async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;
   const search = (req.query.search as string) || "";
-  const tabId = req.params.tabId as string | undefined;
-
+  const type = req.query.type as string || undefined;
   const records = await investorDocumentService.getAllList(
     page,
     limit,
     search,
-    tabId,
+    type
   );
   await Promise.all(
     records.data.map(async (data: any) => {
@@ -141,15 +141,10 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
 
   const updatePayload = Object.fromEntries(
     Object.entries({
-      categoryId: req.body.categoryId,
       title: req.body.title,
-      sub_title: req.body.sub_title,
-      label: req.body.label,
-      docType: req.body.docType,
+      type: req.body.type,
+      dateAt: req.body.dateAt ? new Date(req.body.dateAt) : undefined,
       files: filesByFieldname,
-      alt: req.body.alt,
-      watermark: req.body.watermark,
-      list: req.body.list,
       updatedBy: user.id,
     }).filter(([_, v]) => v !== undefined),
   );
