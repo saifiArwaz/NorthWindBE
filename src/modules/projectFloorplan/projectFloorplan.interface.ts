@@ -1,6 +1,8 @@
 export interface IProjectFloorplanDTO {
   projectId: string;
   type: string;
+  towerId?: string;
+  title?: string;
   list?: any;
   files?: any;
   alt?: string;
@@ -9,7 +11,10 @@ export interface IProjectFloorplanDTO {
 }
 
 export interface IProjectFloorplanUpdateDTO {
+  projectId?: string;
   type?: string;
+  towerId?: string;
+  title?: string;
   list?: any;
   files?: any;
   alt?: string;

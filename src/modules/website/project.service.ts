@@ -335,7 +335,6 @@ export async function getProjectAmenitiesByProjectId(projectId: string) {
       id: true,
       projectId: true,
       title: true,
-      shortDescription: true,
       files: true,
       alt: true,
       watermark: true,
@@ -360,6 +359,13 @@ export async function getProjectFloorPlansByProjectId(
     select: {
       id: true,
       type: true,
+      towerId: true,
+      tower: {
+        select: {
+          id: true,
+          title: true,
+        },
+      },
       list: true,
       files: true,
       alt: true,
@@ -408,7 +414,7 @@ export async function getProjectLocationAdvantageByProjectId(
     select: {
       id: true,
       projectId: true,
-      destination: true,
+      durationUnit: true,
       duration: true,
       status: true,
       seq: true,
@@ -486,3 +492,104 @@ export async function getProjectContentDetailsByType(
   });
 }
 
+export async function getProjectConstructionUpdates(
+  projectId: string,
+  towerId?: string,
+  mediaType?: string,
+  year?: string,
+  month?: string
+) {
+  let dateFilter: any = undefined;
+
+  if (year) {
+    const yr = parseInt(year);
+    if (!isNaN(yr)) {
+      if (month) {
+        const mn = parseInt(month); // 1-12
+        if (!isNaN(mn)) {
+          const startDate = new Date(yr, mn - 1, 1);
+          const endDate = new Date(yr, mn, 0, 23, 59, 59, 999);
+          dateFilter = { gte: startDate, lte: endDate };
+        }
+      } else {
+        const startDate = new Date(yr, 0, 1);
+        const endDate = new Date(yr, 11, 31, 23, 59, 59, 999);
+        dateFilter = { gte: startDate, lte: endDate };
+      }
+    }
+  }
+
+  const towers = await prisma.projectTower.findMany({
+    where: {
+      projectId,
+      isDeleted: false,
+      status: true,
+      ...(towerId ? { id: towerId } : {})
+    },
+    orderBy: { seq: "asc" },
+    include: {
+      galleries: {
+        where: {
+          isDeleted: false,
+          status: true,
+          ...(mediaType ? { fileType: mediaType as any } : {}),
+          ...(dateFilter ? { dateAt: dateFilter } : {})
+        },
+        orderBy: { seq: "asc" },
+        select: {
+          id: true,
+          title: true,
+          dateAt: true,
+          fileType: true,
+          files: true,
+          alt: true,
+          watermark: true,
+          seq: true
+        }
+      }
+    }
+  });
+
+  const allTowers = await prisma.projectTower.findMany({
+    where: {
+      projectId,
+      isDeleted: false,
+      status: true,
+    },
+    select: {
+      id: true,
+      title: true,
+    },
+    orderBy: { seq: "asc" },
+  });
+
+  const metadataRecords = await prisma.constructionGalleries.findMany({
+    where: {
+      projectId,
+      isDeleted: false,
+      status: true,
+    },
+    select: {
+      dateAt: true,
+    }
+  });
+
+  const yearsSet = new Set<number>();
+  const monthsSet = new Set<number>();
+
+  for (const record of metadataRecords) {
+    if (record.dateAt) {
+      yearsSet.add(new Date(record.dateAt).getFullYear());
+      monthsSet.add(new Date(record.dateAt).getMonth() + 1);
+    }
+  }
+
+  return {
+    data: towers,
+    filters: {
+      years: Array.from(yearsSet).sort((a, b) => b - a),
+      months: Array.from(monthsSet).sort((a, b) => a - b),
+      towers: allTowers,
+    },
+  };
+}

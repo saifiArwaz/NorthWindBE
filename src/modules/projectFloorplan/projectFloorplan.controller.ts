@@ -23,6 +23,7 @@ export const create = asyncHandler(async (req: Request, res: Response) => {
 
   const data: any = {
     ...req.body,
+    title: req.body.title,
     files: filesByFieldname,
     createdBy: user?.id,
   };
@@ -50,8 +51,12 @@ export const getAll = asyncHandler(async (req: Request, res: Response) => {
   const limit = parseInt(req.query.limit as string) || 10;
   const search = (req.query.search as string) || "";
   const type = req.query.type as string;
-  const { projectId } = req.query;
+  const { projectId, towerId } = req.query;
 
+  if(!projectId){
+    throw new ApiError(400, "Project Id required")
+  }
+  
   const record = await projectService.getProjectById(projectId as string);
   if (!record) {
     throw new ApiError(404, "Invalid Project Id / Project not found");
@@ -63,6 +68,7 @@ export const getAll = asyncHandler(async (req: Request, res: Response) => {
     search,
     projectId as string,
     type as string,
+    towerId as string,
   );
   await Promise.all(
     records.data.map(async (data: any) => {
@@ -159,6 +165,8 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
     Object.entries({
       projectId: req.body.projectId,
       type: req.body.type,
+      towerId: req.body.towerId,
+      title: req.body.title,
       subTypologyId: req.body.subTypologyId,
       list: req.body.list,
       files: filesByFieldname,

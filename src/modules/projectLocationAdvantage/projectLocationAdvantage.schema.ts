@@ -5,8 +5,9 @@ export const createprojectLocationAdvSchema = z.object({
   body: z
     .object({
       projectId: z.string().min(1, "Project Id field is required"),
+      name: z.string().min(1, "name field is required"),
       duration: z.string().optional(),
-      destination: z.string().min(3, "Destination field is required"),
+      durationUnit: z.string().optional(),
     })
     .superRefine(async (data, ctx) => {
       const project = await prisma.projects.findUnique({
@@ -24,7 +25,8 @@ export const createprojectLocationAdvSchema = z.object({
 
 export const updateprojectLocationAdvSchema = z.object({
   body: z.object({
+    name: z.string().optional(),
     duration: z.string().optional(),
-    destination: z.string().optional(),
+    durationUnit: z.string().optional(),
   }),
 });

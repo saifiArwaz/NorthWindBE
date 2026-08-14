@@ -5,6 +5,7 @@ import { successResponse } from "../../utils/responseHandler.utils.js";
 import { ApiError } from "../../utils/apiError.utils.js";
 import { deleteFromS3 } from "../../utils/fileHandling.utils.js";
 import { getFileUrl } from "../../utils/fileHandling.utils.js";
+import * as projectService from "../projects/project.service.js";
 
 export const create = asyncHandler(async (req: Request, res: Response) => {
   const user = req.user as { id?: string };
@@ -22,6 +23,7 @@ export const create = asyncHandler(async (req: Request, res: Response) => {
 
   const record = await constructionGalleryService.createConstructionGallery({
     ...req.body,
+    dateAt: new Date(req.body.dateAt),
     files: filesByFieldname,
     createdBy: user?.id,
   });
@@ -39,18 +41,29 @@ export const create = asyncHandler(async (req: Request, res: Response) => {
     }
   }
 
-  successResponse(res, 200, "Event Gallery created successfully", record);
+  successResponse(res, 200, "Construction Gallery created successfully", record);
 });
 
 export const getAll = asyncHandler(async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;
   const search = (req.query.search as string) || "";
+  const { projectId, towerId } = req.query;
+
+  if (!projectId) {
+    throw new ApiError(400, "Project Id is required");
+  }
+ const record = await projectService.getProjectById(projectId as string);
+  if (!record) {
+    throw new ApiError(404, "Invalid Project Id / Project not found");
+  }
 
   const records = await constructionGalleryService.getAllList(
     page,
     limit,
     search,
+    projectId as string,
+    towerId as string | undefined
   );
   await Promise.all(
     records.data.map(async (data: any) => {
@@ -70,7 +83,7 @@ export const getAll = asyncHandler(async (req: Request, res: Response) => {
   successResponse(
     res,
     200,
-    "Event Gallery records fetch successfully",
+    "Construction Gallery records fetch successfully",
     records,
   );
 });
@@ -148,7 +161,9 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
   const updatePayload = Object.fromEntries(
     Object.entries({
       projectId: req.body.projectId,
-      year: req.body.year,
+      towerId: req.body.towerId,
+      title: req.body.title,
+      dateAt: new Date (req.body.dateAt),
       fileType: req.body.fileType,
       files: filesByFieldname,
       alt: req.body.alt,
@@ -181,7 +196,7 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
   successResponse(
     res,
     200,
-    "Event Gallery updated successfully",
+    "Construction Gallery updated successfully",
     updatedRecord,
   );
 });
@@ -191,7 +206,7 @@ export const destroy = asyncHandler(async (req: Request, res: Response) => {
   const item = await constructionGalleryService.getConstructionGalleryById(id);
 
   if (!item) {
-    throw new ApiError(404, "Event Gallery record not found");
+    throw new ApiError(404, "Construction Gallery record not found");
   }
 
   // const fileFields = [];
@@ -208,7 +223,7 @@ export const destroy = asyncHandler(async (req: Request, res: Response) => {
   // }
 
   await constructionGalleryService.deleteConstructionGalleryById(id);
-  successResponse(res, 200, "Event Gallery record deleted successfully");
+  successResponse(res, 200, "Construction Gallery record deleted successfully");
 });
 
 export const changeSeq = asyncHandler(
@@ -236,7 +251,7 @@ export const changeSeq = asyncHandler(
 
     const updatedProject =
       await constructionGalleryService.updateEventGallerySeq(id, payload);
-    successResponse(res, 200, "Project seq successfully", updatedProject);
+    successResponse(res, 200, "Construction Gallery seq successfully", updatedProject);
   },
 );
 
@@ -281,12 +296,12 @@ export const chooseFeatureEvent = asyncHandler(
     const record =
       await constructionGalleryService.getConstructionGalleryById(id);
     if (!record) {
-      throw new ApiError(404, "Event Gallery record not found");
+      throw new ApiError(404, "Construction Gallery record not found");
     }
 
     const updatedProject =
       await constructionGalleryService.updateEventGalleryFeature(id, payload);
-    successResponse(res, 200, "Testimonials seq successfully", updatedProject);
+    successResponse(res, 200, "Construction Gallery seq successfully", updatedProject);
   },
 );
 

@@ -99,6 +99,10 @@ router.get(
   "/project/:projectId/project-content-details",
   projectCtrl.getProjectContentDetailsByType,
 );
+router.get(
+  "/project/:projectId/construction-updates",
+  projectCtrl.getProjectConstructionUpdates,
+);
 router.get("/project/:platterSlug/:slug", projectCtrl.getProjectDetailsBySlug);
 
 // filters routers

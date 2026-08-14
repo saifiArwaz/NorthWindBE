@@ -253,7 +253,7 @@ export const changeSeq = asyncHandler(
     successResponse(
       res,
       200,
-      "Project seq successfully",
+      "Project Content Details  seq successfully",
       serializeBigInt(updatedProject),
     );
   },

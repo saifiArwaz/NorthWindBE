@@ -1,18 +1,13 @@
 import asyncHandler from "express-async-handler";
-import type { Request, Response } from "express";
-import * as projectAmenitiesService from "./projectAmenities.service.js";
+import { Request, Response } from "express";
+import * as projectTowerService from "./projectTower.service.js";
 import { successResponse } from "../../utils/responseHandler.utils.js";
 import { ApiError } from "../../utils/apiError.utils.js";
-import { getProjectById } from "../projects/project.service.js";
+import * as projectService from "../projects/project.service.js";
 import { deleteFromS3, getFileUrl } from "../../utils/fileHandling.utils.js";
 
 export const create = asyncHandler(async (req: Request, res: Response) => {
   const user = req.user as { id?: string };
-
-  const project = await getProjectById(req.body.projectId);
-  if (!project) {
-    throw new ApiError(404, "Invalid Project Id / Project not found");
-  }
 
   const allFiles: any[] = Array.isArray(req.files)
     ? req.files
@@ -25,111 +20,132 @@ export const create = asyncHandler(async (req: Request, res: Response) => {
     }
   });
 
-  const data: any = {
-    ...req.body,
-    files: filesByFieldname,
-    createdBy: user?.id,
-  };
-
-  const record = await projectAmenitiesService.createProjectAmenities(data);
-  if (record) {
-    if (record.files && typeof record.files === "object") {
-      const filesObj = record.files as any;
-      await Promise.all(
-        Object.keys(filesObj).map(async (key) => {
-          if (filesObj[key]) {
-            filesObj[key] = await getFileUrl(filesObj[key]);
-          }
-        }),
-      );
+  let list = undefined;
+  if (req.body.list) {
+    try {
+      list = typeof req.body.list === 'string' ? JSON.parse(req.body.list) : req.body.list;
+    } catch(e) {
+      list = req.body.list;
     }
   }
-  successResponse(res, 200, "Project Amenities created successfully", record);
+
+  let title = undefined;
+  if (req.body.title) {
+    try {
+      title = typeof req.body.title === 'string' ? JSON.parse(req.body.title) : req.body.title;
+    } catch(e) {
+      title = req.body.title;
+    }
+  }
+
+  let description = undefined;
+  if (req.body.description) {
+    try {
+      description = typeof req.body.description === 'string' ? JSON.parse(req.body.description) : req.body.description;
+    } catch(e) {
+      description = req.body.description;
+    }
+  }
+
+  const record = await projectTowerService.createProjectTower({
+    ...req.body,
+    title,
+    description,
+    link: req.body.link,
+    list,
+    files: filesByFieldname,
+    watermark: req.body.watermark,
+    createdBy: user?.id,
+  });
+
+  if (record.files && typeof record.files === "object") {
+    const filesObj = record.files as any;
+    await Promise.all(Object.keys(filesObj).map(async (key) => {
+      if (filesObj[key]) filesObj[key] = await getFileUrl(filesObj[key]);
+    }));
+  }
+
+  successResponse(res, 200, "Project Tower created successfully", record);
 });
 
 export const getAll = asyncHandler(async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;
   const search = (req.query.search as string) || "";
-  const projectId = req.query.projectId as string;
+  const projectId = req.query.projectId as string | undefined;
 
-  const project = await getProjectById(projectId);
-  if (!project) {
-    throw new ApiError(404, "Invalid Project Id / Project not found");
+  if (projectId) {
+    const record = await projectService.getProjectById(projectId);
+    if (!record) {
+      throw new ApiError(404, "Invalid Project Id");
+    }
   }
 
-  const records = await projectAmenitiesService.getAllList(
-    projectId,
+  const records = await projectTowerService.getAllList(
     page,
     limit,
     search,
+    projectId,
   );
+
   await Promise.all(
     records.data.map(async (data: any) => {
       if (data.files && typeof data.files === "object") {
         const filesObj = data.files as any;
         await Promise.all(
           Object.keys(filesObj).map(async (key) => {
-            if (filesObj[key]) {
-              filesObj[key] = await getFileUrl(filesObj[key]);
-            }
-          }),
+            if (filesObj[key]) filesObj[key] = await getFileUrl(filesObj[key]);
+          })
         );
       }
-    }),
+    })
   );
+
   successResponse(
     res,
     200,
-    "Project Amenities records fetch successfully",
+    "Project Tower records fetched successfully",
     records,
   );
 });
 
 export const getOne = asyncHandler(async (req: Request, res: Response) => {
   const id = req.params.id as string;
-  const record = await projectAmenitiesService.getProjectAmenitiesById(id);
+  const record = await projectTowerService.getProjectTowerById(id);
 
   if (!record) {
     throw new ApiError(404, "Record not found");
   }
-  if (record) {
-    if (record.files && typeof record.files === "object") {
-      const filesObj = record.files as any;
-      await Promise.all(
-        Object.keys(filesObj).map(async (key) => {
-          if (filesObj[key]) {
-            filesObj[key] = await getFileUrl(filesObj[key]);
-          }
-        }),
-      );
-    }
+
+  if (record.files && typeof record.files === "object") {
+    const filesObj = record.files as any;
+    await Promise.all(Object.keys(filesObj).map(async (key) => {
+      if (filesObj[key]) filesObj[key] = await getFileUrl(filesObj[key]);
+    }));
   }
-  successResponse(res, 200, "Get Project Amenities record", record);
+
+  successResponse(res, 200, "Get edit page record", record);
 });
 
 export const update = asyncHandler(async (req: Request, res: Response) => {
   const user = req.user as { id?: string };
   const id = req.params.id as string;
 
-  const oldRecord = await projectAmenitiesService.getProjectAmenitiesById(id);
+  const oldRecord = await projectTowerService.getProjectTowerById(id);
 
   if (!oldRecord) {
     throw new ApiError(404, "Record not found");
   }
 
-  /** 1. Normalize uploaded files */
   const allFiles: any[] = Array.isArray(req.files)
     ? req.files
     : Object.values(req.files ?? {}).flat();
 
-  /** 2. Parse existing files */
   let filesByFieldname: Record<string, string> = {};
   if (oldRecord.files && typeof oldRecord.files === "object") {
     filesByFieldname = { ...(oldRecord.files as any) };
   }
 
-  /** 3. Track files to delete */
   const filesToDelete: string[] = [];
 
   for (const file of allFiles) {
@@ -141,7 +157,6 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
     }
   }
 
-  /** 4. Optional explicit file removal (frontend sends removeFiles[]) */
   if (Array.isArray(req.body.removeFiles)) {
     for (const field of req.body.removeFiles) {
       if (filesByFieldname[field]) {
@@ -151,53 +166,71 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
     }
   }
 
-  /** 5. Build PATCH-safe payload */
+  let list = req.body.list;
+  if (req.body.list && typeof req.body.list === 'string') {
+    try {
+      list = JSON.parse(req.body.list);
+    } catch(e) {}
+  }
+
+  let title = req.body.title;
+  if (req.body.title && typeof req.body.title === 'string') {
+    try {
+      title = JSON.parse(req.body.title);
+    } catch(e) {}
+  }
+
+  let description = req.body.description;
+  if (req.body.description && typeof req.body.description === 'string') {
+    try {
+      description = JSON.parse(req.body.description);
+    } catch(e) {}
+  }
+
   const updatePayload = Object.fromEntries(
     Object.entries({
-      title: req.body.title,
-      files: filesByFieldname,
+      title,
+      description,
+      link: req.body.link,
+      list,
+      files: Object.keys(filesByFieldname).length ? filesByFieldname : undefined,
       alt: req.body.alt,
       watermark: req.body.watermark,
       updatedBy: user.id,
     }).filter(([_, v]) => v !== undefined),
   );
 
-  const updatedRecord = await projectAmenitiesService.updateProjectAmenities(
-    id,
-    updatePayload,
-  );
+  const updatedRecord = await projectTowerService.updateProjectTower(id, updatePayload);
+
+  for (const file of filesToDelete) {
+    await deleteFromS3(file);
+  }
+
+  if (updatedRecord.files) {
+    for (const key of Object.keys(updatedRecord.files as any)) {
+      const value = (updatedRecord.files as any)[key];
+      if (value) (updatedRecord.files as any)[key] = await getFileUrl(value);
+    }
+  }
 
   successResponse(
     res,
     200,
-    "Project Amenities updated successfully",
+    "Project Tower updated successfully",
     updatedRecord,
   );
 });
 
 export const destroy = asyncHandler(async (req: Request, res: Response) => {
   const id = req.params.id as string;
-  const item = await projectAmenitiesService.getProjectAmenitiesById(id);
+  const item = await projectTowerService.getProjectTowerById(id);
 
   if (!item) {
-    throw new ApiError(404, "Project Amenities record not found");
+    throw new ApiError(404, "Record not found");
   }
 
-  const fileFields = [];
-  if (item.files && typeof item.files === "object") {
-    const filesObj = item.files as any;
-    for (const key of Object.keys(filesObj)) {
-      if (filesObj[key]) {
-        fileFields.push(filesObj[key]);
-      }
-    }
-  }
-  for (const file of fileFields) {
-    file && (await deleteFromS3(file));
-  }
-
-  await projectAmenitiesService.deleteProjectAmenities(id);
-  successResponse(res, 200, "Project Amenities record deleted successfully");
+  await projectTowerService.deleteProjectTower(id);
+  successResponse(res, 200, "Project Tower deleted successfully");
 });
 
 export const changeSeq = asyncHandler(
@@ -217,21 +250,13 @@ export const changeSeq = asyncHandler(
 
     payload.seq = Number(seq);
 
-    const record = await projectAmenitiesService.getProjectAmenitiesById(id);
+    const record = await projectTowerService.getProjectTowerById(id);
     if (!record) {
-      throw new ApiError(404, "Project Amenities record not found");
+      throw new ApiError(404, "Record not found");
     }
 
-    const updatedProject = await projectAmenitiesService.updateProjectAmenities(
-      id,
-      payload,
-    );
-    successResponse(
-      res,
-      200,
-      "Project Amenities seq successfully",
-      updatedProject,
-    );
+    const updated = await projectTowerService.updateSeq(id, payload);
+    successResponse(res, 200, "Seq Updated successfully", updated);
   },
 );
 
@@ -267,16 +292,14 @@ export const changeStatus = asyncHandler(
       status = status === 1;
     }
 
-    const record = (projectAmenitiesService as any).getById
-      ? await (projectAmenitiesService as any).getById(id)
+    const record = (projectTowerService as any).getById
+      ? await (projectTowerService as any).getById(id)
       : null;
     // We bypass getById check here if not universally named, the service updateStatus will throw if not found.
 
-    const updatedRecord = await (projectAmenitiesService as any).updateStatus(
-      id,
-      status as boolean,
-      user?.id,
-    );
+    const updatedRecord = await (
+      projectTowerService as any
+    ).updateStatus(id, status as boolean, user?.id);
 
     successResponse(res, 200, "Status updated successfully", updatedRecord);
   },

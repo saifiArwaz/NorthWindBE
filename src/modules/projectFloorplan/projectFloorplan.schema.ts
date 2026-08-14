@@ -6,6 +6,8 @@ export const createprojectFloorplanSchema = z.object({
     .object({
       projectId: z.string().min(1, "Project Id field is required"),
       type: z.string().min(1, "Type field is required"),
+      towerId: z.string().optional(),
+      title: z.string().optional(),
       list: z.any().optional(),
       alt: z.string().optional(),
       watermark: z.string().optional(),
@@ -27,6 +29,9 @@ export const createprojectFloorplanSchema = z.object({
 
 export const updateprojectFloorplanSchema = z.object({
   body: z.object({
+    projectId: z.string().optional(),
+    towerId: z.string().optional(),
+    title: z.string().optional(),
     type: z.string().optional(),
     list: z.any().optional(),
     alt: z.string().optional(),

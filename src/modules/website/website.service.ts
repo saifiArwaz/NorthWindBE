@@ -14,6 +14,8 @@ import { title } from "process";
 
 type GetUnderConstructionProps = {
   year?: string;
+  month?: string;
+  towerId?: string;
   projectSlug?: string;
 };
 
@@ -579,24 +581,44 @@ export async function getGalleriesByType(type: string, fileType?: string) {
 
 export async function getUnderConstruction({
   year,
+  month,
+  towerId,
   projectSlug,
 }: GetUnderConstructionProps = {}) {
+  let dateFilter: any = undefined;
+
+  if (year) {
+    const yr = parseInt(year);
+    if (!isNaN(yr)) {
+      if (month) {
+        const mn = parseInt(month); // 1-12
+        if (!isNaN(mn)) {
+          const startDate = new Date(yr, mn - 1, 1);
+          const endDate = new Date(yr, mn, 0, 23, 59, 59, 999);
+          dateFilter = { gte: startDate, lte: endDate };
+        }
+      } else {
+        const startDate = new Date(yr, 0, 1);
+        const endDate = new Date(yr, 11, 31, 23, 59, 59, 999);
+        dateFilter = { gte: startDate, lte: endDate };
+      }
+    }
+  }
+
   const whereCondition = {
     status: true,
     isDeleted: false,
-
-    ...(year && {
-      year,
-    }),
 
     ...(projectSlug && {
       project: {
         slug: projectSlug,
       },
     }),
+    ...(towerId && { towerId }),
+    ...(dateFilter && { dateAt: dateFilter }),
   };
 
-  const [galleries, years, projects] = await Promise.all([
+  const [galleries, metadataRecords] = (await Promise.all([
     // Gallery Data
     prisma.constructionGalleries.findMany({
       where: whereCondition,
@@ -607,7 +629,6 @@ export async function getUnderConstruction({
 
       select: {
         id: true,
-        year: true,
         fileType: true,
         files: true,
         alt: true,
@@ -626,34 +647,19 @@ export async function getUnderConstruction({
       },
     }),
 
-    // Distinct Years
+    // Get all records to extract distinct years, months, and towers
     prisma.constructionGalleries.findMany({
       where: {
         status: true,
         isDeleted: false,
+        ...(projectSlug && {
+          project: {
+            slug: projectSlug,
+          },
+        }),
       },
-
-      distinct: ["year"],
-
       select: {
-        year: true,
-      },
-
-      orderBy: {
-        year: "desc",
-      },
-    }),
-
-    // Distinct Projects
-    prisma.constructionGalleries.findMany({
-      where: {
-        status: true,
-        isDeleted: false,
-      },
-
-      distinct: ["projectId"],
-
-      select: {
+        dateAt: true,
         project: {
           select: {
             id: true,
@@ -661,17 +667,42 @@ export async function getUnderConstruction({
             slug: true,
           },
         },
+        tower: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
       },
     }),
-  ]);
+  ])) as [any, any];
+
+  const yearsSet = new Set<number>();
+  const monthsSet = new Set<number>();
+  const towersMap = new Map<string, any>();
+  const projectsMap = new Map<string, any>();
+
+  for (const record of metadataRecords) {
+    if (record.dateAt) {
+      yearsSet.add(new Date(record.dateAt).getFullYear());
+      monthsSet.add(new Date(record.dateAt).getMonth() + 1);
+    }
+    if (record.tower) {
+      towersMap.set(record.tower.id, record.tower);
+    }
+    if (record.project) {
+      projectsMap.set(record.project.id, record.project);
+    }
+  }
 
   return {
     galleries,
 
     filters: {
-      years: years.map((y) => y.year),
-
-      projects: projects.map((p) => p.project),
+      projects: Array.from(projectsMap.values()),
+      years: Array.from(yearsSet).sort((a, b) => b - a),
+      months: Array.from(monthsSet).sort((a, b) => a - b),
+      towers: Array.from(towersMap.values()),
     },
   };
 }

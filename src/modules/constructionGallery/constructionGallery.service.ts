@@ -9,7 +9,9 @@ import { FileType } from "../../generated/prisma/enums.js";
 export async function createConstructionGallery(data: IConstructionGalleryDTO) {
   let prismaData: any = {
     projectId: data.projectId,
-    year: data.year,
+    towerId: data.towerId,
+    title: data.title,
+    dateAt: data.dateAt,
     fileType: data.fileType as FileType,
     files: data.files,
     alt: data.alt,
@@ -19,8 +21,10 @@ export async function createConstructionGallery(data: IConstructionGalleryDTO) {
   return prisma.constructionGalleries.create({ data: prismaData });
 }
 
-export async function getAllList(page = 1, limit = 10, search = "") {
+export async function getAllList(page = 1, limit = 10, search = "", projectId: string, towerId?: string) {
   const where: any = {
+    projectId,
+    ...(towerId && { towerId }),
     ...(search && {
       OR: [{ alt: { contains: search, mode: "insensitive" } }],
     }),
@@ -44,15 +48,15 @@ export async function updateConstructionGallery(
 ) {
   const prismaData = Object.fromEntries(
     Object.entries({
-      year: data.year,
+      towerId: data.towerId,
+      title: data.title,
+      dateAt: data.dateAt,
       fileType: data.fileType as FileType,
       files: data.files,
       alt: data.alt,
       watermark: data.watermark,
-      project: { connect: { id: data.projectId } },
-      ...(data.updatedBy && {
-        updatedUser: { connect: { id: data.updatedBy } },
-      }),
+      projectId: data.projectId,
+      updatedBy: data.updatedBy,
     }).filter(([_, v]) => v !== undefined),
   );
 
@@ -77,8 +81,7 @@ export async function deleteConstructionGalleryById(id: string) {
 export async function updateEventGallerySeq(id: string, payload: any) {
   let data: any = { ...payload };
   if (payload.updatedBy) {
-    data.updatedUser = { connect: { id: payload.updatedBy } };
-    delete data.updatedBy;
+    data.updatedBy = payload.updatedBy;
   }
   return prisma.constructionGalleries.update({
     where: { id },
@@ -89,8 +92,7 @@ export async function updateEventGallerySeq(id: string, payload: any) {
 export async function updateEventGalleryFeature(id: string, payload: any) {
   let data: any = { ...payload };
   if (payload.updatedBy) {
-    data.updatedUser = { connect: { id: payload.updatedBy } };
-    delete data.updatedBy;
+    data.updatedBy = payload.updatedBy;
   }
   return prisma.constructionGalleries.update({
     where: { id },
@@ -107,9 +109,7 @@ export async function updateStatus(
     where: { id },
     data: {
       status,
-      ...(updatedBy && {
-        updatedUser: { connect: { id: updatedBy } },
-      }),
+      updatedBy: updatedBy || null,
     },
   });
 }

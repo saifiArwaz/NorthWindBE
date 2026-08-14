@@ -5,7 +5,7 @@ export interface IProjectSectionCreateDTO {
   files?: string;
   alt?: string;
   watermark?: string;
-  link?: string;
+  link?: any;
   description?: string;
   list?: string;
   createdBy: string;
@@ -18,7 +18,7 @@ export interface IProjectSectionUpdateDTO {
   files?: Record<string, any>;
   alt?: string;
   watermark?: string;
-  link?: string;
+  link?: any;
   description?: string;
   list?: string;
   updatedBy: string;

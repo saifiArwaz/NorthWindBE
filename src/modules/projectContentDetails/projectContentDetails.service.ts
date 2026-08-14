@@ -16,15 +16,9 @@ export async function createProjectContentDetails(data: IProjectContentDetailsCr
       watermark: data.watermark,
       files: data.files,
       list: data.list,
-      project: {
-        connect: { id: data.projectId },
-      },
-      ...(data.createdBy
-        ? { creator: { connect: { id: data.createdBy } } }
-        : {}),
-      ...(data.updatedBy
-        ? { updatedUser: { connect: { id: data.updatedBy } } }
-        : {}),
+      projectId: data.projectId,
+      createdBy: data.createdBy,
+      updatedBy: data.updatedBy,
     },
   });
 }
@@ -70,10 +64,9 @@ export async function updateProjectContentDetails(
       title: data.title,
       files: data.files,
       alt: data.alt,
+      watermark: data.watermark,
       list: data.list,
-      ...(data.updatedBy && {
-        updatedUser: { connect: { id: data.updatedBy } },
-      }),
+      updatedBy: data.updatedBy,
     }).filter(([_, v]) => v !== undefined),
   );
 
@@ -105,9 +98,7 @@ export async function updateStatus(
     where: { id },
     data: {
       status,
-      ...(updatedBy && {
-        updatedUser: { connect: { id: updatedBy } },
-      }),
+      updatedBy: updatedBy || null,
     },
   });
 }
@@ -115,8 +106,7 @@ export async function updateStatus(
 export async function updateSeq(id: string, payload: any) {
   let data: any = { ...payload };
   if (payload.updatedBy) {
-    data.updatedUser = { connect: { id: payload.updatedBy } };
-    delete data.updatedBy;
+    data.updatedBy = payload.updatedBy;
   }
   return prisma.projectContentDetails.update({
     where: { id },

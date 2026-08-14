@@ -9,6 +9,8 @@ import { ProjectFloorPlanTypes } from "../../generated/prisma/enums.js";
 export async function createProjectFloorplan(data: IProjectFloorplanDTO) {
   let prismaData: any = {
     projectId: data.projectId,
+    towerId: data.towerId,
+    title: data.title,
     list: data.list,
     type: data.type as ProjectFloorPlanTypes,
     files: data.files,
@@ -25,12 +27,16 @@ export async function getAllList(
   search = "",
   projectId: string,
   type: string,
+  towerId?: string
 ) {
   let where: any = {
     projectId,
   };
   if (type) {
     where.type = type as ProjectFloorPlanTypes;
+  }
+  if (towerId) {
+    where.towerId = towerId;
   }
 
   if (typeof where !== "undefined" && where && typeof where === "object") {
@@ -52,6 +58,9 @@ export async function updateProjectFloorplan(
 ) {
   const prismaData = Object.fromEntries(
     Object.entries({
+      projectId: data.projectId,
+      towerId: data.towerId,
+      title: data.title,
       type: data.type,
       list: data.list,
       files: data.files,
@@ -81,8 +90,7 @@ export async function deleteProjectFloorplan(id: string) {
 export async function updateSeq(id: string, payload: any) {
   let data: any = { ...payload };
   if (payload.updatedBy) {
-    data.updatedUser = { connect: { id: payload.updatedBy } };
-    delete data.updatedBy;
+    data.updatedBy = payload.updatedBy;
   }
   return prisma.projectFloorPlan.update({
     where: { id },
@@ -99,9 +107,7 @@ export async function updateStatus(
     where: { id },
     data: {
       status,
-      ...(updatedBy && {
-        updatedUser: { connect: { id: updatedBy } },
-      }),
+      updatedBy: updatedBy || null,
     },
   });
 }

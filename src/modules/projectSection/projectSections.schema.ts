@@ -9,6 +9,6 @@ export const createProjectSectionsSchema = z.object({
         message: "Title is required",
       }),
     description: z.record(z.string(), z.unknown()).optional(),
-    list: z.record(z.string(), z.unknown()).optional(),
+    list: z.any().optional(),
   }),
 });

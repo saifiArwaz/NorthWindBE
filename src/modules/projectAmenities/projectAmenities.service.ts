@@ -10,7 +10,6 @@ export async function createProjectAmenities(data: IProjectAmenitiesCreateDTO) {
   const prismaData: any = {
     projectId: data.projectId,
     title: data.title,
-    shortDescription: data.shortDescription,
     files: data.files,
     alt: data.alt,
     watermark: data.watermark,
@@ -31,7 +30,6 @@ export async function getAllList(
     ...(search && {
       OR: [
         { title: { contains: search, mode: "insensitive" } },
-        { shortDescription: { contains: search, mode: "insensitive" } },
       ],
     }),
   };
@@ -61,9 +59,6 @@ export async function updateProjectAmenities(
 ) {
   const prismaData: any = {
     ...(data.title !== undefined ? { title: data.title } : {}),
-    ...(data.shortDescription !== undefined
-      ? { shortDescription: data.shortDescription }
-      : {}),
     ...(data.files !== undefined ? { files: data.files } : {}),
     ...(data.alt !== undefined ? { alt: data.alt } : {}),
     ...(data.watermark !== undefined ? { watermark: data.watermark } : {}),

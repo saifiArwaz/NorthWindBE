@@ -449,3 +449,52 @@ export const getProjectContentDetailsByType = asyncHandler(
   },
 );
 
+export const getProjectConstructionUpdates = asyncHandler(
+  async (
+    req: Request<{ projectId: string }, any, any, { towerId?: string; mediaType?: string; year?: string; month?: string }>,
+    res: Response,
+  ) => {
+    const { projectId } = req.params;
+    const { towerId, mediaType, year, month } = req.query;
+
+    if (!projectId) {
+      throw new ApiError(400, "projectId parameter is required");
+    }
+
+    const record = await projectService.getProjectConstructionUpdates(
+      projectId,
+      towerId,
+      mediaType,
+      year,
+      month
+    );
+
+    // Resolve file URLs for tower cover images and gallery items
+    for (const tower of record.data) {
+      if (tower.files && typeof tower.files === "object") {
+        for (const [key, value] of Object.entries(tower.files)) {
+          if (value && typeof value === "string") {
+            (tower.files as any)[key] = await getFileUrl(value);
+          }
+        }
+      }
+      for (const gallery of (tower as any).galleries || []) {
+        if (gallery.files && typeof gallery.files === "object") {
+          for (const [key, value] of Object.entries(gallery.files)) {
+            if (typeof value === "string" && value) {
+              (gallery.files as any)[key] = await getFileUrl(value);
+            }
+          }
+        }
+      }
+    }
+
+    successResponse(
+      res,
+      200,
+      "Construction updates fetched successfully",
+      record,
+    );
+  }
+);
+

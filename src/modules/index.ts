@@ -43,6 +43,8 @@ import { projectLocationAdvRoutes } from "./projectLocationAdvantage/projectLoca
 import { menuItemRoutes } from "./menu/menu.route.js";
 import { projectReraRoutes } from "./projectRera/projectRera.route.js";
 import projectContentDetailsRoutes from "./projectContentDetails/projectContentDetails.route.js";
+import { ProjectTowerRoutes } from "./projectTower/projectTower.route.js";
+
 // Website Routes
 import { WebsiteRoutes } from "./website/website.route.js";
 // keep new routes under
@@ -132,6 +134,8 @@ router.use("/admin/project-location", authenticate, projectLocationAdvRoutes);
 router.use("/admin/project-status", authenticate, ProjectStatusRoutes);
 router.use("/admin/project-rera", authenticate, projectReraRoutes);
 router.use("/admin/project-content-details", authenticate, projectContentDetailsRoutes);
+router.use("/admin/project-tower", authenticate, ProjectTowerRoutes);
+
 // above new routes--------------------------------
 
 router.use("/admin/career-gallery", authenticate, CareerGalleryRoutes);

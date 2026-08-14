@@ -8,8 +8,9 @@ import { paginate } from "../../utils/pagination.utils.js";
 export async function createProjectLocationAdv(data: IProjectLocationAdvDTO) {
   let prismaData: any = {
     projectId: data.projectId,
+    name: data.name,
     duration: data.duration,
-    destination: data.destination,
+    durationUnit: data.durationUnit,
     createdBy: data.createdBy,
   };
   return prisma.projectLocationAdvantage.create({
@@ -17,7 +18,8 @@ export async function createProjectLocationAdv(data: IProjectLocationAdvDTO) {
     select: {
       id: true,
       projectId: true,
-      destination: true,
+      name: true,
+      durationUnit: true,
       duration: true,
       status: true,
       seq: true,
@@ -42,7 +44,7 @@ export async function getAllList(
   if (search) {
     where.OR = [
       { duration: { contains: search, mode: "insensitive" } },
-      { destination: { contains: search, mode: "insensitive" } },
+      { durationUnit: { contains: search, mode: "insensitive" } },
     ];
   }
 
@@ -57,7 +59,8 @@ export async function getAllList(
       select: {
         id: true,
         projectId: true,
-        destination: true,
+        name:true,
+        durationUnit: true,
         duration: true,
         status: true,
         seq: true,
@@ -76,11 +79,10 @@ export async function updateProjectLocationAdv(
   data: IProjectLocationAdvUpdateDTO,
 ) {
   let prismaData: any = {
+    ...(data.name !== undefined && { name: data.name }),
     ...(data.duration !== undefined && { duration: data.duration }),
-    ...(data.destination !== undefined && { destination: data.destination }),
-    ...(data.updatedBy
-      ? { updatedUser: { connect: { id: data.updatedBy } } }
-      : {}),
+    ...(data.durationUnit !== undefined && { durationUnit: data.durationUnit }),
+    ...(data.updatedBy !== undefined && { updatedBy: data.updatedBy }),
   };
 
   return prisma.projectLocationAdvantage.update({
@@ -89,7 +91,8 @@ export async function updateProjectLocationAdv(
     select: {
       id: true,
       projectId: true,
-      destination: true,
+      name: true,
+      durationUnit: true,
       duration: true,
       status: true,
       seq: true,
@@ -107,7 +110,8 @@ export async function getProjectLocationAdvById(id: string) {
     select: {
       id: true,
       projectId: true,
-      destination: true,
+      name:true,
+      durationUnit: true,
       duration: true,
       status: true,
       seq: true,
@@ -128,8 +132,7 @@ export async function deleteProjectLocationAdv(id: string) {
 export async function updateSeq(id: string, payload: any) {
   let data: any = { ...payload };
   if (payload.updatedBy) {
-    data.updatedUser = { connect: { id: payload.updatedBy } };
-    delete data.updatedBy;
+    data.updatedBy = payload.updatedBy;
   }
   return prisma.projectLocationAdvantage.update({
     where: { id },
@@ -146,9 +149,7 @@ export async function updateStatus(
     where: { id },
     data: {
       status,
-      ...(updatedBy && {
-        updatedUser: { connect: { id: updatedBy } },
-      }),
+      updatedBy: updatedBy || null,
     },
   });
 }

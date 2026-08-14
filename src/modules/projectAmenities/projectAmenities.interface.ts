@@ -1,7 +1,6 @@
 export interface IProjectAmenitiesCreateDTO {
   projectId: string;
   title: string;
-  shortDescription?: string;
   files?: any;
   alt?: string;
   watermark?: string;
@@ -13,7 +12,6 @@ export interface IProjectAmenitiesCreateDTO {
 export interface IProjectAmenitiesUpdateDTO {
   projectId?: string;
   title?: string;
-  shortDescription?: string;
   files?: any;
   alt?: string;
   watermark?: string;

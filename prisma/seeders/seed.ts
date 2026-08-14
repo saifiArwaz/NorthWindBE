@@ -20,6 +20,7 @@ async function main() {
     data: [
       { name: "Overview", type: "overview" },
       { name: "Gallery", type: "gallery" },
+      { name: "Coming Soon", type: "comingSsoon" },
       {name: "Construction", type: "construction" },
       { name: "Highlights", type: "highlights" },
       { name: "Amenities", type: "amenities" },

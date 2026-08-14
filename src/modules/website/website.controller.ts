@@ -574,10 +574,14 @@ export const downloadMediaKitFile = asyncHandler(
 export const getUnderConstruction = asyncHandler(
   async (req: Request, res: Response) => {
     const year = req.query.year as string;
+    const month = req.query.month as string;
+    const towerId = req.query.towerId as string;
     const projectSlug = req.query.projectSlug as string;
 
     const underConstruction = await websiteServices.getUnderConstruction({
       year,
+      month,
+      towerId,
       projectSlug,
     });
     await Promise.all(
