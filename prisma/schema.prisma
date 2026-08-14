@@ -27,11 +27,11 @@ enum ProjectSectionTypes {
   overview
   gallery
   highlights
-  comingSoon
   amenities
   construction
   floorPlan
   locationadvantage
+  tower
 }
 
 enum ProjectFloorPlanTypes {

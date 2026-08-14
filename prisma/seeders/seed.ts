@@ -20,14 +20,12 @@ async function main() {
     data: [
       { name: "Overview", type: "overview" },
       { name: "Gallery", type: "gallery" },
-      { name: "Coming Soon", type: "comingSsoon" },
+      { name: "Tower", type: "tower" },
       {name: "Construction", type: "construction" },
       { name: "Highlights", type: "highlights" },
       { name: "Amenities", type: "amenities" },
       { name: "FloorPlan", type: "floorPlan" },
       { name: "Location Advantage", type: "locationadvantage" },
-      { name: "Media", type: "media" },
-      { name: "Rera", type: "rera" },
     ],
     skipDuplicates: true,
   });
