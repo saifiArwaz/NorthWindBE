@@ -6,13 +6,10 @@ import { ApiError } from "../../utils/apiError.utils.js";
 export async function createAward(data: IAwardDTO) {
   const prismaData: any = {
     title: data.title,
-    year: data.year ? new Date(data.year) : null,
-    shortDescription: data.shortDescription,
-    organization: data.organization,
+    description: data.description,
     files: data.files,
     alt: data.alt,
     watermark: data.watermark,
-
     ...(data.createdBy ? { creator: { connect: { id: data.createdBy } } } : {}),
   };
 
@@ -49,9 +46,7 @@ export async function updateAward(id: string, data: IAwardUpdateDTO) {
   const prismaData = Object.fromEntries(
     Object.entries({
       title: data.title,
-      year: data.year ? new Date(data.year) : undefined,
-      shortDescription: data.shortDescription,
-      organization: data.organization,
+      description: data.description,
       files: data.files,
       alt: data.alt,
       watermark: data.watermark,

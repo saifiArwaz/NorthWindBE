@@ -550,10 +550,8 @@ model CityEcosystemLifestyle {
 
 model Awards {
   id               String    @id @default(cuid())
-  year             DateTime?
   title            String
-  organization     String?
-  shortDescription String?
+  description      String?
   files            Json?
   alt              String?
   watermark        String?
