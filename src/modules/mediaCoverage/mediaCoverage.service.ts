@@ -23,12 +23,16 @@ export async function createMediaCoverage(data: IMediaCoverageDTO) {
   });
 }
 
-export async function getAllList(page = 1, limit = 10, search = "") {
-  const where = search
+export async function getAllList(page = 1, limit = 10, search = "", mediaType?: string) {
+  const where: any = search
     ? {
         OR: [{ title: { contains: search, mode: "insensitive" } }],
       }
     : {};
+  
+  if (mediaType) {
+    where.mediaType = mediaType;
+  }
   if (typeof where !== "undefined" && where && typeof where === "object") {
     (where as any).isDeleted = false;
   }

@@ -96,8 +96,6 @@ enum PartnerType {
 }
 
 enum PressType {
-  press_release
-  announcements
   online
   offline
 }
@@ -113,9 +111,7 @@ enum FaqTypes {
   nri
   about
   tax_benefit
-  emi
-  investment
-  selling
+  emi  
   investor
 }
 

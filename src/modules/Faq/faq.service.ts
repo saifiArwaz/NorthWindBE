@@ -23,12 +23,7 @@ export async function getAllList(
 
    if (type) {
     where.type = type as FaqTypes;
-  } else {
-    where.type = {
-      in: [FaqTypes.selling, FaqTypes.investment],
-    };
-  }
-
+  } 
   if (search) {
     where.OR = [
       { question: { contains: search, mode: "insensitive" } },

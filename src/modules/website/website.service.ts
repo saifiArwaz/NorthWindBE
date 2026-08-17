@@ -476,12 +476,7 @@ export async function getFaqs(type?: string) {
 
   if (type) {
     where.type = type as FaqTypes;
-  } else {
-    where.type = {
-      in: [FaqTypes.selling, FaqTypes.investment],
-    };
-  }
-
+  } 
   return prisma.faqs.findMany({
     where,
     orderBy: {

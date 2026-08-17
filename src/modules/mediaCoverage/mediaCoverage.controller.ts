@@ -27,6 +27,18 @@ export const create = asyncHandler(async (req: Request, res: Response) => {
     files: filesByFieldname,
     createdBy: user?.id,
   });
+
+  if (record && record.files && typeof record.files === "object") {
+    const filesObj = record.files as any;
+    await Promise.all(
+      Object.keys(filesObj).map(async (key) => {
+        if (filesObj[key]) {
+          filesObj[key] = await getFileUrl(filesObj[key]);
+        }
+      }),
+    );
+  }
+
   successResponse(res, 200, "Media Coverage created successfully", record);
 });
 
@@ -34,8 +46,9 @@ export const getAll = asyncHandler(async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;
   const search = (req.query.search as string) || "";
+  const mediaType = (req.query.mediaType as string) || undefined;
 
-  const records = await mediaCoverageService.getAllList(page, limit, search);
+  const records = await mediaCoverageService.getAllList(page, limit, search, mediaType);
   await Promise.all(
     records.data.map(async (data: any) => {
       if (data.files && typeof data.files === "object") {
@@ -78,6 +91,35 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
   if (!oldRecord) {
     throw new ApiError(404, "Record not found");
   }
+  const allFiles: any[] = Array.isArray(req.files)
+    ? req.files
+    : Object.values(req.files ?? {}).flat();
+
+  let filesByFieldname: Record<string, string> = {};
+  if (oldRecord.files && typeof oldRecord.files === "object") {
+    filesByFieldname = { ...(oldRecord.files as any) };
+  }
+
+  const filesToDelete: string[] = [];
+
+  for (const file of allFiles) {
+    if (file.fieldname && file.key) {
+      if (filesByFieldname[file.fieldname]) {
+        filesToDelete.push(filesByFieldname[file.fieldname]);
+      }
+      filesByFieldname[file.fieldname] = file.key;
+    }
+  }
+
+  if (Array.isArray(req.body.removeFiles)) {
+    for (const field of req.body.removeFiles) {
+      if (filesByFieldname[field]) {
+        filesToDelete.push(filesByFieldname[field]);
+        delete filesByFieldname[field];
+      }
+    }
+  }
+
   const updatePayload = Object.fromEntries(
     Object.entries({
       title: req.body.title,
@@ -87,6 +129,7 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
       watermark: req.body.watermark,
       link: req.body.link,
       description: req.body.description,
+      files: filesByFieldname,
       updatedBy: user.id,
     }).filter(([_, v]) => v !== undefined),
   );
@@ -95,6 +138,20 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
     id,
     updatePayload,
   );
+
+  for (const file of filesToDelete) {
+    if (file) await deleteFromS3(file);
+  }
+
+  if (updatedRecord.files && typeof updatedRecord.files === "object") {
+    const filesObj = updatedRecord.files as any;
+    for (const key of Object.keys(filesObj)) {
+      if (filesObj[key]) {
+        filesObj[key] = await getFileUrl(filesObj[key]);
+      }
+    }
+  }
+
   successResponse(
     res,
     200,
