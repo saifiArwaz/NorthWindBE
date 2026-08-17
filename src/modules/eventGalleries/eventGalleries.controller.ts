@@ -22,6 +22,7 @@ export const create = asyncHandler(async (req: Request, res: Response) => {
 
   const record = await eventsGalleryService.createEventsGallery({
     ...req.body,
+    categoryId: req.body.categoryId,
     files: filesByFieldname,
     createdBy: user?.id,
   });
@@ -46,8 +47,9 @@ export const getAll = asyncHandler(async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;
   const search = (req.query.search as string) || "";
+  const categoryId = (req.query.categoryId as string) || undefined;
 
-  const records = await eventsGalleryService.getAllList(page, limit, search);
+  const records = await eventsGalleryService.getAllList(page, limit, search, categoryId);
   await Promise.all(
     records.data.map(async (data: any) => {
       if (data.files && typeof data.files === "object") {
@@ -142,7 +144,7 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
   const updatePayload = Object.fromEntries(
     Object.entries({
       fileType: req.body.fileType,
-      title: req.body.title,
+      categoryId: req.body.categoryId,
       files: filesByFieldname,
       alt: req.body.alt,
       watermark: req.body.watermark,
@@ -230,57 +232,6 @@ export const changeSeq = asyncHandler(
       payload,
     );
     successResponse(res, 200, "Project seq successfully", updatedProject);
-  },
-);
-
-export const chooseFeatureEvent = asyncHandler(
-  async (
-    req: Request<{ id: string }, any, any, { type?: string }>,
-    res: Response,
-  ) => {
-    const user = req.user!;
-    const { id } = req.params;
-    let { isFeature } = req.body;
-
-    let payload: any = { updatedBy: user.id };
-
-    if (
-      !(
-        typeof isFeature === "boolean" ||
-        isFeature === "true" ||
-        isFeature === "false" ||
-        isFeature === 1 ||
-        isFeature === 0 ||
-        isFeature === "1" ||
-        isFeature === "0"
-      )
-    ) {
-      throw new ApiError(
-        400,
-        "isFeature value must be a boolean (true or false), 1/0 or 'true'/'false'",
-      );
-    }
-
-    if (typeof isFeature === "string") {
-      if (isFeature === "true") isFeature = true;
-      else if (isFeature === "false") isFeature = false;
-      else if (isFeature === "1") isFeature = true;
-      else if (isFeature === "0") isFeature = false;
-    } else if (typeof isFeature === "number") {
-      isFeature = isFeature === 1;
-    }
-    payload.isFeature = Boolean(isFeature);
-
-    const record = await eventsGalleryService.getEventsGalleryById(id);
-    if (!record) {
-      throw new ApiError(404, "Event Gallery record not found");
-    }
-
-    const updatedProject = await eventsGalleryService.updateEventGalleryFeature(
-      id,
-      payload,
-    );
-    successResponse(res, 200, "Testimonials seq successfully", updatedProject);
   },
 );
 

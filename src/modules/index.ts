@@ -15,6 +15,7 @@ import { MappingTypologyRoutes } from "./mappingTypology/mappingTypology.route.j
 import { ProjectStatusRoutes } from "./projectStatus/projectStatus.route.js";
 import { ValuesRoutes } from "./values/values.route.js";
 import { EventGalleryRoutes } from "./eventGalleries/eventGalleries.route.js";
+import { EventCategoryRoutes } from "./eventCategory/eventCategory.route.js";
 import { JobRoutes } from "./job/job.route.js";
 import { CareerGalleryRoutes } from "./careerGallery/careerGallery.route.js";
 import { BlogRoutes } from "./blogs/blogs.route.js";
@@ -103,6 +104,7 @@ router.use("/admin/jobs", authenticate, JobRoutes);
 router.use("/admin/csr-communities", authenticate, CsrContentDetailsRoutes);
 router.use("/admin/csr-galleries", authenticate, CsrContentGalleriesRoutes);
 router.use("/admin/event-gallery", authenticate, EventGalleryRoutes);
+router.use("/admin/event-category", authenticate, EventCategoryRoutes);
 router.use(
   "/admin/construction-gallery",
   authenticate,

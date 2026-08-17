@@ -219,6 +219,8 @@ model User {
   UpdatedProjectsMedia             ProjectMedia[]             @relation("UpdatedProjectsMedia")
   CreatedEventGalleries            EventGalleries[]           @relation("CreatedEventGalleries")
   UpdatedEventGalleries            EventGalleries[]           @relation("UpdatedEventGalleries")
+  CreatedEventCategories           EventCategory[]            @relation("CreatedEventCategory")
+  UpdatedEventCategories           EventCategory[]            @relation("UpdatedEventCategory")
   CreatedConstructionGalleries     ConstructionGalleries[]    @relation("CreatedConstructionGalleries")
   UpdatedConstructionGalleries     ConstructionGalleries[]    @relation("UpdatedConstructionGalleries")
   CreatedFaqs                      Faqs[]                     @relation("CreatedFaqs")
@@ -1037,12 +1039,11 @@ model Testimonials {
 model EventGalleries {
   id          String   @id @default(cuid())
   fileType    FileType @default(image)
-  title       String?
+  categoryId  String?
+  category    EventCategory? @relation("EventGalleryCategory", fields: [categoryId], references: [id])
   files       Json?
   alt         String?
   watermark   String?
-  link        String?
-  isFeature   Boolean  @default(false)
   status      Boolean  @default(true)
   seq         Int      @default(0)
   createdAt   DateTime @default(now())
@@ -1519,4 +1520,19 @@ model HomeLoanAssistance {
   updatedBy   String?
   updatedUser User?       @relation("UpdatedHomeLoanAssistance", fields: [updatedBy], references: [id])
   isDeleted   Boolean     @default(false)
+}
+
+model EventCategory {
+  id          String           @id @default(cuid())
+  name        String
+  status      Boolean          @default(true)
+  seq         Int              @default(0)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  createdBy   String?
+  creator     User?            @relation("CreatedEventCategory", fields: [createdBy], references: [id])
+  updatedBy   String?
+  updatedUser User?            @relation("UpdatedEventCategory", fields: [updatedBy], references: [id])
+  isDeleted   Boolean          @default(false)
+  events      EventGalleries[] @relation("EventGalleryCategory")
 }

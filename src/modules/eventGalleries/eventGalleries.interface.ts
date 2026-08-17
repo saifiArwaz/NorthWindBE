@@ -2,7 +2,7 @@ import { FileType } from "../../generated/prisma/enums.js";
 
 export interface IEventsGalleryDTO {
   fileType?: FileType | string;
-  title?: string;
+  categoryId: string;
   files?: string;
   alt?: string;
   watermark?: string;
@@ -11,7 +11,7 @@ export interface IEventsGalleryDTO {
 
 export interface IEventsGalleryUpdateDTO {
   fileType?: FileType | string;
-  title?: string;
+  categoryId?: string;
   files?: string;
   alt?: string;
   watermark?: string;

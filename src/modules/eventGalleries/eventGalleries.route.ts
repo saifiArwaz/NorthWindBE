@@ -29,11 +29,7 @@ router.patch(
   uploadMiddleware("eventGalleries").none(),
   eventGalleryCtrl.changeSeq,
 );
-router.patch(
-  "/:id/feature",
-  uploadMiddleware("eventGalleries").none(),
-  eventGalleryCtrl.chooseFeatureEvent,
-);
+
 router.delete("/:id", eventGalleryCtrl.destroy);
 
 export { router as EventGalleryRoutes };
