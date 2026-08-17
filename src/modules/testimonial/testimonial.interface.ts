@@ -1,10 +1,6 @@
 export interface ITestimonialCreateDTO {
-  type: string;
-  name: string;
-  designation?: string;
+  name?: string;
   fileType: string;
-  location?: string;
-  companyName?: string;
   files?: string;
   alt?: string;
   watermark?: string;
@@ -18,12 +14,8 @@ export interface ITestimonialCreateDTO {
 }
 
 export interface ITestimonialUpdateDTO {
-  type?: string;
   name?: string;
-  designation?: string;
   fileType?: string;
-  location?: string;
-  companyName?: string;
   files?: string;
   alt?: string;
   watermark?: string;

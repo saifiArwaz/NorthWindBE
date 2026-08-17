@@ -1022,16 +1022,12 @@ model BlogFaq {
 model Testimonials {
   id          String          @id @default(cuid())
   fileType    FileType        @default(image)
-  type        TestimonialType @default(customer)
-  name        String
-  designation String?
+  name        String?
   files       Json?
   alt         String?
   watermark   String?
   link        String?
   description String?
-  companyName String?
-  location    String?
   isFeature   Boolean         @default(false)
   isHome      Boolean         @default(false)
   status      Boolean         @default(true)

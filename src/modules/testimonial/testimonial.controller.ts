@@ -50,16 +50,11 @@ export const getAll = asyncHandler(async (req: Request, res: Response) => {
     req.query.fileType === "image" || req.query.fileType === "video"
       ? req.query.fileType
       : undefined;
-  const type =
-    req.query.type === "customer" || req.query.type === "stakeholder"
-      ? req.query.type
-      : undefined;
   const records = await testimonialServices.getAllList(
     page,
     limit,
     search,
-    fileType,
-    type,
+    fileType
   );
   await Promise.all(
     records.data.map(async (data: any) => {
@@ -149,13 +144,9 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
   /** 5. Build PATCH-safe payload */
   const updatePayload = Object.fromEntries(
     Object.entries({
-      type: req.body.type,
       name: req.body.name,
       link: req.body.link,
       fileType: req.body.fileType,
-      designation: req.body.designation,
-      location: req.body.location,
-      companyName: req.body.companyName,
       description: req.body.description,
       files: filesByFieldname,
       alt: req.body.alt,

@@ -7,12 +7,8 @@ import { paginate } from "../../utils/pagination.utils.js";
 
 export async function createTestimonial(data: ITestimonialCreateDTO) {
   let prismaData: any = {
-    type: data.type,
     name: data.name,
     fileType: data.fileType,
-    designation: data.designation,
-    location: data.location,
-    companyName: data.companyName,
     link: data.link,
     description: data.description,
     files: data.files,
@@ -30,15 +26,13 @@ export async function getAllList(
   page = 1,
   limit = 10,
   search = "",
-  fileType?: "image" | "video",
-  type?: "customer" | "stakeholder"
+  fileType?: "image" | "video"
 ) {
   const where: any = {
     ...(search && {
       OR: [{ name: { contains: search, mode: "insensitive" } }],
     }),
     ...(fileType && { fileType }),
-    ...(type && { type }),
   };
   if (typeof where !== "undefined" && where && typeof where === "object") {
     (where as any).isDeleted = false;
@@ -59,13 +53,9 @@ export async function updateTestimonial(
 ) {
   const prismaData = Object.fromEntries(
     Object.entries({
-      type: data.type,
       name: data.name,
       link: data.link,
       fileType: data.fileType,
-      designation: data.designation,
-      location: data.location,
-      companyName: data.companyName,
       description: data.description,
       files: data.files,
       alt: data.alt,

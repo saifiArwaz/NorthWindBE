@@ -71,21 +71,18 @@ export async function getAwardsYear() {
     where: {
       status: true,
       isDeleted: false,
-      year: {
-        not: null,
-      },
     },
     orderBy: {
-      year: "desc",
+      createdAt: "desc",
     },
     select: {
-      year: true,
+      createdAt: true,
     },
   });
 
   // remove duplicates + empty values
   const uniqueYears = [
-    ...new Set(awards.map((item) => item.year?.getFullYear()).filter(Boolean)),
+    ...new Set(awards.map((item) => item.createdAt?.getFullYear()).filter(Boolean)),
   ];
 
   return uniqueYears;
