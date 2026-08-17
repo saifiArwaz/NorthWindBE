@@ -1,6 +1,6 @@
 export interface IHomeLoanDTO {
   link: string;
-  name: string;
+  name?: string;
   files?: Record<string, unknown>;
   alt?: string;
   watermark?: string;

@@ -31,6 +31,7 @@ import { investorDocumentsRoutes } from "./investorDocument/investorDocument.rou
 import { InstagramReelRoutes } from "./instagramReel/instagramReel.route.js";
 import { EnquiriesRoutes } from "./enquiry/enquiry.route.js";
 import { HomeLoanRoutes } from "./homeloan/homeloan.route.js";
+import { HomeLoanAssistanceRoutes } from "./homeLoanAssistance/homeLoanAssistance.route.js";
 
 // projects
 import { projectRoutes } from "./projects/project.route.js";
@@ -71,7 +72,6 @@ import { ContentByTypeRoutes } from "./contentByType/contentByType.route.js";
 import { CsrContentGalleriesRoutes } from "./csrContentGalleries/csrContentGalleries.route.js";
 
 // new routes
-import {PartnerCategoriesRoutes} from "./partnerCategories/partnerCategories.route.js";
 import {PartnersRoutes} from "./partner/partners.route.js";
 
 
@@ -110,6 +110,7 @@ router.use(
 );
 router.use("/admin/testimonial", authenticate, TestimonialRoutes);
 router.use("/admin/homeloan", authenticate, HomeLoanRoutes);
+router.use("/admin/homeloan-assistance", authenticate, HomeLoanAssistanceRoutes);
 router.use("/admin/brands", authenticate, BrandsRoutes);
 router.use("/admin/faq", authenticate, FaqRoutes);
 router.use("/admin/media-coverage", authenticate, MediaCoverageRoutes);
@@ -148,7 +149,6 @@ router.use("/admin/enquiry", authenticate, EnquiriesRoutes);
 router.use("/admin/menu", authenticate, menuItemRoutes);
 
 // new routes ---------------
-router.use("/admin/partner-categories", authenticate, PartnerCategoriesRoutes)
 router.use("/admin/partner", authenticate, PartnersRoutes)
 // Website Routes
 router.use("/website", WebsiteRoutes);

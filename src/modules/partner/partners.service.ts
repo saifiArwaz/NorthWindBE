@@ -10,7 +10,6 @@ export async function createPartners(data: IPartnersDTO) {
     title: data.title,
     watermark: data.watermark,
     status: data.status,
-    ...(data.categoryId ? { category: { connect: { id: data.categoryId } } } : {}),
     ...(data.createdBy ? { creator: { connect: { id: data.createdBy } } } : {}),
   };
 
@@ -21,11 +20,8 @@ export async function getAllList(
   page = 1,
   limit = 10,
   search = "",
-  categoryId: string,
 ) {
-  const where: any = {
-    categoryId,
-  };
+  const where: any = {};
 
   if (search) {
     where.OR = [
@@ -63,7 +59,6 @@ export async function updatePartners(id: string, data: IPartnersUpdateDTO) {
     ...(data.alt !== undefined ? { alt: data.alt } : {}),
     ...(data.watermark !== undefined ? { watermark: data.watermark } : {}),
     ...(data.status !== undefined ? { status: data.status } : {}),
-    ...(data.categoryId !== undefined ? { categoryId: data.categoryId } : {}),
     ...(data.updatedBy
       ? {
           updatedUser: {

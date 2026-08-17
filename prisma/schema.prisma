@@ -135,6 +135,8 @@ model User {
   RefreshToken                     RefreshToken[]
   createdPages                     Pages[]                    @relation("CreatedPage")
   updatedPages                     Pages[]                    @relation("UpdatedPage")
+  CreatedHomeLoanAssistance        HomeLoanAssistance[]       @relation("CreatedHomeLoanAssistance")
+  UpdatedHomeLoanAssistance        HomeLoanAssistance[]       @relation("UpdatedHomeLoanAssistance")
   CreatedPageSections              PageSections[]             @relation("CreatedPageSections")
   UpdatedPageSections              PageSections[]             @relation("UpdatedPageSections")
   CreatedTeam                      Team[]                     @relation("CreatedTeam")
@@ -239,8 +241,6 @@ model User {
   UpdatedProjectsRera              ProjectRera[]              @relation("UpdatedProjectsRera")
   CreatedBlogFaq                   BlogFaq[]                  @relation("CreatedBlogFaq")
   UpdatedBlogFaq                   BlogFaq[]                  @relation("UpdatedBlogFaq")
-  createdPartnerCategories         PartnerCategories[]        @relation("CreatedPartnerCategories")
-  updatedPartnerCategories         PartnerCategories[]        @relation("UpdatedPartnerCategories")
   createdPartner                   Partner[]                  @relation("Createdpartner")
   updatedPartner                   Partner[]                  @relation("Updatedpartner")
   CreatedProjectTower              ProjectTower[]             @relation("CreatedProjectTower")
@@ -1112,7 +1112,7 @@ model ConstructionGalleries {
 model HomeLoan {
   id          String      @id @default(cuid())
   files       Json?
-  name        String
+  name        String?
   alt         String?
   watermark   String?
   link        String?
@@ -1491,29 +1491,13 @@ model orangeCircleEnquiry {
 
 // new schemas by jatin
 
-model PartnerCategories {
-  id          String    @id @default(cuid())
-  name        String    @unique
-  seq         Int       @default(0)
-  status      Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  createdBy   String?
-  creator     User?     @relation("CreatedPartnerCategories", fields: [createdBy], references: [id])
-  updatedBy   String?
-  updatedUser User?     @relation("UpdatedPartnerCategories", fields: [updatedBy], references: [id])
-  partners    Partner[]
-}
-
 model Partner {
   id          String             @id @default(cuid())
-  title       String
+  title       String?
   alt         String?
   files       Json?
   watermark   String?
   link        String?
-  categoryId  String?
-  category    PartnerCategories? @relation(fields: [categoryId], references: [id])
   seq         Int                @default(0)
   status      Boolean            @default(true)
   createdAt   DateTime           @default(now())
@@ -1522,4 +1506,21 @@ model Partner {
   creator     User?              @relation("Createdpartner", fields: [createdBy], references: [id])
   updatedBy   String?
   updatedUser User?              @relation("Updatedpartner", fields: [updatedBy], references: [id])
+}
+
+model HomeLoanAssistance {
+  id          String      @id @default(cuid())
+  files       Json?
+  title       String
+  alt         String?
+  watermark   String?
+  seq         Int         @default(0)
+  status      Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  createdBy   String?
+  creator     User?       @relation("CreatedHomeLoanAssistance", fields: [createdBy], references: [id])
+  updatedBy   String?
+  updatedUser User?       @relation("UpdatedHomeLoanAssistance", fields: [updatedBy], references: [id])
+  isDeleted   Boolean     @default(false)
 }

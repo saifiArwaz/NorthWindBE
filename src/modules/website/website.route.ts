@@ -54,7 +54,7 @@ router.get("/sub-typology", websiteCtrl.getProjectSubTypology);
 router.get("/social-links", websiteCtrl.getSocialLinks);
 router.get("/testimonials", websiteCtrl.getTestimonials);
 router.get("/home-loan", websiteCtrl.getHomeLoan);
-router.get("/partners", websiteCtrl.getPartnersCategoriesWithPartners);
+router.get("/partners", websiteCtrl.getPartners);
 router.get("/events", websiteCtrl.getEvents);
 router.get("/brands", websiteCtrl.getBrands);
 router.get("/nri-why-us", websiteCtrl.getNriWhyUs);

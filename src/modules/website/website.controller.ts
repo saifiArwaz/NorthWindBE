@@ -689,8 +689,8 @@ export const getHomeLoan = asyncHandler(async (req: Request, res: Response) => {
 });
 
 
-export const getPartnersCategoriesWithPartners = asyncHandler(async (req: Request, res: Response) => {
-  const partners = await websiteServices.getPartnersCategoriesWithPartners();
+export const getPartners = asyncHandler(async (req: Request, res: Response) => {
+  const partners = await websiteServices.getPartners();
   await Promise.all(
     partners.map(async (item: any) => {
       if (item.files && typeof item.files === "object") {
@@ -703,7 +703,7 @@ export const getPartnersCategoriesWithPartners = asyncHandler(async (req: Reques
     }),
   );
 
-  successResponse(res, 200, "Partners categories with partners fetched successfully", partners);
+  successResponse(res, 200, "Partners fetched successfully", partners);
 });
 
 export const getEvents = asyncHandler(async (req: Request, res: Response) => {

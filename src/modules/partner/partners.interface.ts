@@ -1,7 +1,6 @@
 export interface IPartnersDTO {
-  categoryId?: string;
   link: string;
-  title: string;
+  title?: string;
   files?: Record<string, unknown>;
   alt?: string;
   watermark?: string;
@@ -10,7 +9,6 @@ export interface IPartnersDTO {
 }
 
 export interface IPartnersUpdateDTO {
-  categoryId?: string;
   link?: string;
   files?: Record<string, unknown>;
   title?: string;

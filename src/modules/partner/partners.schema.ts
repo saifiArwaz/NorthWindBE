@@ -5,7 +5,7 @@ export const createPartnersSchema = z.object({
   body: z.object({
     status: z.boolean().optional(),
     watermark: z.string().optional(),
-    title: z.string().min(3, "Name field is required"),
+    title: z.string().optional(),
     alt: z.string().optional(), 
   }),
 });

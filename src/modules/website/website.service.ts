@@ -779,11 +779,7 @@ export async function getTestimonials(
     select: {
       id: true,
       fileType: true,
-      type: true,
       name: true,
-      designation: true,
-      companyName: true,
-      location: true,
       files: true,
       alt: true,
       watermark: true,
@@ -846,8 +842,8 @@ export async function getHomeLoan() {
   });
 }
 
-export async function getPartnersCategoriesWithPartners() {
-  const categories = await prisma.partnerCategories.findMany({
+export async function getPartners() {
+  return prisma.partner.findMany({
     where: {
       status: true,
     },
@@ -856,28 +852,15 @@ export async function getPartnersCategoriesWithPartners() {
     },
     select: {
       id: true,
-      name: true,
+      title: true,
+      link: true,
+      files: true,
+      alt: true,
+      watermark: true,
       status: true,
       seq: true,
-      partners: {
-        where: {
-          status: true,
-        },
-        orderBy: {
-          seq: "asc",
-        },
-        select: {
-          id: true,
-          title: true,
-          files: true,
-          alt: true,
-          seq: true,
-          status: true,
-        },
-      },
     },
   });
-  return categories;
 }
 
 export async function getEvents(
@@ -1325,7 +1308,6 @@ export async function getFilterJobs() {
     select: {
       jobType: true,
       title: true,
-      designation: true,
       location: true,
     },
   });
@@ -1334,14 +1316,10 @@ export async function getFilterJobs() {
     ...new Set(jobs.map((j) => j.jobType).filter(Boolean)),
   ].sort();
   const titles = [...new Set(jobs.map((j) => j.title).filter(Boolean))].sort();
-  const designations = [
-    ...new Set(jobs.map((j) => j.designation).filter(Boolean)),
-  ].sort();
 
   return {
     jobTypes,
     titles,
-    designations,
   };
 }
 

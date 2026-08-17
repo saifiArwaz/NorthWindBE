@@ -5,7 +5,7 @@ export const createHomeLoanSchema = z.object({
   body: z.object({
     status: z.boolean().optional(),
     watermark: z.string().optional(),
-    name: z.string().min(3, "Name field is required"),
+    name: z.string().optional(),
     alt: z.string().optional(), 
   }),
 });

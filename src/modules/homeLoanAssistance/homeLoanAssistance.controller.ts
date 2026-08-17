@@ -1,10 +1,10 @@
 import asyncHandler from "express-async-handler";
 import type { Request, Response } from "express";
-import * as partnersService from "./partners.service.js";
+import * as HomeLoanAssistanceService from "./homeLoanAssistance.service.js";
 import { successResponse } from "../../utils/responseHandler.utils.js";
 import { ApiError } from "../../utils/apiError.utils.js";
 import { getFileUrl, deleteFromS3 } from "../../utils/fileHandling.utils.js";
-import type { IPartnersUpdateDTO } from "./partners.interface.js";
+import type { IHomeLoanAssistanceUpdateDTO } from "./homeLoanAssistance.interface.js";
 
 export const create = asyncHandler(async (req: Request, res: Response) => {
   const user = req.user as { id?: string };
@@ -20,7 +20,7 @@ export const create = asyncHandler(async (req: Request, res: Response) => {
     }
   });
 
-  const record = await partnersService.createPartners({
+  const record = await HomeLoanAssistanceService.createHomeLoanAssistance({
     ...req.body,
     files: filesByFieldname,
     createdBy: user?.id,
@@ -37,7 +37,7 @@ export const create = asyncHandler(async (req: Request, res: Response) => {
     );
   }
 
-  successResponse(res, 200, "Partners created successfully", record);
+  successResponse(res, 200, "Home Loan Assistance created successfully", record);
 });
 
 export const getAll = asyncHandler(async (req: Request, res: Response) => {
@@ -45,35 +45,37 @@ export const getAll = asyncHandler(async (req: Request, res: Response) => {
   const limit = parseInt(req.query.limit as string) || 10;
   const search = (req.query.search as string) || "";
 
-  const records = await partnersService.getAllList(page, limit, search);
+  const records = await HomeLoanAssistanceService.getAllList(page, limit, search);
 
-  await Promise.all(
-    records.data.map(async (data: any) => {
-      if (data.files && typeof data.files === "object") {
-        const filesObj = data.files as any;
-        await Promise.all(
-          Object.keys(filesObj).map(async (key) => {
-            if (filesObj[key]) {
-              filesObj[key] = await getFileUrl(filesObj[key]);
-            }
-          }),
-        );
-      }
-    }),
-  );
+  if (records && records.data) {
+    await Promise.all(
+      records.data.map(async (data: any) => {
+        if (data.files && typeof data.files === "object") {
+          const filesObj = data.files as any;
+          await Promise.all(
+            Object.keys(filesObj).map(async (key) => {
+              if (filesObj[key]) {
+                filesObj[key] = await getFileUrl(filesObj[key]);
+              }
+            }),
+          );
+        }
+      }),
+    );
+  }
 
-  successResponse(res, 200, "Partners records fetched successfully", records);
+  successResponse(res, 200, "Home Loan Assistance records fetched successfully", records);
 });
 
 export const getOne = asyncHandler(async (req: Request, res: Response) => {
   const id = req.params.id as string;
-  const record = await partnersService.getPartnersById(id);
+  const record = await HomeLoanAssistanceService.getHomeLoanAssistanceById(id);
 
   if (!record) {
     throw new ApiError(404, "Record not found");
   }
 
-  if (record.files && typeof record.files === "object") {
+  if (record && record.files && typeof record.files === "object") {
     const filesObj = record.files as any;
     await Promise.all(
       Object.keys(filesObj).map(async (key) => {
@@ -84,15 +86,14 @@ export const getOne = asyncHandler(async (req: Request, res: Response) => {
     );
   }
 
-  successResponse(res, 200, "Get Partners record", record);
+  successResponse(res, 200, "Home Loan Assistance record fetched successfully", record);
 });
 
 export const update = asyncHandler(async (req: Request, res: Response) => {
   const user = req.user as { id?: string };
   const id = req.params.id as string;
 
-  const oldRecord = await partnersService.getPartnersById(id);
-
+  const oldRecord = await HomeLoanAssistanceService.getHomeLoanAssistanceById(id);
   if (!oldRecord) {
     throw new ApiError(404, "Record not found");
   }
@@ -117,8 +118,8 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
     }
   }
 
-  if (Array.isArray((req.body as any).removeFiles)) {
-    for (const field of (req.body as any).removeFiles) {
+  if (Array.isArray(req.body.removeFiles)) {
+    for (const field of req.body.removeFiles) {
       if (filesByFieldname[field]) {
         filesToDelete.push(filesByFieldname[field]);
         delete filesByFieldname[field];
@@ -126,63 +127,90 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
     }
   }
 
-  const updatePayload: IPartnersUpdateDTO = {
-    link: req.body.link,
-    files: filesByFieldname,
-    alt: req.body.alt,
-    title: req.body.title,
-    watermark: req.body.watermark,
-    status:
-      (req.body as any).status !== undefined
-        ? (req.body as any).status === "true" ||
-          (req.body as any).status === true
-        : undefined,
-    updatedBy: user.id,
-  };
+  const updatePayload: IHomeLoanAssistanceUpdateDTO = Object.fromEntries(
+    Object.entries({
+      title: req.body.title,
+      files: filesByFieldname,
+      alt: req.body.alt,
+      watermark: req.body.watermark,
+      status: req.body.status,
+      updatedBy: user.id,
+    }).filter(([_, v]) => v !== undefined),
+  );
 
-  const updatedRecord = await partnersService.updatePartners(id, updatePayload);
+  const updatedRecord = await HomeLoanAssistanceService.updateHomeLoanAssistance(
+    id,
+    updatePayload,
+  );
 
   for (const file of filesToDelete) {
-    await deleteFromS3(file);
+    if (file) await deleteFromS3(file);
   }
 
-  if (updatedRecord.files) {
-    for (const key of Object.keys(updatedRecord.files as any)) {
-      const value = (updatedRecord.files as any)[key];
-      if (value) {
-        (updatedRecord.files as any)[key] = await getFileUrl(value);
+  if (updatedRecord.files && typeof updatedRecord.files === "object") {
+    const filesObj = updatedRecord.files as any;
+    for (const key of Object.keys(filesObj)) {
+      if (filesObj[key]) {
+        filesObj[key] = await getFileUrl(filesObj[key]);
       }
     }
   }
 
-  successResponse(res, 200, "Partners updated successfully", updatedRecord);
+  successResponse(res, 200, "Home Loan Assistance updated successfully", updatedRecord);
 });
 
-export const destroy = asyncHandler(async (req: Request, res: Response) => {
+export const remove = asyncHandler(async (req: Request, res: Response) => {
   const id = req.params.id as string;
-  const item = await partnersService.getPartnersById(id);
+  const item = await HomeLoanAssistanceService.getHomeLoanAssistanceById(id);
 
   if (!item) {
-    throw new ApiError(404, "Partners record not found");
+    throw new ApiError(404, "Record not found");
   }
 
-  // const fileFields: string[] = [];
-  // if (item.files && typeof item.files === "object") {
-  //   const filesObj = item.files as any;
-  //   for (const key of Object.keys(filesObj)) {
-  //     if (filesObj[key]) {
-  //       fileFields.push(filesObj[key]);
-  //     }
-  //   }
-  // }
+  const fileFields: string[] = [];
+  if (item.files && typeof item.files === "object") {
+    const filesObj = item.files as any;
+    for (const key of Object.keys(filesObj)) {
+      if (filesObj[key]) {
+        fileFields.push(filesObj[key]);
+      }
+    }
+  }
+  for (const file of fileFields) {
+    if (file) await deleteFromS3(file);
+  }
 
-  // for (const file of fileFields) {
-  //   file && (await deleteFromS3(file));
-  // }
-
-  await partnersService.deletePartners(id);
-  successResponse(res, 200, "Partners record deleted successfully");
+  await HomeLoanAssistanceService.deleteHomeLoanAssistanceById(id);
+  successResponse(res, 200, "Home Loan Assistance record deleted successfully");
 });
+
+export const changeSeq = asyncHandler(
+  async (req: Request<{ id: string }>, res: Response) => {
+    const user = req.user as any;
+    const { id } = req.params;
+    const { seq } = req.body;
+
+    if (isNaN(seq)) {
+      throw new ApiError(400, "Seq value must be a number");
+    }
+
+    const payload = {
+      seq: Number(seq),
+      updatedBy: user?.id,
+    };
+
+    const record = await HomeLoanAssistanceService.getHomeLoanAssistanceById(id);
+    if (!record) {
+      throw new ApiError(404, "Record not found");
+    }
+
+    const updatedRecord = await HomeLoanAssistanceService.updateHomeLoanAssistanceSeq(
+      id,
+      payload,
+    );
+    successResponse(res, 200, "Sequence updated successfully", updatedRecord);
+  },
+);
 
 export const changeStatus = asyncHandler(
   async (req: Request<{ id: string }>, res: Response) => {
@@ -216,48 +244,12 @@ export const changeStatus = asyncHandler(
       status = status === 1;
     }
 
-    const record = (partnersService as any).getById
-      ? await (partnersService as any).getById(id)
-      : null;
-    // We bypass getById check here if not universally named, the service updateStatus will throw if not found.
-
-    const updatedRecord = await (partnersService as any).updateStatus(
+    const updatedRecord = await HomeLoanAssistanceService.updateStatus(
       id,
       status as boolean,
       user?.id,
     );
 
     successResponse(res, 200, "Status updated successfully", updatedRecord);
-  },
-);
-
-
-export const changeSeq = asyncHandler(
-  async (
-    req: Request<{ id: string }, any, any, { type?: string }>,
-    res: Response,
-  ) => {
-    const user = req.user!;
-    const { id } = req.params;
-    const { seq } = req.body;
-
-    let payload: any = { updatedBy: user.id };
-
-    if (isNaN(seq)) {
-      throw new ApiError(400, "Seq value must be a number");
-    }
-
-    payload.seq = Number(seq);
-
-    const record = await partnersService.getPartnersById(id);
-    if (!record) {
-      throw new ApiError(404, "Partner record not found");
-    }
-
-    const updatedProject = await partnersService.updatePartnersSeq(
-      id,
-      payload,
-    );
-    successResponse(res, 200, "Partner seq successfully", updatedProject);
   },
 );
