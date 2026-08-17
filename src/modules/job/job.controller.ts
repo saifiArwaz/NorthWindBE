@@ -48,12 +48,9 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
   const updatePayload = Object.fromEntries(
     Object.entries({
       title: req.body.title,
-      designation: req.body.designation,
       jobType: req.body.jobType,
       location: req.body.location,
       description: req.body.description,
-      skills: req.body.skills,
-      qualifications: req.body.qualifications,
       updatedBy: user?.id,
     }).filter(([_, v]) => v !== undefined),
   );

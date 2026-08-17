@@ -587,12 +587,9 @@ model GalleriesList {
 model Jobs {
   id              String           @id @default(cuid())
   title           String
-  designation     String?
   jobType         String?
   location        Json?
   description     Json?
-  skills          String[]         @default([])
-  qualifications  String[]         @default([])
   seq             Int              @default(0)
   status          Boolean          @default(true)
   createdAt       DateTime         @default(now())

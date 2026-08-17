@@ -6,12 +6,9 @@ import { ApiError } from "../../utils/apiError.utils.js";
 export async function createJob(data: IJobDTO) {
   const prismaData: any = {
     title: data.title,
-    designation: data.designation,
     jobType: data.jobType,
     location: data.location,
     description: data.description,
-    skills: data.skills,
-    qualifications: data.qualifications,
     createdBy: data.createdBy,
   };
 
@@ -26,7 +23,6 @@ export async function getAllList(page = 1, limit = 10, search = "") {
   if (search) {
     where.OR = [
       { title: { contains: search, mode: "insensitive" } },
-      { designation: { contains: search, mode: "insensitive" } },
       { jobType: { contains: search, mode: "insensitive" } },
     ];
   }
@@ -51,12 +47,9 @@ export async function updateJob(id: string, data: IJobUpdateDTO) {
   const prismaData = Object.fromEntries(
     Object.entries({
       title: data.title,
-      designation: data.designation,
       jobType: data.jobType,
       location: data.location,
       description: data.description,
-      skills: data.skills,
-      qualifications: data.qualifications,
       ...(data.updatedBy && {
         updatedUser: { connect: { id: data.updatedBy } },
       }),
