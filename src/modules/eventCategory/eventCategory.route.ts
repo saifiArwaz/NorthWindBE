@@ -12,14 +12,14 @@ const router = Router();
 router.get("/", eventCategoryCtrl.getAll);
 router.post(
   "/",
-  uploadMiddleware("eventCategory").none(),
+  uploadMiddleware("eventCategory").fields([{ name: "coverImage", maxCount: 1 }]),
   validate(createEventCategorySchema),
   eventCategoryCtrl.create,
 );
 router.get("/:id", eventCategoryCtrl.getOne);
 router.patch(
   "/:id",
-  uploadMiddleware("eventCategory").none(),
+  uploadMiddleware("eventCategory").fields([{ name: "coverImage", maxCount: 1 }]),
   validate(updateEventCategorySchema),
   eventCategoryCtrl.update,
 );

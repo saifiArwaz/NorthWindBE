@@ -1549,6 +1549,7 @@ model EventCategory {
   eventId     String
   event       Event            @relation(fields: [eventId], references: [id], onDelete: Cascade)
   name        String
+  files       Json?
   status      Boolean          @default(true)
   seq         Int              @default(0)
   createdAt   DateTime         @default(now())

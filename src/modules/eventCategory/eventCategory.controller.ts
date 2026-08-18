@@ -3,14 +3,40 @@ import { Request, Response } from "express";
 import * as eventCategoryService from "./eventCategory.service.js";
 import { successResponse } from "../../utils/responseHandler.utils.js";
 import { ApiError } from "../../utils/apiError.utils.js";
+import { deleteFromS3, getFileUrl } from "../../utils/fileHandling.utils.js";
 
 export const create = asyncHandler(async (req: Request, res: Response) => {
   const user = req.user as { id?: string };
 
+  const allFiles: any[] = Array.isArray(req.files)
+    ? req.files
+    : Object.values(req.files ?? {}).flat();
+
+  let filesByFieldname: Record<string, string> = {};
+  allFiles.forEach((file: any) => {
+    if (file.fieldname && file.key) {
+      filesByFieldname[file.fieldname] = file.key;
+    }
+  });
+
   const record = await eventCategoryService.createEventCategory({
     ...req.body,
+    files: filesByFieldname,
     createdBy: user?.id,
   });
+
+  if (record) {
+    if (record.files && typeof record.files === "object") {
+      const filesObj = record.files as any;
+      await Promise.all(
+        Object.keys(filesObj).map(async (key) => {
+          if (filesObj[key]) {
+            filesObj[key] = await getFileUrl(filesObj[key]);
+          }
+        }),
+      );
+    }
+  }
 
   successResponse(res, 201, "Event Category created successfully", record);
 });
@@ -22,6 +48,21 @@ export const getAll = asyncHandler(async (req: Request, res: Response) => {
   const eventId = (req.query.eventId as string) || undefined;
 
   const records = await eventCategoryService.getAllList(page, limit, search, eventId);
+
+  await Promise.all(
+    records.data.map(async (data: any) => {
+      if (data.files && typeof data.files === "object") {
+        const filesObj = data.files as any;
+        await Promise.all(
+          Object.keys(filesObj).map(async (key) => {
+            if (filesObj[key]) {
+              filesObj[key] = await getFileUrl(filesObj[key]);
+            }
+          }),
+        );
+      }
+    }),
+  );
 
   successResponse(
     res,
@@ -38,6 +79,20 @@ export const getOne = asyncHandler(async (req: Request, res: Response) => {
   if (!record) {
     throw new ApiError(404, "Record not found");
   }
+
+  if (record) {
+    if (record.files && typeof record.files === "object") {
+      const filesObj = record.files as any;
+      await Promise.all(
+        Object.keys(filesObj).map(async (key) => {
+          if (filesObj[key]) {
+            filesObj[key] = await getFileUrl(filesObj[key]);
+          }
+        }),
+      );
+    }
+  }
+
   successResponse(res, 200, "Event Category fetched successfully", record);
 });
 
@@ -51,10 +106,46 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
     throw new ApiError(404, "Record not found");
   }
 
+  const allFiles: any[] = Array.isArray(req.files)
+    ? req.files
+    : Object.values(req.files ?? {}).flat();
+
+  let filesByFieldname: Record<string, string> = {
+    ...(typeof oldRecord.files === "object" && oldRecord.files !== null
+      ? (oldRecord.files as Record<string, string>)
+      : {}),
+  };
+  
+  allFiles.forEach((file: any) => {
+    if (file.fieldname && file.key) {
+      if (
+        oldRecord.files &&
+        (oldRecord.files as Record<string, string>)[file.fieldname]
+      ) {
+        deleteFromS3((oldRecord.files as Record<string, string>)[file.fieldname]);
+      }
+      filesByFieldname[file.fieldname] = file.key;
+    }
+  });
+
   const updatedRecord = await eventCategoryService.updateEventCategory(id, {
     ...req.body,
+    files: filesByFieldname,
     updatedBy: user?.id,
   });
+
+  if (updatedRecord) {
+    if (updatedRecord.files && typeof updatedRecord.files === "object") {
+      const filesObj = updatedRecord.files as any;
+      await Promise.all(
+        Object.keys(filesObj).map(async (key) => {
+          if (filesObj[key]) {
+            filesObj[key] = await getFileUrl(filesObj[key]);
+          }
+        }),
+      );
+    }
+  }
 
   successResponse(
     res,
