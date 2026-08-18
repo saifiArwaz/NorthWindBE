@@ -1,11 +1,25 @@
 import { prisma } from "../../config/prisma.config.js";
 import { IEventDTO, IEventUpdateDTO } from "./event.interface.js";
 import { paginate } from "../../utils/pagination.utils.js";
+import slugifyPkg from "slugify";
+const slugify = (slugifyPkg as any).default ?? slugifyPkg;
+import { ApiError } from "../../utils/apiError.utils.js";
 
 export async function createEvent(data: IEventDTO) {
+  let slug = data.slug;
+  if (!slug && data.title) {
+    slug = slugify(data.title, { lower: true, strict: true });
+  }
+
+  if (slug) {
+    const existing = await prisma.event.findUnique({ where: { slug } });
+    if (existing) throw new ApiError(400, "Slug already exists");
+  }
+
   return prisma.event.create({
     data: {
       title: data.title,
+      slug: slug,
       status: data.status,
       ...(data.createdBy
         ? { creator: { connect: { id: data.createdBy } } }
@@ -99,9 +113,20 @@ export async function getEventByIdWithTree(id: string) {
 
 
 export async function updateEvent(id: string, data: IEventUpdateDTO) {
+  let slug = data.slug;
+  if (data.title && !slug) {
+    slug = slugify(data.title, { lower: true, strict: true });
+  }
+
+  if (slug) {
+    const existing = await prisma.event.findUnique({ where: { slug } });
+    if (existing && existing.id !== id) throw new ApiError(400, "Slug already exists");
+  }
+
   const prismaData = Object.fromEntries(
     Object.entries({
       title: data.title,
+      slug: slug,
       status: data.status,
       ...(data.updatedBy && {
         updatedUser: { connect: { id: data.updatedBy } },

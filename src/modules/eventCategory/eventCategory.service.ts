@@ -4,12 +4,27 @@ import {
   IEventCategoryUpdateDTO,
 } from "./eventCategory.interface.js";
 import { paginate } from "../../utils/pagination.utils.js";
+import slugifyPkg from "slugify";
+const slugify = (slugifyPkg as any).default ?? slugifyPkg;
+import { ApiError } from "../../utils/apiError.utils.js";
 
 export async function createEventCategory(data: IEventCategoryDTO) {
+  let slug = data.slug;
+  if (!slug && data.name) {
+    slug = slugify(data.name, { lower: true, strict: true });
+  }
+
+  if (slug) {
+    const existing = await prisma.eventCategory.findUnique({ where: { slug } });
+    if (existing) throw new ApiError(400, "Slug already exists");
+  }
+
   return prisma.eventCategory.create({
     data: {
       name: data.name,
+      slug: slug,
       event: { connect: { id: data.eventId } },
+      files: data.files,
       status: data.status,
       ...(data.createdBy
         ? { creator: { connect: { id: data.createdBy } } }
@@ -55,9 +70,21 @@ export async function updateEventCategory(
   id: string,
   data: IEventCategoryUpdateDTO,
 ) {
+  let slug = data.slug;
+  if (data.name && !slug) {
+    slug = slugify(data.name, { lower: true, strict: true });
+  }
+
+  if (slug) {
+    const existing = await prisma.eventCategory.findUnique({ where: { slug } });
+    if (existing && existing.id !== id) throw new ApiError(400, "Slug already exists");
+  }
+
   const prismaData = Object.fromEntries(
     Object.entries({
       name: data.name,
+      slug: slug,
+      files: data.files,
       status: data.status,
       ...(data.updatedBy && {
         updatedUser: { connect: { id: data.updatedBy } },

@@ -5,10 +5,24 @@ import {
 } from "./eventGalleries.interface.js";
 import { paginate } from "../../utils/pagination.utils.js";
 import { FileType } from "../../generated/prisma/enums.js";
+import slugifyPkg from "slugify";
+const slugify = (slugifyPkg as any).default ?? slugifyPkg;
+import { ApiError } from "../../utils/apiError.utils.js";
 
 export async function createEventsGallery(data: IEventsGalleryDTO) {
+  let slug = data.slug;
+  if (!slug && data.title) {
+    slug = slugify(data.title, { lower: true, strict: true });
+  }
+
+  if (slug) {
+    const existing = await prisma.eventGalleries.findUnique({ where: { slug } });
+    if (existing) throw new ApiError(400, "Slug already exists");
+  }
+
   let prismaData: any = {
     title: data.title,
+    slug: slug,
     fileType: data.fileType as FileType,
     category: { connect: { id: data.categoryId } },
     ...(data.parentGalleryId && { parentGallery: { connect: { id: data.parentGalleryId } } }),
@@ -84,9 +98,20 @@ export async function updateEventsGallery(
     await validateCircularHierarchy(id, data.parentGalleryId);
   }
 
+  let slug = data.slug;
+  if (data.title && !slug) {
+    slug = slugify(data.title, { lower: true, strict: true });
+  }
+
+  if (slug) {
+    const existing = await prisma.eventGalleries.findUnique({ where: { slug } });
+    if (existing && existing.id !== id) throw new ApiError(400, "Slug already exists");
+  }
+
   const prismaData: any = Object.fromEntries(
     Object.entries({
       title: data.title,
+      slug: slug,
       fileType: data.fileType as FileType,
       ...(data.categoryId && { category: { connect: { id: data.categoryId } } }),
       ...(data.parentGalleryId && { parentGallery: { connect: { id: data.parentGalleryId } } }),

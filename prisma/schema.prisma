@@ -1040,6 +1040,7 @@ model Testimonials {
 
 model EventGalleries {
   id              String           @id @default(cuid())
+  slug            String?          @unique
   title           String?
   fileType        FileType         @default(image)
   categoryId      String
@@ -1531,6 +1532,7 @@ model HomeLoanAssistance {
 
 model Event {
   id          String          @id @default(cuid())
+  slug        String?         @unique
   title       String
   status      Boolean         @default(true)
   seq         Int             @default(0)
@@ -1549,6 +1551,7 @@ model EventCategory {
   eventId     String
   event       Event            @relation(fields: [eventId], references: [id], onDelete: Cascade)
   name        String
+  slug        String?          @unique
   files       Json?
   status      Boolean          @default(true)
   seq         Int              @default(0)

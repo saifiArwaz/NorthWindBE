@@ -4,6 +4,7 @@ import { prisma } from "../../config/prisma.config.js";
 export const createEventGallerySchema = z.object({
   body: z.object({
     title: z.string().optional(),
+    slug: z.string().optional(),
     alt: z.string().optional(),
     categoryId: z.string().min(1, "Category ID is required"),
     parentGalleryId: z.string().optional(),
@@ -47,6 +48,7 @@ export const createEventGallerySchema = z.object({
 export const updateEventGallerySchema = z.object({
   body: z.object({
     title: z.string().optional(),
+    slug: z.string().optional(),
     alt: z.string().optional(),
     categoryId: z.string().optional(),
     parentGalleryId: z.string().optional(),
