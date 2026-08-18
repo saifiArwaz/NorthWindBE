@@ -3,6 +3,7 @@ import * as eventGalleryCtrl from "./eventGalleries.controller.js";
 import {
   createEventGallerySchema,
   updateEventGallerySchema,
+  changeFeatureSchema,
 } from "./eventGalleries.schema.js";
 import { validate } from "../../middlewares/validate.js";
 import { uploadMiddleware } from "../../middlewares/multer-s3.middleware.js";
@@ -28,6 +29,19 @@ router.patch(
   "/:id/seq",
   uploadMiddleware("eventGalleries").none(),
   eventGalleryCtrl.changeSeq,
+);
+
+router.patch(
+  "/:id/status",
+  uploadMiddleware("eventGalleries").none(),
+  eventGalleryCtrl.changeStatus,
+);
+
+router.patch(
+  "/:id/isFeature",
+  uploadMiddleware("eventGalleries").none(),
+  validate(changeFeatureSchema),
+  eventGalleryCtrl.changeFeature,
 );
 
 router.delete("/:id", eventGalleryCtrl.destroy);

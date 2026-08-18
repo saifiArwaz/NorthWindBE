@@ -111,7 +111,7 @@ enum FaqTypes {
   nri
   about
   tax_benefit
-  emi  
+  emi
   investor
 }
 
@@ -221,6 +221,8 @@ model User {
   UpdatedEventGalleries            EventGalleries[]           @relation("UpdatedEventGalleries")
   CreatedEventCategories           EventCategory[]            @relation("CreatedEventCategory")
   UpdatedEventCategories           EventCategory[]            @relation("UpdatedEventCategory")
+  CreatedEvents                    Event[]                    @relation("CreatedEvents")
+  UpdatedEvents                    Event[]                    @relation("UpdatedEvents")
   CreatedConstructionGalleries     ConstructionGalleries[]    @relation("CreatedConstructionGalleries")
   UpdatedConstructionGalleries     ConstructionGalleries[]    @relation("UpdatedConstructionGalleries")
   CreatedFaqs                      Faqs[]                     @relation("CreatedFaqs")
@@ -243,7 +245,6 @@ model User {
   updatedPartner                   Partner[]                  @relation("Updatedpartner")
   CreatedProjectTower              ProjectTower[]             @relation("CreatedProjectTower")
   UpdatedProjectTower              ProjectTower[]             @relation("UpdatedProjectTower")
-
 }
 
 model RefreshToken {
@@ -450,18 +451,18 @@ model TypologySubTypology {
 }
 
 model Country {
-  id          String     @id @default(cuid())
-  name        String     @unique
+  id          String   @id @default(cuid())
+  name        String   @unique
   slug        String
-  status      Boolean    @default(true)
+  status      Boolean  @default(true)
   createdBy   String?
-  creator     User?      @relation("CreatedCountries", fields: [createdBy], references: [id])
+  creator     User?    @relation("CreatedCountries", fields: [createdBy], references: [id])
   updatedBy   String?
-  updatedUser User?      @relation("UpdatedCountries", fields: [updatedBy], references: [id])
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  updatedUser User?    @relation("UpdatedCountries", fields: [updatedBy], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   states      State[]
-  isDeleted   Boolean    @default(false)
+  isDeleted   Boolean  @default(false)
 }
 
 model State {
@@ -481,19 +482,19 @@ model State {
 }
 
 model City {
-  id               String         @id @default(cuid())
-  name             String
-  slug             String
-  seoTags          Json?
-  status           Boolean        @default(true)
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
-  projects         Projects[]
-  createdBy        String?
-  creator          User?          @relation("CreatedCity", fields: [createdBy], references: [id])
-  updatedBy        String?
-  updatedUser      User?          @relation("UpdatedCity", fields: [updatedBy], references: [id])
-  isDeleted        Boolean        @default(false)
+  id          String     @id @default(cuid())
+  name        String
+  slug        String
+  seoTags     Json?
+  status      Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  projects    Projects[]
+  createdBy   String?
+  creator     User?      @relation("CreatedCity", fields: [createdBy], references: [id])
+  updatedBy   String?
+  updatedUser User?      @relation("UpdatedCity", fields: [updatedBy], references: [id])
+  isDeleted   Boolean    @default(false)
 
   @@unique([name])
 }
@@ -547,21 +548,21 @@ model CityEcosystemLifestyle {
 }
 
 model Awards {
-  id               String    @id @default(cuid())
-  title            String
-  description      String?
-  files            Json?
-  alt              String?
-  watermark        String?
-  status           Boolean   @default(true) //true->active, false->Inactive
-  seq              Int       @default(0)
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-  createdBy        String?
-  creator          User?     @relation("CreatedAwards", fields: [createdBy], references: [id])
-  updatedBy        String?
-  updatedUser      User?     @relation("UpdatedAwards", fields: [updatedBy], references: [id])
-  isDeleted        Boolean   @default(false)
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  files       Json?
+  alt         String?
+  watermark   String?
+  status      Boolean  @default(true) //true->active, false->Inactive
+  seq         Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String?
+  creator     User?    @relation("CreatedAwards", fields: [createdBy], references: [id])
+  updatedBy   String?
+  updatedUser User?    @relation("UpdatedAwards", fields: [updatedBy], references: [id])
+  isDeleted   Boolean  @default(false)
 }
 
 model GalleriesList {
@@ -652,29 +653,29 @@ model BlogCategories {
 }
 
 model Blogs {
-  id           String         @id @default(cuid())
-  title        String         @unique
-  slug         String         @unique
-  dateAt       DateTime?
-  description  Json
-  files        Json?
-  alt          String?
-  watermark    String?
-  seoTags      Json?
-  tag          String?
-  isLatest     Boolean        @default(false)
-  isFeature    Boolean        @default(false)
-  isHome       Boolean        @default(false)
-  status       Boolean        @default(true)
-  seq          Int            @default(0)
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  createdBy    String?
-  blogFaqs     BlogFaq[]
-  creator      User?          @relation("CreatedBlogs", fields: [createdBy], references: [id])
-  updatedBy    String?
-  updatedUser  User?          @relation("UpdatedBlogs", fields: [updatedBy], references: [id])
-  isDeleted    Boolean        @default(false)
+  id          String    @id @default(cuid())
+  title       String    @unique
+  slug        String    @unique
+  dateAt      DateTime?
+  description Json
+  files       Json?
+  alt         String?
+  watermark   String?
+  seoTags     Json?
+  tag         String?
+  isLatest    Boolean   @default(false)
+  isFeature   Boolean   @default(false)
+  isHome      Boolean   @default(false)
+  status      Boolean   @default(true)
+  seq         Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  createdBy   String?
+  blogFaqs    BlogFaq[]
+  creator     User?     @relation("CreatedBlogs", fields: [createdBy], references: [id])
+  updatedBy   String?
+  updatedUser User?     @relation("UpdatedBlogs", fields: [updatedBy], references: [id])
+  isDeleted   Boolean   @default(false)
 }
 
 model socialLinks {
@@ -712,14 +713,14 @@ model News {
 }
 
 model Locality {
-  id        String     @id @default(cuid())
+  id        String   @id @default(cuid())
   name      String
-  slug      String     @unique
+  slug      String   @unique
   cityId    String
-  status    Boolean    @default(true)
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  isDeleted Boolean    @default(false)
+  status    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
 }
 
 model Projects {
@@ -769,8 +770,9 @@ model Projects {
   constructionGalleries    ConstructionGalleries[]
   projectTowers            ProjectTower[]
 
-  seoFooterLinks           SeoFooterLink[]
-  isDeleted                Boolean                    @default(false)
+  seoFooterLinks SeoFooterLink[]
+  isDeleted      Boolean         @default(false)
+
   @@index([projectName, slug, cityId, typologyId])
 }
 
@@ -858,22 +860,22 @@ model ProjectBanner {
 }
 
 model ProjectAmenities {
-  id               String   @id @default(cuid())
-  projectId        String
-  title            String
-  files            Json?
-  alt              String?
-  watermark        String?
-  status           Boolean  @default(true)
-  seq              Int      @default(0)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  project          Projects @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  createdBy        String?
-  creator          User?    @relation("CreatedProjectsAmenities", fields: [createdBy], references: [id])
-  updatedBy        String?
-  updatedUser      User?    @relation("UpdatedProjectsAmenities", fields: [updatedBy], references: [id])
-  isDeleted        Boolean  @default(false)
+  id          String   @id @default(cuid())
+  projectId   String
+  title       String
+  files       Json?
+  alt         String?
+  watermark   String?
+  status      Boolean  @default(true)
+  seq         Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  project     Projects @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy   String?
+  creator     User?    @relation("CreatedProjectsAmenities", fields: [createdBy], references: [id])
+  updatedBy   String?
+  updatedUser User?    @relation("UpdatedProjectsAmenities", fields: [updatedBy], references: [id])
+  isDeleted   Boolean  @default(false)
 }
 
 model ProjectFloorPlan {
@@ -920,21 +922,21 @@ model ProjectMedia {
 }
 
 model ProjectLocationAdvantage {
-  id          String   @id @default(cuid())
-  projectId   String
-  name        String 
-  duration    String?
+  id           String   @id @default(cuid())
+  projectId    String
+  name         String
+  duration     String?
   durationUnit String   @default("min")
-  status      Boolean  @default(true)
-  seq         Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  project     Projects @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  createdBy   String?
-  creator     User?    @relation("CreatedProjectsLocationAdvantage", fields: [createdBy], references: [id])
-  updatedBy   String?
-  updatedUser User?    @relation("UpdatedProjectsLocationAdvantage", fields: [updatedBy], references: [id])
-  isDeleted   Boolean  @default(false)
+  status       Boolean  @default(true)
+  seq          Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  project      Projects @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy    String?
+  creator      User?    @relation("CreatedProjectsLocationAdvantage", fields: [createdBy], references: [id])
+  updatedBy    String?
+  updatedUser  User?    @relation("UpdatedProjectsLocationAdvantage", fields: [updatedBy], references: [id])
+  isDeleted    Boolean  @default(false)
 }
 
 model ProjectRera {
@@ -1015,115 +1017,118 @@ model BlogFaq {
 }
 
 model Testimonials {
-  id          String          @id @default(cuid())
-  fileType    FileType        @default(image)
+  id          String   @id @default(cuid())
+  fileType    FileType @default(image)
   name        String?
   files       Json?
   alt         String?
   watermark   String?
   link        String?
   description String?
-  isFeature   Boolean         @default(false)
-  isHome      Boolean         @default(false)
-  status      Boolean         @default(true)
-  seq         Int             @default(0)
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+  isFeature   Boolean  @default(false)
+  isHome      Boolean  @default(false)
+  status      Boolean  @default(true)
+  seq         Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   createdBy   String?
-  creator     User?           @relation("CreatedTestimonials", fields: [createdBy], references: [id])
+  creator     User?    @relation("CreatedTestimonials", fields: [createdBy], references: [id])
   updatedBy   String?
-  updatedUser User?           @relation("UpdatedTestimonials", fields: [updatedBy], references: [id])
-  isDeleted   Boolean         @default(false)
+  updatedUser User?    @relation("UpdatedTestimonials", fields: [updatedBy], references: [id])
+  isDeleted   Boolean  @default(false)
 }
 
 model EventGalleries {
-  id          String   @id @default(cuid())
-  fileType    FileType @default(image)
-  categoryId  String?
-  category    EventCategory? @relation("EventGalleryCategory", fields: [categoryId], references: [id])
-  files       Json?
-  alt         String?
-  watermark   String?
-  status      Boolean  @default(true)
-  seq         Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  createdBy   String?
-  creator     User?    @relation("CreatedEventGalleries", fields: [createdBy], references: [id])
-  updatedBy   String?
-  updatedUser User?    @relation("UpdatedEventGalleries", fields: [updatedBy], references: [id])
-  isDeleted   Boolean  @default(false)
+  id              String           @id @default(cuid())
+  title           String
+  fileType        FileType         @default(image)
+  categoryId      String
+  category        EventCategory    @relation("EventGalleryCategory", fields: [categoryId], references: [id])
+  parentGalleryId String?
+  parentGallery   EventGalleries?  @relation("GalleryHierarchy", fields: [parentGalleryId], references: [id], onDelete: Cascade)
+  childGalleries  EventGalleries[] @relation("GalleryHierarchy")
+  files           Json?
+  alt             String?
+  watermark       String?
+  status          Boolean          @default(true)
+  isFeature       Boolean          @default(false)
+  seq             Int              @default(0)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  createdBy       String?
+  creator         User?            @relation("CreatedEventGalleries", fields: [createdBy], references: [id])
+  updatedBy       String?
+  updatedUser     User?            @relation("UpdatedEventGalleries", fields: [updatedBy], references: [id])
+  isDeleted       Boolean          @default(false)
 }
 
 model ProjectTower {
-  id          String   @id @default(cuid())
-  projectId   String
-  name        String
-  slug        String   @unique
-  title       Json?
-  description Json?
-  link        String?
-  files       Json?
-  list        Json?
-  alt         String?
-  watermark   String?
-  status      Boolean  @default(true)
-  seq         Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  createdBy   String?
-  creator     User?    @relation("CreatedProjectTower", fields: [createdBy], references: [id])
-  updatedBy   String?
-  updatedUser User?    @relation("UpdatedProjectTower", fields: [updatedBy], references: [id])
-  isDeleted   Boolean  @default(false)
-  project     Projects             @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  galleries   ConstructionGalleries[]
+  id                String                  @id @default(cuid())
+  projectId         String
+  name              String
+  slug              String                  @unique
+  title             Json?
+  description       Json?
+  link              String?
+  files             Json?
+  list              Json?
+  alt               String?
+  watermark         String?
+  status            Boolean                 @default(true)
+  seq               Int                     @default(0)
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+  createdBy         String?
+  creator           User?                   @relation("CreatedProjectTower", fields: [createdBy], references: [id])
+  updatedBy         String?
+  updatedUser       User?                   @relation("UpdatedProjectTower", fields: [updatedBy], references: [id])
+  isDeleted         Boolean                 @default(false)
+  project           Projects                @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  galleries         ConstructionGalleries[]
   projectFloorplans ProjectFloorPlan[]
 }
 
-
-
 model ConstructionGalleries {
-  id                   String   @id @default(cuid())
-  projectId            String
-  towerId              String?
-  title                String?
-  fileType             FileType
-  files                Json?
-  alt                  String?
-  watermark            String?
-  link                 String?
-  dateAt               DateTime @default(now())
-  isFeature            Boolean  @default(false)
-  status               Boolean  @default(true)
-  seq                  Int      @default(0)
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
-  createdBy            String?
-  tower                ProjectTower?        @relation(fields: [towerId], references: [id], onDelete: Cascade)
-  project              Projects @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  creator              User?    @relation("CreatedConstructionGalleries", fields: [createdBy], references: [id])
-  updatedBy            String?
-  updatedUser          User?    @relation("UpdatedConstructionGalleries", fields: [updatedBy], references: [id])
-  isDeleted            Boolean  @default(false)
+  id          String        @id @default(cuid())
+  projectId   String
+  towerId     String?
+  title       String?
+  fileType    FileType
+  files       Json?
+  alt         String?
+  watermark   String?
+  link        String?
+  dateAt      DateTime      @default(now())
+  isFeature   Boolean       @default(false)
+  status      Boolean       @default(true)
+  seq         Int           @default(0)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  createdBy   String?
+  tower       ProjectTower? @relation(fields: [towerId], references: [id], onDelete: Cascade)
+  project     Projects      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  creator     User?         @relation("CreatedConstructionGalleries", fields: [createdBy], references: [id])
+  updatedBy   String?
+  updatedUser User?         @relation("UpdatedConstructionGalleries", fields: [updatedBy], references: [id])
+  isDeleted   Boolean       @default(false)
 }
 
 model HomeLoan {
-  id          String      @id @default(cuid())
+  id          String   @id @default(cuid())
   files       Json?
   name        String?
   alt         String?
   watermark   String?
   link        String?
-  seq         Int         @default(0)
-  status      Boolean     @default(true)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  seq         Int      @default(0)
+  status      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   createdBy   String?
-  creator     User?       @relation("CreatedHomeLoan", fields: [createdBy], references: [id])
+  creator     User?    @relation("CreatedHomeLoan", fields: [createdBy], references: [id])
   updatedBy   String?
-  updatedUser User?       @relation("UpdatedHomeLoan", fields: [updatedBy], references: [id])
-  isDeleted   Boolean     @default(false)
+  updatedUser User?    @relation("UpdatedHomeLoan", fields: [updatedBy], references: [id])
+  isDeleted   Boolean  @default(false)
 }
 
 model Faqs {
@@ -1203,40 +1208,40 @@ model NriWhy {
 }
 
 model InverstorTabs {
-  id                String              @id @default(cuid())
-  title             String
-  slug              String
-  files             Json?
-  alt               String?
-  watermark         String?
-  status            Boolean             @default(true)
-  seq               Int                 @default(0)
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  createdBy         String?
-  creator           User?               @relation("CreatedInverstorTabs", fields: [createdBy], references: [id])
-  updatedBy         String?
-  updatedUser       User?               @relation("UpdatedInverstorTabs", fields: [updatedBy], references: [id])
-  isDeleted         Boolean             @default(false)
+  id          String   @id @default(cuid())
+  title       String
+  slug        String
+  files       Json?
+  alt         String?
+  watermark   String?
+  status      Boolean  @default(true)
+  seq         Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String?
+  creator     User?    @relation("CreatedInverstorTabs", fields: [createdBy], references: [id])
+  updatedBy   String?
+  updatedUser User?    @relation("UpdatedInverstorTabs", fields: [updatedBy], references: [id])
+  isDeleted   Boolean  @default(false)
 
   @@unique([slug])
 }
 
 model InvestorDocuments {
-  id             String        @id @default(cuid())
-  title          String
-  type           InvestorDocumentType?
-  dateAt         DateTime?
-  files          Json?
-  seq            Int           @default(0)
-  status         Boolean       @default(true)
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  createdBy      String?
-  creator        User?         @relation("CreatedInvestorDocuments", fields: [createdBy], references: [id])
-  updatedBy      String?
-  updatedUser    User?         @relation("UpdatedInvestorDocuments", fields: [updatedBy], references: [id])
-  isDeleted      Boolean       @default(false)
+  id          String                @id @default(cuid())
+  title       String
+  type        InvestorDocumentType?
+  dateAt      DateTime?
+  files       Json?
+  seq         Int                   @default(0)
+  status      Boolean               @default(true)
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  createdBy   String?
+  creator     User?                 @relation("CreatedInvestorDocuments", fields: [createdBy], references: [id])
+  updatedBy   String?
+  updatedUser User?                 @relation("UpdatedInvestorDocuments", fields: [updatedBy], references: [id])
+  isDeleted   Boolean               @default(false)
 }
 
 model Amenities {
@@ -1437,7 +1442,7 @@ model contactEnquiry {
 }
 
 model projectEnquiry {
-  id           String    @id @default(cuid())
+  id           String   @id @default(cuid())
   projectId    String?
   fullName     String
   emailAddress String
@@ -1450,7 +1455,7 @@ model projectEnquiry {
   utmcontent   String?
   utmmedium    String?
   utmsource    String?
-  dateAt       DateTime  @default(now())
+  dateAt       DateTime @default(now())
 }
 
 model channelPartnerEnquiry {
@@ -1491,41 +1496,58 @@ model orangeCircleEnquiry {
 // new schemas by jatin
 
 model Partner {
-  id          String             @id @default(cuid())
+  id          String   @id @default(cuid())
   title       String?
   alt         String?
   files       Json?
   watermark   String?
   link        String?
-  seq         Int                @default(0)
-  status      Boolean            @default(true)
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
+  seq         Int      @default(0)
+  status      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   createdBy   String?
-  creator     User?              @relation("Createdpartner", fields: [createdBy], references: [id])
+  creator     User?    @relation("Createdpartner", fields: [createdBy], references: [id])
   updatedBy   String?
-  updatedUser User?              @relation("Updatedpartner", fields: [updatedBy], references: [id])
+  updatedUser User?    @relation("Updatedpartner", fields: [updatedBy], references: [id])
 }
 
 model HomeLoanAssistance {
-  id          String      @id @default(cuid())
+  id          String   @id @default(cuid())
   files       Json?
   title       String
   alt         String?
   watermark   String?
-  seq         Int         @default(0)
-  status      Boolean     @default(true)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  seq         Int      @default(0)
+  status      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   createdBy   String?
-  creator     User?       @relation("CreatedHomeLoanAssistance", fields: [createdBy], references: [id])
+  creator     User?    @relation("CreatedHomeLoanAssistance", fields: [createdBy], references: [id])
   updatedBy   String?
-  updatedUser User?       @relation("UpdatedHomeLoanAssistance", fields: [updatedBy], references: [id])
-  isDeleted   Boolean     @default(false)
+  updatedUser User?    @relation("UpdatedHomeLoanAssistance", fields: [updatedBy], references: [id])
+  isDeleted   Boolean  @default(false)
+}
+
+model Event {
+  id          String          @id @default(cuid())
+  title       String
+  status      Boolean         @default(true)
+  seq         Int             @default(0)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  createdBy   String?
+  creator     User?           @relation("CreatedEvents", fields: [createdBy], references: [id])
+  updatedBy   String?
+  updatedUser User?           @relation("UpdatedEvents", fields: [updatedBy], references: [id])
+  isDeleted   Boolean         @default(false)
+  categories  EventCategory[]
 }
 
 model EventCategory {
   id          String           @id @default(cuid())
+  eventId     String
+  event       Event            @relation(fields: [eventId], references: [id], onDelete: Cascade)
   name        String
   status      Boolean          @default(true)
   seq         Int              @default(0)

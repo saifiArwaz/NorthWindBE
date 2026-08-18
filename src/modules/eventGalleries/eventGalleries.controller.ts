@@ -281,3 +281,50 @@ export const changeStatus = asyncHandler(
     successResponse(res, 200, "Status updated successfully", updatedRecord);
   },
 );
+
+export const changeFeature = asyncHandler(
+  async (req: Request<{ id: string }>, res: Response) => {
+    const user = req.user as any;
+    const { id } = req.params;
+    let { isFeature } = req.body;
+
+    if (
+      !(
+        typeof isFeature === "boolean" ||
+        isFeature === "true" ||
+        isFeature === "false" ||
+        isFeature === 1 ||
+        isFeature === 0 ||
+        isFeature === "1" ||
+        isFeature === "0"
+      )
+    ) {
+      throw new ApiError(
+        400,
+        "isFeature value must be a boolean (true or false), 1/0 or 'true'/'false'",
+      );
+    }
+
+    if (typeof isFeature === "string") {
+      if (isFeature === "true") isFeature = true;
+      else if (isFeature === "false") isFeature = false;
+      else if (isFeature === "1") isFeature = true;
+      else if (isFeature === "0") isFeature = false;
+    } else if (typeof isFeature === "number") {
+      isFeature = isFeature === 1;
+    }
+
+    const record = await eventsGalleryService.getEventsGalleryById(id);
+    if (!record) {
+      throw new ApiError(404, "Event Gallery record not found");
+    }
+
+    const updatedRecord = await eventsGalleryService.updateFeature(
+      id,
+      isFeature as boolean,
+      user?.id,
+    );
+
+    successResponse(res, 200, "isFeature updated successfully", updatedRecord);
+  },
+);

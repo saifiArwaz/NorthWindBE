@@ -1,80 +1,87 @@
 import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
-import * as eventCategoryService from "./eventCategory.service.js";
+import * as eventService from "./event.service.js";
 import { successResponse } from "../../utils/responseHandler.utils.js";
 import { ApiError } from "../../utils/apiError.utils.js";
 
 export const create = asyncHandler(async (req: Request, res: Response) => {
   const user = req.user as { id?: string };
-
-  const record = await eventCategoryService.createEventCategory({
+  const record = await eventService.createEvent({
     ...req.body,
     createdBy: user?.id,
   });
-
-  successResponse(res, 201, "Event Category created successfully", record);
+  successResponse(res, 200, "Event created successfully", record);
 });
 
 export const getAll = asyncHandler(async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;
   const search = (req.query.search as string) || "";
-  const eventId = (req.query.eventId as string) || undefined;
-
-  const records = await eventCategoryService.getAllList(page, limit, search, eventId);
-
-  successResponse(
-    res,
-    200,
-    "Event Categories fetched successfully",
-    records,
-  );
+  
+  const records = await eventService.getAllList(page, limit, search);
+  successResponse(res, 200, "Events fetched successfully", records);
 });
 
 export const getOne = asyncHandler(async (req: Request, res: Response) => {
   const id = req.params.id as string;
-  const record = await eventCategoryService.getEventCategoryById(id);
+  const record = await eventService.getEventByIdWithTree(id);
 
   if (!record) {
-    throw new ApiError(404, "Record not found");
+    throw new ApiError(404, "Event record not found");
   }
-  successResponse(res, 200, "Event Category fetched successfully", record);
+
+  successResponse(res, 200, "Event details fetched", record);
 });
 
 export const update = asyncHandler(async (req: Request, res: Response) => {
   const user = req.user as { id?: string };
   const id = req.params.id as string;
-
-  const oldRecord = await eventCategoryService.getEventCategoryById(id);
-
+  
+  const oldRecord = await eventService.getEventById(id);
   if (!oldRecord) {
-    throw new ApiError(404, "Record not found");
+    throw new ApiError(404, "Event record not found");
   }
 
-  const updatedRecord = await eventCategoryService.updateEventCategory(id, {
+  const updatedRecord = await eventService.updateEvent(id, {
     ...req.body,
-    updatedBy: user?.id,
+    updatedBy: user.id,
   });
 
-  successResponse(
-    res,
-    200,
-    "Event Category updated successfully",
-    updatedRecord,
-  );
+  successResponse(res, 200, "Event updated successfully", updatedRecord);
 });
 
 export const destroy = asyncHandler(async (req: Request, res: Response) => {
   const id = req.params.id as string;
-  const item = await eventCategoryService.getEventCategoryById(id);
-
-  if (!item) {
-    throw new ApiError(404, "Record not found");
+  const oldRecord = await eventService.getEventById(id);
+  if (!oldRecord) {
+    throw new ApiError(404, "Event record not found");
   }
 
-  await eventCategoryService.deleteEventCategory(id);
-  successResponse(res, 200, "Event Category deleted successfully");
+  await eventService.deleteEvent(id);
+  successResponse(res, 200, "Event record deleted successfully");
 });
+
+export const changeSeq = asyncHandler(
+  async (req: Request<{ id: string }, any, any, { type?: string }>, res: Response) => {
+    const user = req.user!;
+    const { id } = req.params;
+    const { seq } = req.body;
+
+    if (isNaN(seq)) {
+      throw new ApiError(400, "Seq value must be a number");
+    }
+
+    const payload: any = { seq: Number(seq), updatedBy: user.id };
+    
+    const record = await eventService.getEventById(id);
+    if (!record) {
+      throw new ApiError(404, "Event record not found");
+    }
+
+    const updated = await eventService.updateSeq(id, payload);
+    successResponse(res, 200, "Event sequence updated successfully", updated);
+  },
+);
 
 export const changeStatus = asyncHandler(
   async (req: Request<{ id: string }>, res: Response) => {
@@ -108,22 +115,12 @@ export const changeStatus = asyncHandler(
       status = status === 1;
     }
 
-    const record = await eventCategoryService.getEventCategoryById(id);
+    const record = await eventService.getEventById(id);
     if (!record) {
-        throw new ApiError(404, "Event Category record not found");
+        throw new ApiError(404, "Event record not found");
     }
 
-    const updated = await eventCategoryService.updateStatus(id, status as boolean, user?.id);
-    successResponse(res, 200, "Event Category status updated successfully", updated);
+    const updated = await eventService.updateStatus(id, status as boolean, user?.id);
+    successResponse(res, 200, "Event status updated successfully", updated);
   },
 );
-
-
-export const changeSeq = asyncHandler(async (req: Request, res: Response) => {
-  const user = req.user as { id?: string };
-  const id = req.params.id as string;
-  const payload = { seq: parseInt(req.body.seq), updatedBy: user.id };
-
-  const updatedRecord = await eventCategoryService.updateSeq(id, payload);
-  successResponse(res, 200, "Sequence updated successfully", updatedRecord);
-});
