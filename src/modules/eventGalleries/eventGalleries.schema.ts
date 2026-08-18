@@ -3,7 +3,7 @@ import { prisma } from "../../config/prisma.config.js";
 
 export const createEventGallerySchema = z.object({
   body: z.object({
-    title: z.string().min(1, "Title is required"),
+    title: z.string().optional(),
     alt: z.string().optional(),
     categoryId: z.string().min(1, "Category ID is required"),
     parentGalleryId: z.string().optional(),

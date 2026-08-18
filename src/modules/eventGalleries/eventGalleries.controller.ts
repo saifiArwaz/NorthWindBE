@@ -144,6 +144,7 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
   const updatePayload = Object.fromEntries(
     Object.entries({
       fileType: req.body.fileType,
+      title:req.body.title,
       categoryId: req.body.categoryId,
       files: filesByFieldname,
       alt: req.body.alt,

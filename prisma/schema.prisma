@@ -1040,7 +1040,7 @@ model Testimonials {
 
 model EventGalleries {
   id              String           @id @default(cuid())
-  title           String
+  title           String?
   fileType        FileType         @default(image)
   categoryId      String
   category        EventCategory    @relation("EventGalleryCategory", fields: [categoryId], references: [id])

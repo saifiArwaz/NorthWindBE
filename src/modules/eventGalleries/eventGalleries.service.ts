@@ -15,7 +15,9 @@ export async function createEventsGallery(data: IEventsGalleryDTO) {
     files: data.files,
     alt: data.alt,
     watermark: data.watermark,
-    createdBy: data.createdBy,
+    ...(data.createdBy && {
+      creator: { connect: { id: data.createdBy } },
+    }),
   };
   return prisma.eventGalleries.create({
     data: prismaData,

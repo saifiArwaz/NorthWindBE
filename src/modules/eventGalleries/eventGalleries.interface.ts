@@ -1,7 +1,7 @@
 import { FileType } from "../../generated/prisma/enums.js";
 
 export interface IEventsGalleryDTO {
-  title: string;
+  title?: string;
   fileType?: FileType | string;
   categoryId: string;
   parentGalleryId?: string;
