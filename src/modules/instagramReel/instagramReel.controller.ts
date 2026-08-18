@@ -60,7 +60,11 @@ export const getAllReels = asyncHandler(async (req: Request, res: Response) => {
       successResponse(res, 200, "Instagram reels fetched", result);
       return;
     }
-    throw new ApiError(400, err.message || "Failed to fetch reels");
+    const errorMessage = err.response?.data?.error?.message || err.message;
+    if (err.response?.status !== 401) {
+      console.log("Instagram API Error Data:", err.response?.data);
+    }
+    throw new ApiError(400, errorMessage || "Failed to fetch reels");
   }
 });
 

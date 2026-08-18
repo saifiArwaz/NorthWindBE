@@ -4,6 +4,8 @@ import { prisma } from "../../config/prisma.config.js";
 export const createprojectTowerSchema = z.object({
   body: z.object({
     projectId: z.string().min(1, "Project Id is required"),
+    name: z.string().min(1, "Name is required"),
+    slug: z.string().optional(),
     title: z.any().optional(),
     description: z.any().optional(),
     link: z.string().optional(),
@@ -20,6 +22,8 @@ export const createprojectTowerSchema = z.object({
 
 export const updateprojectTowerSchema = z.object({
   body: z.object({
+    name: z.string().optional(),
+    slug: z.string().optional(),
     title: z.any().optional(),
     description: z.any().optional(),
     link: z.string().optional(),

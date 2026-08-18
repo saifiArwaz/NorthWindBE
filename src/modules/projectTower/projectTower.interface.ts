@@ -1,5 +1,7 @@
 export interface IProjectTowerDTO {
   projectId: string;
+  name: string;
+  slug?: string;
   title?: any;
   description?: any;
   link?: string;
@@ -8,9 +10,12 @@ export interface IProjectTowerDTO {
   alt?: string;
   watermark?: string;
   createdBy?: string;
+  updatedBy?: string;
 }
 
 export interface IProjectTowerUpdateDTO {
+  name?: string;
+  slug?: string;
   title?: any;
   description?: any;
   link?: string;

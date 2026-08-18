@@ -20,7 +20,7 @@ router.post(
 );
 router.patch("/:id/seq", noneUpload, instagramReelCtrl.changeSeq);
 router.patch(
-  "/:id/display",
+  "/:id/isDisplay",
   noneUpload,
   instagramReelCtrl.chooseReelForDisplay,
 );

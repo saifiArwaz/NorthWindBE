@@ -1058,6 +1058,8 @@ model EventGalleries {
 model ProjectTower {
   id          String   @id @default(cuid())
   projectId   String
+  name        String
+  slug        String   @unique
   title       Json?
   description Json?
   link        String?

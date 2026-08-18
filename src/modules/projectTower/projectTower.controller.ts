@@ -5,6 +5,8 @@ import { successResponse } from "../../utils/responseHandler.utils.js";
 import { ApiError } from "../../utils/apiError.utils.js";
 import * as projectService from "../projects/project.service.js";
 import { deleteFromS3, getFileUrl } from "../../utils/fileHandling.utils.js";
+import slugifyPkg from "slugify";
+const slugify = (slugifyPkg as any).default ?? slugifyPkg;
 
 export const create = asyncHandler(async (req: Request, res: Response) => {
   const user = req.user as { id?: string };
@@ -20,42 +22,11 @@ export const create = asyncHandler(async (req: Request, res: Response) => {
     }
   });
 
-  let list = undefined;
-  if (req.body.list) {
-    try {
-      list = typeof req.body.list === 'string' ? JSON.parse(req.body.list) : req.body.list;
-    } catch(e) {
-      list = req.body.list;
-    }
-  }
-
-  let title = undefined;
-  if (req.body.title) {
-    try {
-      title = typeof req.body.title === 'string' ? JSON.parse(req.body.title) : req.body.title;
-    } catch(e) {
-      title = req.body.title;
-    }
-  }
-
-  let description = undefined;
-  if (req.body.description) {
-    try {
-      description = typeof req.body.description === 'string' ? JSON.parse(req.body.description) : req.body.description;
-    } catch(e) {
-      description = req.body.description;
-    }
-  }
-
   const record = await projectTowerService.createProjectTower({
     ...req.body,
-    title,
-    description,
-    link: req.body.link,
-    list,
     files: filesByFieldname,
-    watermark: req.body.watermark,
-    createdBy: user?.id,
+    createdBy: user.id,
+    updatedBy: user.id,
   });
 
   if (record.files && typeof record.files === "object") {
@@ -137,6 +108,18 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
     throw new ApiError(404, "Record not found");
   }
 
+  let slug = oldRecord.slug;
+  if (req.body.name) {
+    slug = slugify(req.body.slug || req.body.name, {
+      lower: true,
+      strict: true,
+    });
+    const exists = await projectTowerService.findFirst(id, slug!);
+    if (exists) {
+      throw new ApiError(404, "Project tower name already exists");
+    }
+  }
+
   const allFiles: any[] = Array.isArray(req.files)
     ? req.files
     : Object.values(req.files ?? {}).flat();
@@ -166,33 +149,14 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
     }
   }
 
-  let list = req.body.list;
-  if (req.body.list && typeof req.body.list === 'string') {
-    try {
-      list = JSON.parse(req.body.list);
-    } catch(e) {}
-  }
-
-  let title = req.body.title;
-  if (req.body.title && typeof req.body.title === 'string') {
-    try {
-      title = JSON.parse(req.body.title);
-    } catch(e) {}
-  }
-
-  let description = req.body.description;
-  if (req.body.description && typeof req.body.description === 'string') {
-    try {
-      description = JSON.parse(req.body.description);
-    } catch(e) {}
-  }
-
   const updatePayload = Object.fromEntries(
     Object.entries({
-      title,
-      description,
+      name: req.body.name,
+      slug: slug,
+      title: req.body.title,
+      description: req.body.description,
       link: req.body.link,
-      list,
+      list: req.body.list,
       files: Object.keys(filesByFieldname).length ? filesByFieldname : undefined,
       alt: req.body.alt,
       watermark: req.body.watermark,
