@@ -858,32 +858,130 @@ export async function getPartners() {
   });
 }
 
-export async function getEvents(
-  page: number = 1,
-  limit: number = 10,
-) {
-  const where: any = {
-    status: true,
-    isDeleted: false,
-  };
-  return paginate(
-    prisma.eventGalleries,
+export async function getEvents(page = 1, limit = 10, eventSlug?: string) {
+  const where: any = { status: true, isDeleted: false };
+  if (eventSlug) {
+    where.slug = eventSlug;
+  }
+  
+  const eventsResult = await paginate(
+    prisma.event,
     {
       where,
       orderBy: { seq: "asc" },
       select: {
         id: true,
         title: true,
+        slug: true,
+        type: true,
+        seq: true,
+        status: true,
+        categories: {
+          where: { status: true, isDeleted: false },
+          orderBy: { seq: "asc" },
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            files: true,
+            seq: true,
+            status: true,
+          },
+        },
+        galleries: {
+          where: { status: true, isDeleted: false },
+          orderBy: { seq: "asc" },
+          select: {
+            id: true,
+            title: true,
+            slug: true,
+            files: true,
+            alt: true,
+            watermark: true,
+            fileType: true,
+            seq: true,
+            status: true,
+          },
+        },
+      },
+    },
+    { page, limit }
+  );
+
+  // Clean up responses based on event type
+  eventsResult.data = eventsResult.data.map((event: any) => {
+    if (event.type === 'album') {
+      delete event.galleries;
+    } else if (event.type === 'gallery') {
+      delete event.categories;
+    }
+    return event;
+  });
+
+  return eventsResult;
+}
+
+export async function getCategoryGalleries(slug: string, page = 1, limit = 10) {
+  const category = await prisma.eventCategory.findFirst({
+    where: { slug, status: true, isDeleted: false },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      files: true,
+      seq: true,
+      status: true,
+    }
+  });
+
+  if (!category) return null;
+
+  const galleriesResult = await paginate(
+    prisma.eventGalleries,
+    {
+      where: { categoryId: category.id, status: true, isDeleted: false },
+      orderBy: { seq: "asc" },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
         files: true,
         alt: true,
         watermark: true,
+        fileType: true,
         seq: true,
         status: true,
-        createdAt: true,
-        updatedAt: true,
-      },
+      }
     },
-    { page, limit },
+    { page, limit }
+  );
+
+  return {
+    category,
+    galleries: galleriesResult.data,
+    pagination: galleriesResult.pagination
+  };
+}
+
+export async function getFeaturedGalleries(page = 1, limit = 10) {
+  return paginate(
+    prisma.eventGalleries,
+    {
+      where: { isFeature: true, status: true, isDeleted: false },
+      orderBy: { seq: "asc" },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        files: true,
+        alt: true,
+        watermark: true,
+        fileType: true,
+        seq: true,
+        status: true,
+      }
+    },
+    { page, limit }
   );
 }
 

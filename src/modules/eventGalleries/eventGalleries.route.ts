@@ -3,7 +3,6 @@ import * as eventGalleryCtrl from "./eventGalleries.controller.js";
 import {
   createEventGallerySchema,
   updateEventGallerySchema,
-  changeFeatureSchema,
 } from "./eventGalleries.schema.js";
 import { validate } from "../../middlewares/validate.js";
 import { uploadMiddleware } from "../../middlewares/multer-s3.middleware.js";
@@ -40,7 +39,6 @@ router.patch(
 router.patch(
   "/:id/isFeature",
   uploadMiddleware("eventGalleries").none(),
-  validate(changeFeatureSchema),
   eventGalleryCtrl.changeFeature,
 );
 

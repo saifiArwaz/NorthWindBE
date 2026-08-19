@@ -22,7 +22,6 @@ export const create = asyncHandler(async (req: Request, res: Response) => {
 
   const record = await eventsGalleryService.createEventsGallery({
     ...req.body,
-    categoryId: req.body.categoryId,
     files: filesByFieldname,
     createdBy: user?.id,
   });
@@ -48,8 +47,9 @@ export const getAll = asyncHandler(async (req: Request, res: Response) => {
   const limit = parseInt(req.query.limit as string) || 10;
   const search = (req.query.search as string) || "";
   const categoryId = (req.query.categoryId as string) || undefined;
+  const eventId = (req.query.eventId as string) || undefined;
 
-  const records = await eventsGalleryService.getAllList(page, limit, search, categoryId);
+  const records = await eventsGalleryService.getAllList(page, limit, search, categoryId, eventId);
   await Promise.all(
     records.data.map(async (data: any) => {
       if (data.files && typeof data.files === "object") {
@@ -146,6 +146,7 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
       fileType: req.body.fileType,
       title:req.body.title,
       categoryId: req.body.categoryId,
+      eventId: req.body.eventId,
       files: filesByFieldname,
       alt: req.body.alt,
       watermark: req.body.watermark,

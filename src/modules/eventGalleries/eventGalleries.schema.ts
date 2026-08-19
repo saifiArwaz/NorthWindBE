@@ -1,14 +1,19 @@
 import z from "zod";
 import { prisma } from "../../config/prisma.config.js";
+import { FileType } from "../../generated/prisma/enums.js";
 
 export const createEventGallerySchema = z.object({
   body: z.object({
     title: z.string().optional(),
     slug: z.string().optional(),
     alt: z.string().optional(),
-    categoryId: z.string().min(1, "Category ID is required"),
-    parentGalleryId: z.string().optional(),
+    fileType: z.nativeEnum(FileType).optional(),
+    categoryId: z.string().optional(),
+    eventId: z.string().optional(),
     watermark: z.string().optional(),
+  }).refine(data => data.categoryId || data.eventId, {
+    message: "Either categoryId or eventId must be provided",
+    path: ["categoryId"],
   }),
 }).superRefine(async (data, ctx) => {
   if (data.body.categoryId) {
@@ -23,23 +28,15 @@ export const createEventGallerySchema = z.object({
       });
     }
   }
-
-  if (data.body.parentGalleryId) {
-    const parentGallery = await prisma.eventGalleries.findUnique({
-      where: { id: data.body.parentGalleryId, isDeleted: false, status: true },
+  if (data.body.eventId) {
+    const event = await prisma.event.findUnique({
+      where: { id: data.body.eventId, isDeleted: false, status: true },
     });
-    
-    if (!parentGallery) {
+    if (!event) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Invalid or inactive Parent Gallery ID",
-        path: ["body", "parentGalleryId"],
-      });
-    } else if (parentGallery.categoryId !== data.body.categoryId) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Parent gallery must belong to the same category",
-        path: ["body", "parentGalleryId"],
+        message: "Invalid or inactive Event ID",
+        path: ["body", "eventId"],
       });
     }
   }
@@ -51,7 +48,8 @@ export const updateEventGallerySchema = z.object({
     slug: z.string().optional(),
     alt: z.string().optional(),
     categoryId: z.string().optional(),
-    parentGalleryId: z.string().optional(),
+    fileType: z.nativeEnum(FileType).optional(),
+    eventId: z.string().optional(),
     watermark: z.string().optional(),
     status: z.coerce.boolean().optional(),
   }),
@@ -68,24 +66,16 @@ export const updateEventGallerySchema = z.object({
       });
     }
   }
-  
-  if (data.body.parentGalleryId) {
-    const parentGallery = await prisma.eventGalleries.findUnique({
-      where: { id: data.body.parentGalleryId, isDeleted: false },
+  if (data.body.eventId) {
+    const event = await prisma.event.findUnique({
+      where: { id: data.body.eventId, isDeleted: false },
     });
-    
-    if (!parentGallery) {
+    if (!event) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Invalid Parent Gallery ID",
-        path: ["body", "parentGalleryId"],
+        message: "Invalid Event ID",
+        path: ["body", "eventId"],
       });
     }
   }
-});
-
-export const changeFeatureSchema = z.object({
-  body: z.object({
-    isFeature: z.coerce.boolean(),
-  }),
 });

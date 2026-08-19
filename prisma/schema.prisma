@@ -119,6 +119,10 @@ enum ProjectAmenityTypes {
   icon
   image
 }
+enum EventType {
+  album
+  gallery
+}
 
 model User {
   id                               String                     @id @default(cuid())
@@ -1043,11 +1047,10 @@ model EventGalleries {
   slug            String?          @unique
   title           String?
   fileType        FileType         @default(image)
-  categoryId      String
-  category        EventCategory    @relation("EventGalleryCategory", fields: [categoryId], references: [id])
-  parentGalleryId String?
-  parentGallery   EventGalleries?  @relation("GalleryHierarchy", fields: [parentGalleryId], references: [id], onDelete: Cascade)
-  childGalleries  EventGalleries[] @relation("GalleryHierarchy")
+  categoryId      String?
+  category        EventCategory?   @relation("EventGalleryCategory", fields: [categoryId], references: [id])
+  eventId         String?
+  event           Event?           @relation("EventGalleryEvent", fields: [eventId], references: [id], onDelete: Cascade)
   files           Json?
   alt             String?
   watermark       String?
@@ -1534,6 +1537,7 @@ model Event {
   id          String          @id @default(cuid())
   slug        String?         @unique
   title       String
+  type        EventType       @default(gallery)
   status      Boolean         @default(true)
   seq         Int             @default(0)
   createdAt   DateTime        @default(now())
@@ -1544,6 +1548,7 @@ model Event {
   updatedUser User?           @relation("UpdatedEvents", fields: [updatedBy], references: [id])
   isDeleted   Boolean         @default(false)
   categories  EventCategory[]
+  galleries   EventGalleries[] @relation("EventGalleryEvent")
 }
 
 model EventCategory {
