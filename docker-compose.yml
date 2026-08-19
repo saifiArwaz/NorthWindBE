@@ -28,7 +28,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-northwind_user}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-northwind@!7701^$%}
     ports:
-      - "5437:5432"
+      - "5434:5432"
     volumes:
       - northwind_pg_data:/var/lib/postgresql/data
     healthcheck:
