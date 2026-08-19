@@ -20,6 +20,7 @@ export async function createEvent(data: IEventDTO) {
     data: {
       title: data.title,
       slug: slug,
+      type: data.type,
       status: data.status,
       ...(data.createdBy
         ? { creator: { connect: { id: data.createdBy } } }
@@ -57,7 +58,7 @@ export async function getEventById(id: string) {
   });
 }
 
-// Memory tree builder
+// Memory tree builder (no longer builds a tree since parentGalleryId was removed, just formats the response)
 export async function getEventByIdWithTree(id: string) {
   const event = await prisma.event.findUnique({
     where: { id, isDeleted: false },
@@ -77,30 +78,11 @@ export async function getEventByIdWithTree(id: string) {
 
   if (!event) return null;
 
-  // Reconstruct tree
+  // Map to format response
   const treeCategories = event.categories.map((category) => {
-    const flatGalleries = category.events; // all galleries for category
-    const galleryMap = new Map();
-    
-    // Initialize map
-    for (const g of flatGalleries) {
-      galleryMap.set(g.id, { ...g, children: [] });
-    }
-
-    const rootGalleries: any[] = [];
-
-    for (const g of flatGalleries) {
-      const gWithChildren = galleryMap.get(g.id);
-      if (g.parentGalleryId && galleryMap.has(g.parentGalleryId)) {
-        galleryMap.get(g.parentGalleryId).children.push(gWithChildren);
-      } else {
-        rootGalleries.push(gWithChildren);
-      }
-    }
-
     return {
       ...category,
-      galleries: rootGalleries,
+      galleries: category.events,
       events: undefined, // remove flat list from response
     };
   });
@@ -127,6 +109,7 @@ export async function updateEvent(id: string, data: IEventUpdateDTO) {
     Object.entries({
       title: data.title,
       slug: slug,
+      type: data.type,
       status: data.status,
       ...(data.updatedBy && {
         updatedUser: { connect: { id: data.updatedBy } },
@@ -177,7 +160,8 @@ export async function deleteEvent(id: string) {
         include: {
           events: true, // galleries
         }
-      }
+      },
+      galleries: true,
     }
   });
 
@@ -185,13 +169,15 @@ export async function deleteEvent(id: string) {
 
   // Collect all category IDs and gallery IDs
   const categoryIds = event.categories.map(c => c.id);
-  const galleryIds = event.categories.flatMap(c => c.events.map(g => g.id));
+  const categoryGalleryIds = event.categories.flatMap(c => c.events.map(g => g.id));
+  const directGalleryIds = event.galleries.map(g => g.id);
+  const allGalleryIds = [...categoryGalleryIds, ...directGalleryIds];
 
   // Perform soft deletion in transaction
   return prisma.$transaction(async (tx) => {
-    if (galleryIds.length > 0) {
+    if (allGalleryIds.length > 0) {
       await tx.eventGalleries.updateMany({
-        where: { id: { in: galleryIds } },
+        where: { id: { in: allGalleryIds } },
         data: { isDeleted: true },
       });
     }

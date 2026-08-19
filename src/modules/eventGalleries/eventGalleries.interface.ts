@@ -1,16 +1,13 @@
 import { FileType } from "../../generated/prisma/enums.js";
-
 export interface IEventsGalleryDTO {
   title?: string;
   slug?: string;
   fileType?: FileType | string;
-  categoryId: string;
-  parentGalleryId?: string;
-  files?: string;
+  categoryId?: string;
+  eventId?: string;
+  files?: Record<string, string> | any;
   alt?: string;
   watermark?: string;
-  isFeature?: boolean;
-  status?: boolean;
   createdBy?: string;
 }
 
@@ -19,11 +16,9 @@ export interface IEventsGalleryUpdateDTO {
   slug?: string;
   fileType?: FileType | string;
   categoryId?: string;
-  parentGalleryId?: string | null;
-  files?: string;
+  eventId?: string;
+  files?: Record<string, string> | any;
   alt?: string;
   watermark?: string;
-  isFeature?: boolean;
-  status?: boolean;
   updatedBy?: string;
 }

@@ -705,33 +705,136 @@ export const getPartners = asyncHandler(async (req: Request, res: Response) => {
 
   successResponse(res, 200, "Partners fetched successfully", partners);
 });
-
 export const getEvents = asyncHandler(async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;
-  const search = (req.query.search as string) || "";
+  const eventSlug = (req.query.eventSlug as string) || undefined;
 
-  const records = await websiteServices.getEvents(page, limit);
-  await Promise.all(
-    records.data.map(async (data: any) => {
-      if (data.files && typeof data.files === "object") {
-        const filesObj = data.files as any;
-        await Promise.all(
-          Object.keys(filesObj).map(async (key) => {
-            if (filesObj[key]) {
-              filesObj[key] = await getFileUrl(filesObj[key]);
-            }
-          }),
-        );
-      }
-    }),
-  );
+  const records = await websiteServices.getEvents(page, limit, eventSlug);
+
+  // Helper to process files for an event array
+  const processFiles = async (event: any) => {
+    // 1. Process category cover images (if album)
+    if (event.categories && Array.isArray(event.categories)) {
+      await Promise.all(
+        event.categories.map(async (category: any) => {
+          if (category.files && typeof category.files === "object") {
+            await Promise.all(
+              Object.keys(category.files).map(async (key) => {
+                if (category.files[key]) {
+                  category.files[key] = await getFileUrl(category.files[key]);
+                }
+              })
+            );
+          }
+        })
+      );
+    }
+
+    // 2. Process direct gallery images (if gallery event)
+    if (event.galleries && Array.isArray(event.galleries)) {
+      await Promise.all(
+        event.galleries.map(async (gallery: any) => {
+          if (gallery.files && typeof gallery.files === "object") {
+            await Promise.all(
+              Object.keys(gallery.files).map(async (key) => {
+                if (gallery.files[key]) {
+                  gallery.files[key] = await getFileUrl(gallery.files[key]);
+                }
+              })
+            );
+          }
+        })
+      );
+    }
+  };
+
+  await Promise.all(records.data.map((record: any) => processFiles(record)));
 
   successResponse(
     res,
     200,
     "Events fetched successfully",
     records,
+  );
+});
+
+export const getCategoryGalleries = asyncHandler(async (req: Request, res: Response) => {
+  const slug = req.params.slug as string;
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 10;
+
+  const result = await websiteServices.getCategoryGalleries(slug, page, limit);
+
+  if (!result) {
+    throw new ApiError(404, "Category not found");
+  }
+
+  // Process category files
+  if (result.category.files && typeof result.category.files === "object") {
+    const filesObj = result.category.files as Record<string, any>;
+    await Promise.all(
+      Object.keys(filesObj).map(async (key) => {
+        if (filesObj[key]) {
+          filesObj[key] = await getFileUrl(filesObj[key]);
+        }
+      })
+    );
+  }
+
+  // Process galleries files
+  if (result.galleries && Array.isArray(result.galleries)) {
+    await Promise.all(
+      result.galleries.map(async (gallery: any) => {
+        if (gallery.files && typeof gallery.files === "object") {
+          await Promise.all(
+            Object.keys(gallery.files).map(async (key) => {
+              if (gallery.files[key]) {
+                gallery.files[key] = await getFileUrl(gallery.files[key]);
+              }
+            })
+          );
+        }
+      })
+    );
+  }
+
+  successResponse(
+    res,
+    200,
+    "Category galleries fetched successfully",
+    result,
+  );
+});
+
+export const getFeaturedGalleries = asyncHandler(async (req: Request, res: Response) => {
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 10;
+
+  const result = await websiteServices.getFeaturedGalleries(page, limit);
+
+  // Process galleries files
+  if (result.data && Array.isArray(result.data)) {
+    await Promise.all(
+      result.data.map(async (gallery: any) => {
+        if (gallery.files && typeof gallery.files === "object") {
+          await Promise.all(
+            Object.keys(gallery.files).map(async (key) => {
+              if (gallery.files[key]) {
+                gallery.files[key] = await getFileUrl(gallery.files[key]);
+              }
+            })
+          );
+        }
+      })
+    );
+  }
+
+  successResponse(
+    res,
+    200,
+    "Featured event galleries fetched successfully",
+    result,
   );
 });
 
