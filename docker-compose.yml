@@ -1,47 +1,47 @@
 version: "3.9"
 
 services:
-  radhey_api:
+  northwind_api:
     build: .
-    container_name: radhey_api
+    container_name: northwind_api
     restart: always
     ports:
-      - "3307:3307"
+      - "4004:4004"
     env_file:
       - .env
     environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-radhey_user}:${POSTGRES_PASSWORD:-radhey@!7701^$%}@radhey-postgres:5432/${POSTGRES_DB:-radhey_group_db}?schema=public
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-northwind_user}:${POSTGRES_PASSWORD:-northwind@!7701^$%}@northwind-postgres:5432/${POSTGRES_DB:-northwind_db}?schema=public
     depends_on:
-      radhey-postgres:
+      northwind-postgres:
         condition: service_healthy
     volumes:
-      - radhey_uploads:/app/uploads
+      - northwind_uploads:/app/uploads
     networks:
-      - radhey-network
+      - northwind-network
 
-  radhey-postgres:
+  northwind-postgres:
     image: postgres:16
-    container_name: radhey-postgres
+    container_name: northwind-postgres
     restart: always
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-radhey_group_db}
-      POSTGRES_USER: ${POSTGRES_USER:-radhey_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-radhey@!7701^$%}
+      POSTGRES_DB: ${POSTGRES_DB:-northwind_db}
+      POSTGRES_USER: ${POSTGRES_USER:-northwind_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-northwind@!7701^$%}
     ports:
       - "5437:5432"
     volumes:
-      - radhey_pg_data:/var/lib/postgresql/data
+      - northwind_pg_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
       interval: 5s
       timeout: 5s
       retries: 5
-    networks: 
-      - radhey-network
+    networks:
+      - northwind-network
 
 volumes:
-  radhey_pg_data:
-  radhey_uploads:
+  northwind_pg_data:
+  northwind_uploads:
 
 networks:
-  radhey-network:
+  northwind-network:
