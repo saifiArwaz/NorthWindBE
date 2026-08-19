@@ -6,8 +6,6 @@ export const createprojectGallerySchema = z.object({
     .object({
       projectId: z.string().min(1, "Project Id field is required"),
       fileType: z.string().min(1, "File Type field is required"),
-      type: z.string().optional(),
-      dateAt: z.string().optional(),
       image: z.string().optional(),
       video: z.string().optional(),
       link: z.string().optional(),
@@ -31,9 +29,7 @@ export const createprojectGallerySchema = z.object({
 
 export const updateprojectGallerySchema = z.object({
   body: z.object({
-    type: z.string().optional(),
     fileType: z.string().optional(),
-    dateAt: z.string().optional(),
     alt: z.string().optional(),
     watermark: z.string().optional(),
     link: z.string().optional(),

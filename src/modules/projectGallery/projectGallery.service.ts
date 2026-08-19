@@ -5,14 +5,12 @@ import {
 } from "./projectGallery.interface.js";
 import { paginate } from "../../utils/pagination.utils.js";
 import { ApiError } from "../../utils/apiError.utils.js";
-import { FileType, ProjectGalleryTypes } from "../../generated/prisma/enums.js";
+import { FileType } from "../../generated/prisma/enums.js";
 
 export async function createProjectGallery(data: IProjectGalleryDTO) {
   let prismaData: any = {
     projectId: data.projectId,
-    type: data.type as ProjectGalleryTypes,
     fileType: data.fileType as FileType,
-    dateAt: data.dateAt,
     files: data.files,
     link: data.link,
     alt: data.alt,
@@ -27,14 +25,10 @@ export async function getAllList(
   limit = 10,
   search = "",
   projectId: string,
-  type: string,
 ) {
   let where: any = {
     projectId,
   };
-  if (type) {
-    where.type = type as ProjectGalleryTypes;
-  }
 
   if (typeof where !== "undefined" && where && typeof where === "object") {
     (where as any).isDeleted = false;
@@ -55,9 +49,7 @@ export async function updateProjectGallery(
 ) {
   const prismaData = Object.fromEntries(
     Object.entries({
-      type: data.type as ProjectGalleryTypes,
       fileType: data.fileType as FileType,
-      dateAt: data.dateAt,
       files: data.files,
       alt: data.alt,
       watermark: data.watermark,

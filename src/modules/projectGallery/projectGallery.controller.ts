@@ -23,7 +23,6 @@ export const create = asyncHandler(async (req: Request, res: Response) => {
   });
   const data: any = {
     ...req.body,
-    dateAt: req.body.dateAt ? new Date(req.body.dateAt) : undefined,
     files: filesByFieldname,
     createdBy: user?.id,
   };
@@ -49,9 +48,10 @@ export const getAll = asyncHandler(async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;
   const search = (req.query.search as string) || "";
-  const type = req.query.type as string;
   const { projectId } = req.query;
-
+  if(!projectId){
+    throw new ApiError(400, "ProjectId is required");
+  }
   const record = await projectService.getProjectById(projectId as string);
   if (!record) {
     throw new ApiError(404, "Invalid Project Id / Project not found");
@@ -61,8 +61,7 @@ export const getAll = asyncHandler(async (req: Request, res: Response) => {
     page,
     limit,
     search,
-    projectId as string,
-    type as string,
+    projectId as string
   );
   await Promise.all(
     records.data.map(async (data: any) => {
@@ -157,11 +156,7 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
   const updatePayload = Object.fromEntries(
     Object.entries({
       projectId: req.body.projectId,
-      type: req.body.type,
       fileType: req.body.fileType,
-      ...(req.body.dateAt !== undefined && {
-        dateAt: req.body.dateAt ? new Date(req.body.dateAt) : null,
-      }),
       files: filesByFieldname,
       alt: req.body.alt,
       watermark: req.body.watermark,

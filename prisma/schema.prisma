@@ -965,9 +965,7 @@ model ProjectRera {
 model ProjectGallery {
   id          String              @id @default(cuid())
   projectId   String
-  type        ProjectGalleryTypes @default(gallery)
   fileType    FileType
-  dateAt      DateTime?
   files       Json?
   alt         String?
   watermark   String?

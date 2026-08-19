@@ -1709,7 +1709,6 @@ export async function getProjectGalleriesByProjectId(
     where: {
       projectId,
       status: true,
-      ...(types && types.length > 0 ? { type: { in: types as any[] } } : {}),
       ...(fileTypes && fileTypes.length > 0
         ? { fileType: { in: fileTypes as any[] } }
         : {}),
@@ -1717,7 +1716,6 @@ export async function getProjectGalleriesByProjectId(
     orderBy: { seq: "asc" },
     select: {
       id: true,
-      type: true,
       fileType: true,
       files: true,
       alt: true,

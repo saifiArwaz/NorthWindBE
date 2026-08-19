@@ -301,7 +301,6 @@ export async function getProjectGalleriesByProjectId(
       projectId,
       status: true,
       isDeleted: false,
-      ...(types && types.length > 0 ? { type: { in: types as any[] } } : {}),
       ...(fileTypes && fileTypes.length > 0
         ? { fileType: { in: fileTypes as any[] } }
         : {}),
@@ -309,10 +308,8 @@ export async function getProjectGalleriesByProjectId(
     orderBy: { seq: "asc" },
     select: {
       id: true,
-      type: true,
       fileType: true,
       files: true,
-      dateAt: true,
       alt: true,
       watermark: true,
       link: true,
