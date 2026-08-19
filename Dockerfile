@@ -23,7 +23,7 @@ RUN npx prisma generate
 RUN npm run build
 
 # Expose port
-EXPOSE 3307
+EXPOSE 4004
 
 # Run migrations and start application
 CMD ["sh", "-c", "npx prisma db push && node dist/server.js"]
