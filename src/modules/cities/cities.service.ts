@@ -89,3 +89,14 @@ export async function updateStatus(
     },
   });
 }
+
+export async function updateSeq(id: string, seq: number, updatedBy?: string) {
+  let data: any = { seq };
+  if (updatedBy) {
+    data.updatedUser = { connect: { id: updatedBy } };
+  }
+  return prisma.city.update({
+    where: { id },
+    data,
+  });
+}

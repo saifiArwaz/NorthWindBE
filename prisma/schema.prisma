@@ -491,6 +491,7 @@ model City {
   slug        String
   seoTags     Json?
   status      Boolean    @default(true)
+  seq         Int        @default(0)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   projects    Projects[]

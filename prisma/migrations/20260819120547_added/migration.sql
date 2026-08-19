@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "City" ADD COLUMN     "seq" INTEGER NOT NULL DEFAULT 0;

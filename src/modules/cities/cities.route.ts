@@ -30,6 +30,12 @@ router.patch(
   uploadMiddleware("cities").none(),
   citiesCtrl.changeStatus,
 );
+router.patch(
+  "/:id/seq",
+  uploadMiddleware("cities").none(),
+  citiesCtrl.changeSeq,
+);
+
 router.delete("/:id", citiesCtrl.deleteById);
 
 export { router as CitiesRoutes };

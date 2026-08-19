@@ -91,6 +91,26 @@ export const deleteById = asyncHandler(async (req: Request, res: Response) => {
   successResponse(res, 200, "City record deleted successfully");
 });
 
+export const changeSeq = asyncHandler(
+  async (req: Request<{ id: string }>, res: Response) => {
+    const user = req.user as any;
+    const { id } = req.params;
+    const { seq } = req.body;
+
+    if (isNaN(seq)) {
+      throw new ApiError(400, "Seq value must be a number");
+    }
+
+    const record = await citiesService.getCityById(id);
+    if (!record) {
+      throw new ApiError(404, "City record not found");
+    }
+
+    const updatedRecord = await citiesService.updateSeq(id, Number(seq), user?.id);
+    successResponse(res, 200, "Seq updated successfully", updatedRecord);
+  }
+);
+
 export const changeStatus = asyncHandler(
   async (req: Request<{ id: string }>, res: Response) => {
     const user = req.user as any;
