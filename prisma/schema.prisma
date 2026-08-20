@@ -104,6 +104,8 @@ enum InvestorDocumentType {
   new_release
   annual
   quarterly
+  monthly
+  half_yearly
 }
 
 enum FaqTypes {
