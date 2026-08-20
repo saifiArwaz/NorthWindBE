@@ -11,9 +11,9 @@ const router = Router();
 
 const uploaded = uploadMiddleware("contentByType").any();
 
-router.get("/:type/list", contentByTypeCtrl.getContentByTypeList);
+router.get("/", contentByTypeCtrl.getContentByTypeList);
 router.post(
-  "/",  
+  "/",
   uploaded,
   validate(createContentByTypeSchema),
   contentByTypeCtrl.create,
