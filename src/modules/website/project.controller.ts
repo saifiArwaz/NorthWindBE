@@ -417,15 +417,13 @@ export const getProjectContentDetailsByType = asyncHandler(
     req: Request,    res: Response,
   ) => {
     const projectId = req.params.projectId as string ;
-    const type =  req.query.type as string ;
 
     if (!projectId) {
       throw new ApiError(400, "projectId parameter is required");
     }
 
     const records = await projectService.getProjectContentDetailsByType(
-      projectId,
-      type
+      projectId
     );
 
     await Promise.all(
@@ -443,7 +441,7 @@ export const getProjectContentDetailsByType = asyncHandler(
     successResponse(
       res,
       200,
-      `Project content details${type ? ` (${type})` : ""} fetched successfully`,
+      `Project content details fetched successfully`,
       records,
     );
   },

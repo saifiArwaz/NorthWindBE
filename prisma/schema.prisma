@@ -818,9 +818,9 @@ model ProjectSection {
 model ProjectContentDetails {
   id          String                     @id @default(cuid())
   projectId   String
-  type        ProjectContentDetailsTypes
-  title       Json?
-  list        Json?
+
+  title       String?
+  description String?
   files       Json?
   alt         String?
   watermark   String?

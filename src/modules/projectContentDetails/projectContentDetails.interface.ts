@@ -1,11 +1,10 @@
 export interface IProjectContentDetailsCreateDTO {
   projectId: string;
-  type: string;
   title?: string;
+  description?: string;
   files?: Record<string, any>;
   alt?: string;
   watermark?: string;
-  list?: Record<string, any>;
   createdBy: string;
   updatedBy: string;
 }
@@ -13,9 +12,9 @@ export interface IProjectContentDetailsCreateDTO {
 export interface IProjectContentDetailsUpdateDTO {
   projectId?: string;
   title?: string;
+  description?: string;
   files?: Record<string, any>;
   alt?: string;
   watermark?: string;
-  list?: Record<string, any>;
   updatedBy: string;
 }

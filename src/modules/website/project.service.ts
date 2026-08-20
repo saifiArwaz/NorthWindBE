@@ -460,26 +460,19 @@ export async function getProjectFaqsByProjectId(projectId: string) {
 
 export async function getProjectContentDetailsByType(
   projectId: string,
-  type?: string,
 ) {
   return prisma.projectContentDetails.findMany({
     where: {
       OR: [{ projectId: projectId }, { project: { slug: projectId } }],
       status: true,
       isDeleted: false,
-      ...(type
-        ? {
-            type: type.toLowerCase() as ProjectContentDetailsTypes,
-          }
-        : {}),
     },
     orderBy: { seq: "asc" },
     select: {
       id: true,
       projectId: true,
-      type: true,
       title: true,
-      list: true,
+      description: true,
       files: true,
       alt: true,
       watermark: true,

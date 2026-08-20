@@ -10,12 +10,11 @@ import { ApiError } from "../../utils/apiError.utils.js";
 export async function createProjectContentDetails(data: IProjectContentDetailsCreateDTO) {
   return prisma.projectContentDetails.create({
     data: {
-      type: data.type as ProjectContentDetailsTypes,
-      title: data.title as any,
+      title: data.title,
+      description: data.description,
       alt: data.alt,
       watermark: data.watermark,
       files: data.files,
-      list: data.list,
       projectId: data.projectId,
       createdBy: data.createdBy,
       updatedBy: data.updatedBy,
@@ -23,7 +22,7 @@ export async function createProjectContentDetails(data: IProjectContentDetailsCr
   });
 }
 
-export async function getAllList(projectId = "", type = "", page = 1, limit = 10, search = "") {
+export async function getAllList(projectId = "", page = 1, limit = 10, search = "") {
   const where: any = {};
 
   if (!projectId) {
@@ -31,16 +30,9 @@ export async function getAllList(projectId = "", type = "", page = 1, limit = 10
   }
   where.projectId = projectId;
 
-  if (type) {
-    where.type = type;
-  }
-
   if (search) {
     // In-memory filter fallback for JSON search on list/title could be added here if needed,
     // but we will keep it simple.
-    where.OR = [
-      { type: { contains: search, mode: "insensitive" } }
-    ];
   }
 
   where.isDeleted = false;
@@ -62,10 +54,10 @@ export async function updateProjectContentDetails(
   const prismaData = Object.fromEntries(
     Object.entries({
       title: data.title,
+      description: data.description,
       files: data.files,
       alt: data.alt,
       watermark: data.watermark,
-      list: data.list,
       updatedBy: data.updatedBy,
     }).filter(([_, v]) => v !== undefined),
   );

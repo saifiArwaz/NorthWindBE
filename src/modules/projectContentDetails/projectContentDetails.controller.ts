@@ -53,7 +53,6 @@ export const getAll = asyncHandler(async (req: Request, res: Response) => {
   const limit = parseInt(req.query.limit as string) || 10;
   const search = (req.query.search as string) || "";
   const projectId = req.query.projectId as string;
-  const type = req.query.type as string;
 
   if (projectId) {
     const project = await getProjectById(projectId);
@@ -64,7 +63,6 @@ export const getAll = asyncHandler(async (req: Request, res: Response) => {
 
   const records = await projectContentDetailsService.getAllList(
     projectId,
-    type,
     page,
     limit,
     search,
