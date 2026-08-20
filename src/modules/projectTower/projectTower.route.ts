@@ -7,7 +7,7 @@ import * as projectTowerController from "./projectTower.controller.js";
 const router = Router();
 const uploaded = uploadMiddleware("projectTower").fields([
   { name: "image", maxCount: 1 },
-  { name: "coverImage", maxCount: 1 },
+  { name: "thumbnailImage", maxCount: 1 },
   { name: "icon", maxCount: 1 },
   { name: "bgImage", maxCount: 1 }
 ]);

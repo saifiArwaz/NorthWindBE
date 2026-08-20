@@ -605,6 +605,8 @@ export const getUnderConstruction = asyncHandler(
   },
 );
 
+
+
 export const getSocialLinks = asyncHandler(
   async (req: Request, res: Response) => {
     const socialLinks = await websiteServices.getSocialLinks?.();
@@ -1063,6 +1065,19 @@ export const getFilterJobs = asyncHandler(
   async (req: Request, res: Response) => {
     const filters = await websiteServices.getFilterJobs();
     successResponse(res, 200, "Job filters fetched successfully", filters);
+  },
+);
+
+export const getFilterTowers = asyncHandler(
+  async (req: Request, res: Response) => {
+    const projectId = req.params.projectId as string;
+
+    if (!projectId) {
+      throw new ApiError(400, "projectId parameter is required");
+    }
+
+    const towers = await websiteServices.getFilterTowers(projectId);
+    successResponse(res, 200, "Towers fetched successfully", towers);
   },
 );
 

@@ -27,15 +27,7 @@ export async function getProjects(params: ProjectFilterParams = {}) {
     search,
     platterIds,
     cityIds,
-    localityIds,
-    subTypologyIds,
     projectStatusIds,
-    minPrice,
-    maxPrice,
-    isFeature,
-    isLuxuryLocation,
-    isPage,
-    isNewLaunch,
     page = 1,
     limit = 10,
   } = params;
@@ -43,57 +35,14 @@ export async function getProjects(params: ProjectFilterParams = {}) {
     status: true,
     isDeleted: false,
   };
-
   if (platterIds) {
     where.platter = { slug: platterIds };
   }
-
   if (cityIds) {
     where.city = { slug: cityIds };
   }
-
-  if (localityIds) {
-    where.locality = { slug: localityIds };
-  }
-
-  if (subTypologyIds) {
-    where.projectSubTypology = {
-      some: {
-        subTypology: {
-          slug: subTypologyIds,
-        },
-      },
-    };
-  }
-
   if (projectStatusIds) {
     where.projectStatus = { slug: projectStatusIds };
-  }
-
-  if (typeof minPrice === "number" || typeof maxPrice === "number") {
-    where.price = {};
-    if (typeof minPrice === "number") {
-      where.price.gte = Number(minPrice);
-    }
-    if (typeof maxPrice === "number") {
-      where.price.lte = Number(maxPrice);
-    }
-  }
-
-  if (isFeature !== undefined) {
-    where.isFeature = Boolean(isFeature);
-  }
-
-  if (isLuxuryLocation !== undefined) {
-    where.isLuxuryLocation = Number(isLuxuryLocation);
-  }
-
-  if (isPage !== undefined) {
-    where.isPage = Boolean(isPage);
-  }
-
-  if (isNewLaunch !== undefined) {
-    where.isNewLaunch = Boolean(isNewLaunch);
   }
 
   if (search?.trim()) {
@@ -122,7 +71,6 @@ export async function getProjects(params: ProjectFilterParams = {}) {
         id: true,
         slug: true,
         projectName: true,
-        price: true,
         cityId: true,
         platterId: true,
         typologyId: true,
@@ -131,13 +79,11 @@ export async function getProjects(params: ProjectFilterParams = {}) {
         files: true,
         alt: true,
         watermark: true,
-        tags: true,
         brochure: true,
         seoTags: true,
         otherDetails: true,
         isPage: true,
         isFeature: true,
-        isLuxuryLocation: true,
         status: true,
         seq: true,
         platter: {
@@ -148,13 +94,6 @@ export async function getProjects(params: ProjectFilterParams = {}) {
           },
         },
         city: {
-          select: {
-            id: true,
-            name: true,
-            slug: true,
-          },
-        },
-        locality: {
           select: {
             id: true,
             name: true,
@@ -188,17 +127,6 @@ export async function getProjects(params: ProjectFilterParams = {}) {
                 slug: true,
               },
             },
-          },
-        },
-        projectBanner: {
-          select: {
-            id: true,
-            projectId: true,
-            alt: true,
-            files: true,
-            watermark: true,
-            seq: true,
-            status: true,
           },
         },
       },
@@ -275,25 +203,11 @@ export async function getProjectBySlug(platterSlug: string, slug: string) {
       },
     },
   });
-
-  if (project?.projectSection) {
-    if (project && Array.isArray(project.projectSection)) {
-      const sectionObject: { [type: string]: any } = {};
-      for (const section of project.projectSection) {
-        if (section.type) {
-          sectionObject[section.type] = section;
-        }
-      }
-      (project as any).projectSectionByType = sectionObject;
-    }
-  }
-
   return project;
 }
 
 export async function getProjectGalleriesByProjectId(
   projectId: string,
-  types?: string[],
   fileTypes?: string[],
 ) {
   const galleries = await prisma.projectGallery.findMany({
@@ -344,6 +258,7 @@ export async function getProjectAmenitiesByProjectId(projectId: string) {
 export async function getProjectFloorPlansByProjectId(
   projectId: string,
   type?: string,
+  towerId?: string,
 ) {
   return prisma.projectFloorPlan.findMany({
     where: {
@@ -351,6 +266,7 @@ export async function getProjectFloorPlansByProjectId(
       status: true,
       isDeleted: false,
       ...(type ? { type: type as any } : {}),
+      ...(towerId ? { towerId } : {}),
     },
     orderBy: { seq: "asc" },
     select: {
@@ -360,7 +276,7 @@ export async function getProjectFloorPlansByProjectId(
       tower: {
         select: {
           id: true,
-          title: true,
+          name: true,
         },
       },
       list: true,
@@ -411,6 +327,7 @@ export async function getProjectLocationAdvantageByProjectId(
     select: {
       id: true,
       projectId: true,
+      name:true,
       durationUnit: true,
       duration: true,
       status: true,
@@ -485,101 +402,122 @@ export async function getProjectContentDetailsByType(
 export async function getProjectConstructionUpdates(
   projectId: string,
   towerId?: string,
-  mediaType?: string,
-  year?: string,
-  month?: string
+  year?: number,
+  month?: number
 ) {
-  let dateFilter: any = undefined;
+  const project = await prisma.projects.findUnique({
+    where: { id: projectId },
+    select: { id: true, projectName: true },
+  });
 
-  if (year) {
-    const yr = parseInt(year);
-    if (!isNaN(yr)) {
+  if (!project) {
+    throw new Error("Project not found");
+  }
+
+  const projectData = {
+    id: project.id,
+    name: project.projectName,
+  };
+
+  if (towerId) {
+    const tower = await prisma.projectTower.findFirst({
+      where: {
+        id: towerId,
+        projectId,
+        status: true,
+        isDeleted: false,
+      },
+      select: {
+        id: true,
+        projectId: true,
+        name: true,
+      },
+    });
+
+    if (!tower) {
+      throw new Error("Tower not found or does not belong to this project");
+    }
+
+    let dateFilter: any = undefined;
+
+    if (year) {
       if (month) {
-        const mn = parseInt(month); // 1-12
-        if (!isNaN(mn)) {
-          const startDate = new Date(yr, mn - 1, 1);
-          const endDate = new Date(yr, mn, 0, 23, 59, 59, 999);
-          dateFilter = { gte: startDate, lte: endDate };
-        }
+        // Use UTC dates to avoid any timezone shifts
+        const startDate = new Date(Date.UTC(year, month - 1, 1));
+        const endDate = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999));
+        dateFilter = { gte: startDate, lte: endDate };
       } else {
-        const startDate = new Date(yr, 0, 1);
-        const endDate = new Date(yr, 11, 31, 23, 59, 59, 999);
+        const startDate = new Date(Date.UTC(year, 0, 1));
+        const endDate = new Date(Date.UTC(year, 11, 31, 23, 59, 59, 999));
         dateFilter = { gte: startDate, lte: endDate };
       }
     }
+
+    let galleries = await prisma.constructionGalleries.findMany({
+      where: {
+        projectId,
+        towerId,
+        status: true,
+        isDeleted: false,
+        ...(dateFilter ? { dateAt: dateFilter } : {}),
+      },
+      select: {
+        id: true,
+        title: true,
+        files: true,
+        alt: true,
+        watermark: true,
+        seq: true,
+        dateAt: true,
+      },
+      orderBy: { seq: "asc" },
+    });
+
+    if (!year && month) {
+      galleries = galleries.filter(g => {
+        if (!g.dateAt) return false;
+        return new Date(g.dateAt).getUTCMonth() + 1 === month;
+      });
+    }
+
+    return {
+      project: projectData,
+      tower,
+      galleries,
+    };
   }
 
   const towers = await prisma.projectTower.findMany({
     where: {
       projectId,
-      isDeleted: false,
       status: true,
-      ...(towerId ? { id: towerId } : {})
-    },
-    orderBy: { seq: "asc" },
-    include: {
-      galleries: {
-        where: {
-          isDeleted: false,
-          status: true,
-          ...(mediaType ? { fileType: mediaType as any } : {}),
-          ...(dateFilter ? { dateAt: dateFilter } : {})
-        },
-        orderBy: { seq: "asc" },
-        select: {
-          id: true,
-          title: true,
-          dateAt: true,
-          fileType: true,
-          files: true,
-          alt: true,
-          watermark: true,
-          seq: true
-        }
-      }
-    }
-  });
-
-  const allTowers = await prisma.projectTower.findMany({
-    where: {
-      projectId,
       isDeleted: false,
-      status: true,
     },
     select: {
       id: true,
+      name: true,
       title: true,
+      files: true,
+      list: true,
     },
-    orderBy: { seq: "asc" },
+    orderBy: {
+      seq: "asc",
+    },
   });
 
-  const metadataRecords = await prisma.constructionGalleries.findMany({
+  return {
+    project: projectData,
+    towers,
+  };
+}
+
+export async function getProjectTowersByProjectId(projectId: string) {
+  return prisma.projectTower.findMany({
     where: {
       projectId,
       isDeleted: false,
       status: true,
     },
-    select: {
-      dateAt: true,
-    }
+    orderBy: { seq: "asc" },
   });
-
-  const yearsSet = new Set<number>();
-  const monthsSet = new Set<number>();
-
-  for (const record of metadataRecords) {
-    if (record.dateAt) {
-      yearsSet.add(new Date(record.dateAt).getFullYear());
-      monthsSet.add(new Date(record.dateAt).getMonth() + 1);
-    }
-  }
-
-  return {
-    data: towers,
-    filters: {
-      years: Array.from(yearsSet).sort((a, b) => b - a),
-      months: Array.from(monthsSet).sort((a, b) => a - b),
-      towers: allTowers,
-    },
-  };
 }

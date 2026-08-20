@@ -294,7 +294,7 @@ export async function getRelatedBlogs(
   return paginate(
     prisma.blogs,
     {
-        where: {
+      where: {
         id: {
           not: blog.id,
         },
@@ -476,7 +476,7 @@ export async function getFaqs(type?: string) {
 
   if (type) {
     where.type = type as FaqTypes;
-  } 
+  }
   return prisma.faqs.findMany({
     where,
     orderBy: {
@@ -863,7 +863,7 @@ export async function getEvents(page = 1, limit = 10, eventSlug?: string) {
   if (eventSlug) {
     where.slug = eventSlug;
   }
-  
+
   const eventsResult = await paginate(
     prisma.event,
     {
@@ -1414,6 +1414,22 @@ export async function getFilterJobs() {
     jobTypes,
     titles,
   };
+}
+
+export async function getFilterTowers(projectId: string) {
+  return prisma.projectTower.findMany({
+    where: {
+      projectId,
+      status: true,
+      isDeleted: false,
+    },
+    select: {
+      id: true,
+      name: true,
+      title:true,
+    },
+    orderBy: { seq: "asc" },
+  });
 }
 
 // ---------------------------- new service end here ----------------------------

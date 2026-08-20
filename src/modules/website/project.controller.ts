@@ -12,15 +12,7 @@ export const getProjects = asyncHandler(async (req: Request, res: Response) => {
     search,
     platterIds,
     cityIds,
-    localityIds,
-    subTypologyIds,
     projectStatusIds,
-    minPrice,
-    maxPrice,
-    isFeature,
-    isLuxuryLocation,
-    isNewLaunch,
-    isPage,
     page,
     limit,
   } = req.query;
@@ -36,20 +28,8 @@ export const getProjects = asyncHandler(async (req: Request, res: Response) => {
   if (cityIds !== undefined) {
     filterParams.cityIds = cityIds;
   }
-  if (localityIds !== undefined) {
-    filterParams.localityIds = localityIds;
-  }
-  if (subTypologyIds !== undefined) {
-    filterParams.subTypologyIds = subTypologyIds;
-  }
   if (projectStatusIds !== undefined) {
     filterParams.projectStatusIds = projectStatusIds;
-  }
-  if (minPrice !== undefined) {
-    filterParams.minPrice = Number(minPrice);
-  }
-  if (maxPrice !== undefined) {
-    filterParams.maxPrice = Number(maxPrice);
   }
   const parseBoolean = (value: any): boolean | undefined => {
     if (value === undefined) return undefined;
@@ -57,28 +37,11 @@ export const getProjects = asyncHandler(async (req: Request, res: Response) => {
     if (value === false || value === "false") return false;
     return undefined;
   };
-
-  if (isFeature !== undefined) {
-    filterParams.isFeature = parseBoolean(isFeature);
-  }
-
-  if (isLuxuryLocation !== undefined) {
-    filterParams.isLuxuryLocation = Number(isLuxuryLocation);
-  }
-
-  if (isPage !== undefined) {
-    filterParams.isPage = parseBoolean(isPage);
-  }
-
   if (page !== undefined) {
     filterParams.page = Number(page);
   }
   if (limit !== undefined) {
     filterParams.limit = Number(limit);
-  }
-
-  if (isNewLaunch !== undefined) {
-    filterParams.isNewLaunch = parseBoolean(isNewLaunch);
   }
 
   // Call service with filters
@@ -97,17 +60,6 @@ export const getProjects = asyncHandler(async (req: Request, res: Response) => {
             }
           }
         }
-        await Promise.all(
-          item.projectBanner.map(async (banner: any) => {
-            if (banner.files && typeof banner.files === "object") {
-              for (const [key, value] of Object.entries(banner.files)) {
-                if (typeof value === "string" && value) {
-                  (banner.files as any)[key] = await getFileUrl(value);
-                }
-              }
-            }
-          }),
-        );
       }),
     );
   }
@@ -168,25 +120,16 @@ export const getProjectGalleriesByProjectId = asyncHandler(
     if (!projectId) {
       throw new ApiError(400, "projectId parameter is required");
     }
-
-    const types =
-      typeof req.query.projectGalleryTypes === "string"
-        ? req.query.projectGalleryTypes
-            .split(",")
-            .map((t) => t.trim())
-            .filter(Boolean)
-        : [];
     const fileTypes =
-      typeof req.query.projectGalleryFileType === "string"
-        ? req.query.projectGalleryFileType
-            .split(",")
-            .map((t) => t.trim())
-            .filter(Boolean)
+      typeof req.query.fileTypes === "string"
+        ? req.query.fileTypes
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean)
         : [];
 
     const galleries = await projectService.getProjectGalleriesByProjectId(
       projectId,
-      types.length > 0 ? types : undefined,
       fileTypes.length > 0 ? fileTypes : undefined,
     );
 
@@ -247,18 +190,18 @@ export const getProjectAmenitiesByProjectId = asyncHandler(
 
 export const getProjectFloorPlansByProjectId = asyncHandler(
   async (
-    req: Request<{ projectId: string }, any, any, { type?: string }>,
+    req: Request<{ projectId: string }, any, any, { type?: string; towerId?: string }>,
     res: Response,
   ) => {
     const { projectId } = req.params;
-    const { type } = req.query;
+    const { type, towerId } = req.query;
 
     if (!projectId) {
       throw new ApiError(400, "projectId parameter is required");
     }
 
     // Support filtering by type
-    const validTypes = ["floorplan", "unitplan", "masterplan"];
+    const validTypes = ["floorplan", "masterplan"];
     let planType: string | undefined = undefined;
 
     if (type) {
@@ -274,6 +217,7 @@ export const getProjectFloorPlansByProjectId = asyncHandler(
     const floorPlans = await projectService.getProjectFloorPlansByProjectId(
       projectId,
       planType,
+      planType === "masterplan" ? undefined : towerId,
     );
 
     // Handle presigned URLs for images
@@ -414,9 +358,9 @@ export const getProjectFaqsByProjectId = asyncHandler(
 
 export const getProjectContentDetailsByType = asyncHandler(
   async (
-    req: Request,    res: Response,
+    req: Request, res: Response,
   ) => {
-    const projectId = req.params.projectId as string ;
+    const projectId = req.params.projectId as string;
 
     if (!projectId) {
       throw new ApiError(400, "projectId parameter is required");
@@ -448,38 +392,58 @@ export const getProjectContentDetailsByType = asyncHandler(
 );
 
 export const getProjectConstructionUpdates = asyncHandler(
-  async (
-    req: Request<{ projectId: string }, any, any, { towerId?: string; mediaType?: string; year?: string; month?: string }>,
-    res: Response,
-  ) => {
+  async (req: Request, res: Response) => {
     const { projectId } = req.params;
-    const { towerId, mediaType, year, month } = req.query;
+    const { towerId, year, month } = req.query;
 
     if (!projectId) {
       throw new ApiError(400, "projectId parameter is required");
     }
 
+    const parsedYear = year ? Number(year) : undefined;
+    const parsedMonth = month ? Number(month) : undefined;
+
+    if (year && !Number.isInteger(parsedYear)) {
+      throw new ApiError(400, "Invalid year");
+    }
+
+    if (
+      month &&
+      (
+        parsedMonth === undefined ||
+        !Number.isInteger(parsedMonth) ||
+        parsedMonth < 1 ||
+        parsedMonth > 12
+      )
+    ) {
+      throw new ApiError(400, "Invalid month");
+    }
     const record = await projectService.getProjectConstructionUpdates(
-      projectId,
-      towerId,
-      mediaType,
-      year,
-      month
+      projectId as string,
+      towerId as string | undefined,
+      parsedYear,
+      parsedMonth
     );
 
-    // Resolve file URLs for tower cover images and gallery items
-    for (const tower of record.data) {
-      if (tower.files && typeof tower.files === "object") {
-        for (const [key, value] of Object.entries(tower.files)) {
-          if (value && typeof value === "string") {
-            (tower.files as any)[key] = await getFileUrl(value);
+    // Resolve tower file URLs
+    if (record.towers) {
+      for (const tower of record.towers) {
+        if (tower.files && typeof tower.files === "object") {
+          for (const [key, value] of Object.entries(tower.files)) {
+            if (value && typeof value === "string") {
+              (tower.files as any)[key] = await getFileUrl(value);
+            }
           }
         }
       }
-      for (const gallery of (tower as any).galleries || []) {
+    }
+
+    // Resolve gallery file URLs
+    if (record.galleries) {
+      for (const gallery of record.galleries) {
         if (gallery.files && typeof gallery.files === "object") {
           for (const [key, value] of Object.entries(gallery.files)) {
-            if (typeof value === "string" && value) {
+            if (value && typeof value === "string") {
               (gallery.files as any)[key] = await getFileUrl(value);
             }
           }
@@ -491,8 +455,33 @@ export const getProjectConstructionUpdates = asyncHandler(
       res,
       200,
       "Construction updates fetched successfully",
-      record,
+      record
     );
   }
 );
 
+export const getProjectTowersByProjectId = asyncHandler(
+  async (req: Request<{ projectId: string }>, res: Response) => {
+    const { projectId } = req.params;
+
+    if (!projectId) {
+      throw new ApiError(400, "projectId parameter is required");
+    }
+
+    const towers = await projectService.getProjectTowersByProjectId(projectId);
+
+    await Promise.all(
+      towers.map(async (item: any) => {
+        if (item.files && typeof item.files === "object") {
+          for (const [key, value] of Object.entries(item.files)) {
+            if (typeof value === "string" && value) {
+              (item.files as any)[key] = await getFileUrl(value);
+            }
+          }
+        }
+      }),
+    );
+
+    successResponse(res, 200, "Project towers fetched successfully", towers);
+  }
+);

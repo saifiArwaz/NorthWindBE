@@ -102,6 +102,10 @@ router.get(
   projectCtrl.getProjectContentDetailsByType,
 );
 router.get(
+  "/project/:projectId/towers",
+  projectCtrl.getProjectTowersByProjectId,
+);
+router.get(
   "/project/:projectId/construction-updates",
   projectCtrl.getProjectConstructionUpdates,
 );
@@ -115,6 +119,8 @@ router.get("/filter/sub-typology", websiteCtrl.getFilterSubTypology);
 router.get("/filter/project-status", websiteCtrl.getFilterProjectStatus);
 router.get("/filter/budget", websiteCtrl.getFilterBudget);
 router.get("/filter/job", websiteCtrl.getFilterJobs);
+router.get("/filter/towers/:projectId", websiteCtrl.getFilterTowers);
+
 
 // ---------------------------- new service end here ----------------------------
 

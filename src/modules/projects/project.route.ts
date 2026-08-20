@@ -7,9 +7,6 @@ import { uploadMiddleware } from "../../middlewares/multer-s3.middleware.js";
 const router = Router();
 
 const uploaded = uploadMiddleware("projects").fields([
-  { name: "logo", maxCount: 1 },
-  { name: "ogImage", maxCount: 1 },
-  { name: "qrCode", maxCount: 1 },
   { name: "desktopVideo", maxCount: 1 },
   { name: "mobileVideo", maxCount: 1 },
   { name: "desktopImage", maxCount: 1 },
@@ -19,6 +16,7 @@ const uploaded = uploadMiddleware("projects").fields([
   { name: "featureDesktopImage", maxCount: 1 },
   { name: "featureMobileImage", maxCount: 1 },
   { name: "brochure", maxCount: 1 },
+  { name: "elevationImage", maxCount: 1 },
 ]);
 
 router.get("/filter-list", projectCtrl.getFilterList);
