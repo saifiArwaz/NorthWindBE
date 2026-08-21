@@ -1432,7 +1432,7 @@ model jobApplication {
   emailAddress String
   phoneNo      String
   resume       String?
-  message      String?
+  location     String?
   dateAt       DateTime @default(now())
 }
 
@@ -1442,6 +1442,8 @@ model contactEnquiry {
   emailAddress String
   mobileNo     String
   query        String?
+  location     String?
+  pageUrl      String?
   dateAt       DateTime @default(now())
 }
 

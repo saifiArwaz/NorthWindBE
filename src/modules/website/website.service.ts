@@ -1896,7 +1896,7 @@ export async function createJobApplication(data: {
   fullName: string;
   emailAddress: string;
   phoneNo: string;
-  message?: string;
+  location?: string;
   resume: string;
 }) {
   const jobApplication = await prisma.jobApplication.create({
@@ -1926,6 +1926,8 @@ export async function createContactEnquiry(data: {
   emailAddress: string;
   mobileNo: string;
   query?: string;
+  location?:string;
+  pageUrl?: string;
 }) {
   const projectEnquiry = await prisma.contactEnquiry.create({
     data: {
@@ -1933,8 +1935,9 @@ export async function createContactEnquiry(data: {
       emailAddress: data.emailAddress,
       mobileNo: data.mobileNo,
       query: data.query || null,
-    },
-  });
+      pageUrl: data.pageUrl || null,
+      location: data.location || null,
+}});
   return projectEnquiry;
 }
 

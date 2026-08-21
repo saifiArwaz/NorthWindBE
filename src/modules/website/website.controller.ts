@@ -1516,7 +1516,7 @@ export const getProjectsByCity = asyncHandler(
 
 export const createJobApplication = asyncHandler(
   async (req: Request, res: Response) => {
-    const { jobId, fullName, emailAddress, phoneNo, message } =
+    const { jobId, fullName, emailAddress, phoneNo, location } =
       req.body;
     const resumeFile = req.file as any;
 
@@ -1525,7 +1525,7 @@ export const createJobApplication = asyncHandler(
       fullName,
       emailAddress,
       phoneNo,
-      message,
+      location,
       resume: resumeFile ? resumeFile.key : null,
     });
 
@@ -1540,7 +1540,7 @@ export const createJobApplication = asyncHandler(
           "Full Name": fullName,
           "Email Address": emailAddress,
           "Phone No": phoneNo,
-          "Message": message,
+          "Location": location,
         },
       }
     );
@@ -1576,6 +1576,8 @@ export const createContactEnquiry = asyncHandler(
       emailAddress,
       mobileNo,
       query,
+      location,
+      pageUrl,
     } = req.body;
 
     const enquiry = await websiteServices.createContactEnquiry({
@@ -1583,6 +1585,8 @@ export const createContactEnquiry = asyncHandler(
       emailAddress,
       mobileNo,
       query,
+      location,
+      pageUrl,
     });
 
     try {
@@ -1594,7 +1598,9 @@ export const createContactEnquiry = asyncHandler(
             "Full Name": fullName,
             "Email Address": emailAddress,
             "Mobile No": mobileNo,
-            "Message": query
+            "Location":location,
+            "Message": query,
+            "Page URL": pageUrl || "N/A"
           }
         });
       }

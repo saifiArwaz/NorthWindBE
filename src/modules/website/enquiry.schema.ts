@@ -8,7 +8,7 @@ export const createJobApplicationSchema = z.object({
     fullName: z.string().min(1, "fullName is required"),
     emailAddress: z.string().email("Invalid emailAddress"),
     phoneNo: z.string().min(1, "phoneNo is required"),
-    message: z.string().optional(),
+    location: z.string().optional(),
   }),
 });
 
@@ -30,13 +30,8 @@ export const createContactEnquirySchema = z.object({
     emailAddress: z.string().email("Invalid emailAddress"),
     mobileNo: z.string().min(10, "mobileNo is required"),
     query: z.string().optional(),
-    campaignCode: z.string().optional(),
-    remarks: z.string().optional(),
-    AgencyName: z.string().optional(),
-    utmcampaign: z.string().optional(),
-    utmcontent: z.string().optional(),
-    utmmedium: z.string().optional(),
-    utmsource: z.string().optional(),
+    location: z.string().optional(),
+    pageUrl: z.string().optional(),
   }),
 });
 

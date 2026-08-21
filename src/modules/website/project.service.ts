@@ -204,7 +204,18 @@ export async function getProjectBySlug(platterSlug: string, slug: string) {
       },
     },
   });
-  return project;
+  if (project?.projectSection) {
+          if (project && Array.isArray(project.projectSection)) {
+               const sectionObject: { [type: string]: any } = {};
+               for (const section of project.projectSection) {
+                    if (section.type) {
+                         sectionObject[section.type] = section;
+                    }
+               }
+               (project as any).projectSectionByType = sectionObject;
+          }
+     }
+     return project;
 }
 
 export async function getProjectGalleriesByProjectId(
