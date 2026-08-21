@@ -9,15 +9,11 @@ export interface ProjectFilterParams {
   search?: string;
   platterIds?: string;
   cityIds?: string;
-  localityIds?: string;
+  isHome?:boolean;
   subTypologyIds?: string;
   projectStatusIds?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  isFeature?: boolean;
-  isLuxuryLocation?: number;
   isPage?: boolean;
-  isNewLaunch?: boolean;
+  isFeature?: boolean;
   page?: number;
   limit?: number;
 }
@@ -27,6 +23,7 @@ export async function getProjects(params: ProjectFilterParams = {}) {
     search,
     platterIds,
     cityIds,
+    isHome,
     projectStatusIds,
     page = 1,
     limit = 10,
@@ -37,6 +34,9 @@ export async function getProjects(params: ProjectFilterParams = {}) {
   };
   if (platterIds) {
     where.platter = { slug: platterIds };
+  }
+ if (isHome !== undefined) {
+    where.isHome = Boolean(isHome);
   }
   if (cityIds) {
     where.city = { slug: cityIds };
@@ -84,6 +84,7 @@ export async function getProjects(params: ProjectFilterParams = {}) {
         otherDetails: true,
         isPage: true,
         isFeature: true,
+        isHome:true,
         status: true,
         seq: true,
         platter: {
