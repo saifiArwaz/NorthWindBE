@@ -102,33 +102,20 @@ export async function getAwards(
       mode: "insensitive",
     };
   }
-  if (filter.year?.length > 0) {
-    where.OR = filter.year.map((year: number) => ({
-      year: {
-        gte: new Date(`${year}-01-01T00:00:00.000Z`),
-        lt: new Date(`${year + 1}-01-01T00:00:00.000Z`),
-      },
-    }));
-  }
-
   return paginate(
     prisma.awards,
     {
       where,
-      orderBy: { year: "desc" },
+      orderBy: { seq: "asc" },
       select: {
         id: true,
-        year: true,
         title: true,
-        organization: true,
-        shortDescription: true,
+        description: true,
         files: true,
         alt: true,
         watermark: true,
         status: true,
         seq: true,
-        createdAt: true,
-        updatedAt: true,
       },
     },
     { page, limit },
@@ -146,7 +133,7 @@ export async function getBlogs(
   };
   const orderBy: any = {};
 
-  const { search, isLatest, isFeature, isHome, categoryId } = filter;
+  const { search, isLatest, isFeature, isHome } = filter;
 
   if (isLatest && typeof isLatest === "boolean" && isLatest === true) {
     orderBy.dateAt = "desc";
@@ -173,14 +160,6 @@ export async function getBlogs(
     };
   }
 
-  if (
-    categoryId &&
-    typeof categoryId === "string" &&
-    categoryId.trim() !== ""
-  ) {
-    where.categoryId = categoryId;
-  }
-
   return paginate(
     prisma.blogs,
     {
@@ -188,7 +167,6 @@ export async function getBlogs(
       orderBy,
       select: {
         id: true,
-        categoryId: true,
         title: true,
         slug: true,
         dateAt: true,
@@ -197,11 +175,9 @@ export async function getBlogs(
         alt: true,
         watermark: true,
         seoTags: true,
-        tag: true,
         isLatest: true,
         isFeature: true,
         isHome: true,
-        publishBy: true,
         status: true,
         seq: true,
         createdAt: true,
@@ -218,17 +194,6 @@ export async function getBlogBySlug(slug: string) {
       slug,
       status: true,
       isDeleted: false,
-    },
-    include: {
-      blogFaqs: {
-        where: {
-          status: true,
-          isDeleted: false,
-        },
-        orderBy: {
-          seq: "asc",
-        },
-      },
     },
   });
 }
@@ -359,6 +324,7 @@ export async function getMediaCoverage(
         mediaType: true,
         dateAt: true,
         description: true,
+        files:true,
         link: true,
         status: true,
         seq: true,
@@ -403,47 +369,15 @@ export async function getTimelines() {
       status: true,
       isDeleted: false,
     },
-    orderBy: [{ year: "desc" }, { seq: "asc" }],
+    orderBy: [{ seq: "asc" }],
     select: {
       id: true,
-      title: true,
-      year: true,
       files: true,
-      alt: true,
-      watermark: true,
       description: true,
       seq: true,
     },
   });
-
-  function parseYears(year: string) {
-    const RANGE_REGEX =
-      /(\d{4})\s*[\u2012\u2013\u2014\u2015\u2212\-]\s*(\d{4})/; // match "1996–1999" with various dashes
-    const SINGLE_REGEX = /^(\d{4})/; // match "1996"
-    year = (year || "").trim();
-    const range = year.match(RANGE_REGEX);
-    if (range) {
-      return { start: parseInt(range[1], 10), end: parseInt(range[2], 10) };
-    }
-    const single = year.match(SINGLE_REGEX);
-    if (single) {
-      return { start: parseInt(single[1], 10), end: parseInt(single[1], 10) };
-    }
-    return { start: 0, end: 0 };
-  }
-
-  return timelines.slice().sort((a, b) => {
-    const aY = parseYears(String(a.year));
-    const bY = parseYears(String(b.year));
-
-    if (aY.start !== bY.start) {
-      return aY.start - bY.start;
-    }
-    if (aY.end !== bY.end) {
-      return aY.end - bY.end;
-    }
-    return (a.seq ?? 0) - (b.seq ?? 0);
-  });
+  return timelines
 }
 
 export async function getFaqsByType(type: string) {
@@ -829,12 +763,33 @@ export async function getHomeLoan() {
       files: true,
       name: true,
       alt: true,
-      link: true,
       watermark: true,
       seq: true,
       status: true,
     },
   });
+}
+
+export async function getHomeLoanAssistance(){
+  const where : any = {
+    status: true,
+    isDeleted: false,
+  }
+  return prisma.homeLoanAssistance.findMany({
+    where,
+    orderBy: {
+      seq: "asc"
+    },
+    select:{
+      id: true,
+      title:true,
+      files: true,
+      alt: true,
+      watermark: true,
+      seq: true,
+      status: true,
+    }
+  })
 }
 
 export async function getPartners() {
@@ -1118,8 +1073,6 @@ export async function getJobs(
         id: true,
         title: true,
         jobType: true,
-        skills: true,
-        qualifications: true,
         location: true,
         description: true,
         createdAt: true,
@@ -1346,9 +1299,6 @@ export async function getLocations() {
     where: {
       status: true,
       isDeleted: false,
-      projects: {
-        some: { status: true },
-      },
     },
     orderBy: { name: "asc" },
     select: {

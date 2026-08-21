@@ -669,7 +669,6 @@ model Blogs {
   alt         String?
   watermark   String?
   seoTags     Json?
-  tag         String?
   isLatest    Boolean   @default(false)
   isFeature   Boolean   @default(false)
   isHome      Boolean   @default(false)

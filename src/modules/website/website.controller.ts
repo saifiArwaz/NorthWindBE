@@ -105,24 +105,11 @@ export const getAwards = asyncHandler(async (req: Request, res: Response) => {
   const limit = parseInt(req.query.limit as string) || 10;
   const search =
     typeof req.query.search === "string" ? req.query.search : undefined;
-
-  const year =
-    typeof req.query.year === "string" && req.query.year.trim()
-      ? req.query.year
-          .split(",")
-          .map((y) => parseInt(y.trim(), 10))
-          .filter((y) => Number.isInteger(y))
-      : [];
   const filter: any = {};
 
   if (search) {
     filter.search = search;
   }
-
-  if (year?.length) {
-    filter.year = year;
-  }
-
   const awards = await websiteServices.getAwards(page, limit, filter);
 
   if (awards?.data?.length) {
@@ -170,9 +157,6 @@ export const getBlogs = asyncHandler(async (req: Request, res: Response) => {
     req.query.isHome !== undefined
       ? req.query.isHome === "true" || (req.query.isHome as unknown) === true
       : undefined;
-  const categoryId =
-    typeof req.query.categoryId === "string" ? req.query.categoryId : undefined;
-
   const filter: any = {};
   if (search) {
     filter.search = search;
@@ -186,10 +170,6 @@ export const getBlogs = asyncHandler(async (req: Request, res: Response) => {
   if (isHome !== undefined) {
     filter.isHome = isHome;
   }
-  if (categoryId) {
-    filter.categoryId = categoryId;
-  }
-
   const blogs = await websiteServices.getBlogs(page, limit, filter);
 
   let items: unknown = blogs;
@@ -616,7 +596,6 @@ export const getSocialLinks = asyncHandler(
 
 export const getTestimonials = asyncHandler(
   async (req: Request, res: Response) => {
-    const type = req.query.type as string | undefined;
     const fileType = req.query.fileType as string | undefined;
     const isFeature =
       req.query.isFeature !== undefined
@@ -628,9 +607,6 @@ export const getTestimonials = asyncHandler(
         : undefined;
 
     const filter: any = {};
-    if (type) {
-      filter.type = type;
-    }
    if (fileType) {
       filter.fileType = fileType;
     }
@@ -689,6 +665,22 @@ export const getHomeLoan = asyncHandler(async (req: Request, res: Response) => {
 
   successResponse(res, 200, "Home Loan fetched successfully", homeLoan);
 });
+
+export const getHomeLoanAssistance = asyncHandler(async (req: Request, res: Response)=>{
+  const homeLoanAssistance = await websiteServices.getHomeLoanAssistance();
+  await Promise.all(
+    homeLoanAssistance.map(async (item: any)=>{
+      if(item.files && typeof item.files === "object"){
+        for(const [key, value] of Object.entries(item.files)){
+          if(typeof value === "string" && value){
+            (item.files as any)[key] = await getFileUrl(value);
+          }
+        }
+      }
+    })
+  )
+  successResponse(res, 200, "Home Loan Assistance fetched successfully", homeLoanAssistance);
+})
 
 
 export const getPartners = asyncHandler(async (req: Request, res: Response) => {
@@ -1030,7 +1022,7 @@ export const getFilterProjectsWithGallery = asyncHandler(
 export const getFilterLocations = asyncHandler(
   async (req: Request, res: Response) => {
     const locations = await websiteServices.getLocations();
-    successResponse(res, 200, "Locations fetched successfully", locations);
+    successResponse(res, 200, "Cities fetched successfully", locations);
   },
 );
 
@@ -1152,6 +1144,7 @@ export const getInstagramReels = asyncHandler(
     const ids = localReels.map((r: any) => r.reelId).filter(Boolean);
     if (!ids.length) {
       successResponse(res, 200, "Instagram reels fetched successfully", []);
+      return;
     }
     const fetchReelsFromGraph = async (accessToken: string) => {
       const IG_USER_ID = process.env.IG_USER_ID;

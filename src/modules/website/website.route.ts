@@ -54,6 +54,7 @@ router.get("/sub-typology", websiteCtrl.getProjectSubTypology);
 router.get("/social-links", websiteCtrl.getSocialLinks);
 router.get("/testimonials", websiteCtrl.getTestimonials);
 router.get("/home-loan", websiteCtrl.getHomeLoan);
+router.get("/home-loan-assistance", websiteCtrl.getHomeLoanAssistance);
 router.get("/partners", websiteCtrl.getPartners);
 router.get("/events", websiteCtrl.getEvents);
 router.get("/events/featured-galleries", websiteCtrl.getFeaturedGalleries);
