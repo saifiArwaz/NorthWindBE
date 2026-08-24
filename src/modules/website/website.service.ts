@@ -131,15 +131,8 @@ export async function getBlogs(
     status: true,
     isDeleted: false,
   };
-  const orderBy: any = {};
 
   const { search, isLatest, isFeature, isHome } = filter;
-
-  if (isLatest && typeof isLatest === "boolean" && isLatest === true) {
-    orderBy.dateAt = "desc";
-  } else {
-    orderBy.dateAt = "desc";
-  }
 
   if (isHome !== undefined) {
     where.isHome = Boolean(isHome);
@@ -164,7 +157,9 @@ export async function getBlogs(
     prisma.blogs,
     {
       where,
-      orderBy,
+       orderBy: {
+       createdAt: "desc",
+      },
       select: {
         id: true,
         title: true,
