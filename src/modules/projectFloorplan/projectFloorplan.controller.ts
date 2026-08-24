@@ -21,8 +21,14 @@ export const create = asyncHandler(async (req: Request, res: Response) => {
     }
   });
 
+  const towerId =
+    typeof req.body.towerId === "string" && req.body.towerId.trim() !== ""
+      ? req.body.towerId
+      : undefined;
+
   const data: any = {
     ...req.body,
+    towerId,
     title: req.body.title,
     files: filesByFieldname,
     createdBy: user?.id,
@@ -160,12 +166,17 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
     }
   }
 
+  const towerId =
+    typeof req.body.towerId === "string" && req.body.towerId.trim() !== ""
+      ? req.body.towerId
+      : undefined;
+
   /** 5. Build PATCH-safe payload */
   const updatePayload = Object.fromEntries(
     Object.entries({
       projectId: req.body.projectId,
       type: req.body.type,
-      towerId: req.body.towerId,
+      towerId,
       title: req.body.title,
       subTypologyId: req.body.subTypologyId,
       list: req.body.list,

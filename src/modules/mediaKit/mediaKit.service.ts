@@ -7,6 +7,7 @@ export async function createMediaKit(data: IMediaKitDTO) {
   let prismaData: any = {
     logo: data.logo,
     alt: data.alt,
+    type: data.type,
     watermark: data.watermark,
     title: data.title,
     link: data.link,
@@ -16,14 +17,19 @@ export async function createMediaKit(data: IMediaKitDTO) {
   return prisma.mediaKit.create({ data: prismaData });
 }
 
-export async function getAllList(page = 1, limit = 10, search = "") {
-  const where = search
+export async function getAllList(page = 1, limit = 10, search = "", type?: string) {
+  const where: any = search
     ? {
-        OR: [{ pageName: { contains: search, mode: "insensitive" } }],
+        OR: [{ title: { contains: search, mode: "insensitive" } }],
       }
     : {};
+  
+  if (type) {
+    where.type = type;
+  }
+  
   if (typeof where !== "undefined" && where && typeof where === "object") {
-    (where as any).isDeleted = false;
+    where.isDeleted = false;
   }
   return paginate(
     prisma.mediaKit,
@@ -40,6 +46,7 @@ export async function updateMediaKit(id: string, data: IMediaKitUpdateDTO) {
     Object.entries({
       logo: data.logo,
       alt: data.alt,
+      type: data.type,
       title: data.title,
       watermark: data.watermark,
       listKit: data.listKit,

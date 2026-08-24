@@ -1173,11 +1173,17 @@ model MediaCoverage {
   isDeleted   Boolean   @default(false)
 }
 
+enum MediaKitType {
+  light
+  dark
+}
+
 model MediaKit {
   id          String   @id @default(cuid())
   title       String?
   logo        String?
   alt         String?
+  type        MediaKitType @default(light)
   watermark   String?
   listKit     Json?
   link        String?

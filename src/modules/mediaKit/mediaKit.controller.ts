@@ -41,6 +41,7 @@ export const create = asyncHandler(async (req: Request, res: Response) => {
   const record = await mediaKitService.createMediaKit({
     ...req.body,
     logo: logo,
+    type: req.body.type,
     createdBy: user?.id,
   });
 
@@ -64,8 +65,9 @@ export const getAll = asyncHandler(async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;
   const search = (req.query.search as string) || "";
+  const type = (req.query.type as string) || undefined;
 
-  const records = await mediaKitService.getAllList(page, limit, search);
+  const records = await mediaKitService.getAllList(page, limit, search, type);
   await Promise.all(
     records.data.map(async (data: any) => {
       data.logo = data.logo ? await getFileUrl(data.logo) : null;
@@ -152,6 +154,7 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
       logo: newLogo ? newLogo.key : oldRecord.logo,
       alt: req.body.alt,
       title: req.body.title,
+      type: req.body.type,
       watermark: req.body.watermark,
       link: req.body.link,
       listKit: req.body.listKit,

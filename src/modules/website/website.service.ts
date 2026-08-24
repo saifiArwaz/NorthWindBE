@@ -647,7 +647,7 @@ export async function getMediakit() {
       logo: true,
       alt: true,
       title: true,
-      link: true,
+      type:true,
       watermark: true,
       listKit: true,
       status: true,
