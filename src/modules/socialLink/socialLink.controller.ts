@@ -71,6 +71,37 @@ export const remove = asyncHandler(async (req: Request, res: Response) => {
   successResponse(res, 200, "Social Lik record deleted successfully");
 });
 
+export const changeSeq = asyncHandler(
+  async (
+    req: Request<{ id: string }, any, any, { type?: string }>,
+    res: Response,
+  ) => {
+    const user = req.user!;
+    const { id } = req.params;
+    const { seq } = req.body;
+
+    let payload: any = { updatedBy: user.id };
+
+    if (isNaN(seq)) {
+      throw new ApiError(400, "Seq value must be a number");
+    }
+
+    payload.seq = Number(seq);
+
+    const record = await socialLinkServices.getSocialLinkById(id);
+    if (!record) {
+      throw new ApiError(404, "SocialLink record not found");
+    }
+
+    const updatedProject = await socialLinkServices.updateSocialLinkSeq(
+      id,
+      payload,
+    );
+    successResponse(res, 200, "SocialLink seq updated successfully", updatedProject);
+  },
+);
+
+
 export const changeStatus = asyncHandler(
   async (req: Request<{ id: string }>, res: Response) => {
     const user = req.user as any;

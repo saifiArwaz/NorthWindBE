@@ -25,6 +25,11 @@ router.patch(
   socialLinkCtrl.update,
 );
 router.patch("/:id/status", upload.none(), socialLinkCtrl.changeStatus);
+router.patch(
+  "/:id/seq",
+  upload.none(),
+  socialLinkCtrl.changeSeq,
+);
 router.delete("/:id", socialLinkCtrl.remove);
 
 export { router as SocialLinkRoutes };

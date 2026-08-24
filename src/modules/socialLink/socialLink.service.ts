@@ -67,6 +67,18 @@ export async function deleteSocialLink(id: string) {
   });
 }
 
+export async function updateSocialLinkSeq(id: string, payload: any) {
+  let data: any = { ...payload };
+  if (payload.updatedBy) {
+    data.updatedUser = { connect: { id: payload.updatedBy } };
+    delete data.updatedBy;
+  }
+  return prisma.socialLinks.update({
+    where: { id },
+    data,
+  });
+}
+
 export async function updateStatus(
   id: string,
   status: boolean,
