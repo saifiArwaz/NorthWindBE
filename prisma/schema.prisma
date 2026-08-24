@@ -775,6 +775,7 @@ model Projects {
   updatedUser              User?                      @relation("UpdatedProjects", fields: [updatedBy], references: [id])
   constructionGalleries    ConstructionGalleries[]
   projectTowers            ProjectTower[]
+  projectEnquiry           projectEnquiry[]
 
   seoFooterLinks SeoFooterLink[]
   isDeleted      Boolean         @default(false)
@@ -1456,17 +1457,11 @@ model contactEnquiry {
 model projectEnquiry {
   id           String   @id @default(cuid())
   projectId    String?
+  projects     Projects? @relation(fields: [projectId], references: [id])
   fullName     String
   emailAddress String
   mobileNo     String
   query        String?
-  campaignCode String?
-  remarks      String?
-  AgencyName   String?
-  utmcampaign  String?
-  utmcontent   String?
-  utmmedium    String?
-  utmsource    String?
   dateAt       DateTime @default(now())
 }
 

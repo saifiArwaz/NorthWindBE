@@ -172,6 +172,12 @@ router.post(
 );
 
 router.post(
+  "/enquiry/project",
+  validate(createProjectEnquirySchema),
+  websiteCtrl.createProjectEnquiry,
+);
+
+router.post(
   "/enquiry/channel-partner",
   validate(createChannelPartnerEnquirySchema),
   websiteCtrl.createChannelPartnerEnquiry,

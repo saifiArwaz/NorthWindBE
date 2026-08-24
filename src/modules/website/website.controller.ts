@@ -1624,13 +1624,6 @@ export const createProjectEnquiry = asyncHandler(
       emailAddress,
       mobileNo,
       query,
-      campaignCode,
-      remarks,
-      AgencyName,
-      utmcampaign,
-      utmcontent,
-      utmmedium,
-      utmsource,
     } = req.body;
 
     const enquiry = await websiteServices.createProjectEnquiry({
@@ -1639,45 +1632,7 @@ export const createProjectEnquiry = asyncHandler(
       emailAddress,
       mobileNo,
       query,
-      campaignCode,
-      remarks,
-      AgencyName,
-      utmcampaign,
-      utmcontent,
-      utmmedium,
-      utmsource,
     });
-    // Forward to Salesforce
-    try {
-      const salesforceToken = await getSalesforceToken();
-      await axios.post(
-        "https://sdplorg2023.my.salesforce.com/services/apexrest/DigitalAPI/",
-        {
-          req: {
-            firstName: fullName,
-            lastName: "",
-            email: emailAddress,
-            mobile: mobileNo,
-            campaignCode: process.env.SALESFORCE_CAMPAIGNCODE,
-            remarks: remarks || "New Digital Lead",
-            AgencyName: AgencyName || "Web",
-            utmcampaign: utmcampaign || "",
-            utmcontent: utmcontent || "",
-            utmmedium: utmmedium || "",
-            utmsource: utmsource || "",
-          },
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${salesforceToken}`,
-          },
-        },
-      );
-    } catch (error) {
-      logger.error("Salesforce API integration failed:", error);
-    }
-
     successResponse(
       res,
       201,

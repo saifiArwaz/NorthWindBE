@@ -1947,13 +1947,6 @@ export async function createProjectEnquiry(data: {
   emailAddress: string;
   mobileNo: string;
   query?: string;
-  campaignCode?: string;
-  remarks?: string;
-  AgencyName?: string;
-  utmcampaign?: string;
-  utmcontent?: string;
-  utmmedium?: string;
-  utmsource?: string;
 }) {
   const projectEnquiry = await prisma.projectEnquiry.create({
     data: {
@@ -1962,13 +1955,6 @@ export async function createProjectEnquiry(data: {
       emailAddress: data.emailAddress,
       mobileNo: data.mobileNo,
       query: data.query || null,
-      campaignCode: data.campaignCode || null,
-      remarks: data.remarks || null,
-      AgencyName: data.AgencyName || null,
-      utmcampaign: data.utmcampaign || null,
-      utmcontent: data.utmcontent || null,
-      utmmedium: data.utmmedium || null,
-      utmsource: data.utmsource || null,
     },
   });
   return projectEnquiry;
