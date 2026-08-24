@@ -121,6 +121,7 @@ router.get("/filter/project-status", websiteCtrl.getFilterProjectStatus);
 router.get("/filter/budget", websiteCtrl.getFilterBudget);
 router.get("/filter/job", websiteCtrl.getFilterJobs);
 router.get("/filter/towers/:projectId", websiteCtrl.getFilterTowers);
+router.get("/filter/construction-years/:projectId", websiteCtrl.getFilterConstructionYears);
 
 
 // ---------------------------- new service end here ----------------------------

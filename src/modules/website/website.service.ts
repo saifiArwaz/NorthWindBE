@@ -1382,6 +1382,28 @@ export async function getFilterTowers(projectId: string) {
   });
 }
 
+export async function getFilterConstructionYears(projectId: string) {
+  const galleries = await prisma.constructionGalleries.findMany({
+    where: {
+      projectId,
+      status: true,
+      isDeleted: false,
+    },
+    select: {
+      dateAt: true,
+    },
+  });
+
+  const years = new Set<number>();
+  galleries.forEach((g) => {
+    if (g.dateAt) {
+      years.add(new Date(g.dateAt).getUTCFullYear());
+    }
+  });
+
+  return Array.from(years).sort((a, b) => b - a);
+}
+
 // ---------------------------- new service end here ----------------------------
 
 export async function getInstagramReelsForWebsite() {

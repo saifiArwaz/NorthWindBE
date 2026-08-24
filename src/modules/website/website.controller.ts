@@ -1073,6 +1073,19 @@ export const getFilterTowers = asyncHandler(
   },
 );
 
+export const getFilterConstructionYears = asyncHandler(
+  async (req: Request, res: Response) => {
+    const projectId = req.params.projectId as string;
+
+    if (!projectId) {
+      throw new ApiError(400, "projectId parameter is required");
+    }
+
+    const years = await websiteServices.getFilterConstructionYears(projectId);
+    successResponse(res, 200, "Construction years fetched successfully", years);
+  },
+);
+
 export const getJobs = asyncHandler(async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;
