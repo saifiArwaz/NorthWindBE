@@ -10,19 +10,8 @@ const slugify = (slugifyPkg as any).default ?? slugifyPkg;
 import { ApiError } from "../../utils/apiError.utils.js";
 
 export async function createEventsGallery(data: IEventsGalleryDTO) {
-  let slug = data.slug;
-  if (!slug && data.title) {
-    slug = slugify(data.title, { lower: true, strict: true });
-  }
-
-  if (slug) {
-    const existing = await prisma.eventGalleries.findUnique({ where: { slug } });
-    if (existing) throw new ApiError(400, "Slug already exists");
-  }
-
   let prismaData: any = {
     title: data.title,
-    slug: slug,
     fileType: data.fileType as FileType,
     ...(data.categoryId && { category: { connect: { id: data.categoryId } } }),
     ...(data.eventId && { event: { connect: { id: data.eventId } } }),
@@ -71,20 +60,9 @@ export async function updateEventsGallery(
   data: IEventsGalleryUpdateDTO,
 ) {
 
-  let slug = data.slug;
-  if (data.title && !slug) {
-    slug = slugify(data.title, { lower: true, strict: true });
-  }
-
-  if (slug) {
-    const existing = await prisma.eventGalleries.findUnique({ where: { slug } });
-    if (existing && existing.id !== id) throw new ApiError(400, "Slug already exists");
-  }
-
   const prismaData: any = Object.fromEntries(
     Object.entries({
       title: data.title,
-      slug: slug,
       fileType: data.fileType as FileType,
       ...(data.categoryId && { category: { connect: { id: data.categoryId } } }),
       ...(data.eventId && { event: { connect: { id: data.eventId } } }),
@@ -100,7 +78,7 @@ export async function updateEventsGallery(
   return prisma.eventGalleries.update({
     where: { id },
     data: prismaData,
-    include: { category: { include: { event: { select: { id: true, title: true, type: true } } } } },
+    include: { category: { include: { event: { select: { id: true, title: true } } } } },
   });
 }
 
@@ -108,7 +86,7 @@ export async function getEventsGalleryById(id: string) {
   const record = await prisma.eventGalleries.findUnique({
     where: { id, isDeleted: false },
     include: { 
-      category: { include: { event: { select: { id: true, title: true, type: true } } } }, 
+      category: { include: { event: { select: { id: true, title: true} } } }, 
     },
   });
 
@@ -116,9 +94,8 @@ export async function getEventsGalleryById(id: string) {
 }
 
 export async function deleteEventsGalleryById(id: string) {
-  return prisma.eventGalleries.updateMany({
+  return prisma.eventGalleries.delete({
     where: { id },
-    data: { isDeleted: true }
   });
 }
 

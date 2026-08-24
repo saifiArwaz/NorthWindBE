@@ -8,18 +8,21 @@ import { validate } from "../../middlewares/validate.js";
 import { uploadMiddleware } from "../../middlewares/multer-s3.middleware.js";
 
 const router = Router();
+const uploaded = uploadMiddleware("mediaCoverage").fields([
+  { name: "coverImage", maxCount: 1 },
+]);
 
 router.get("/", eventCategoryCtrl.getAll);
 router.post(
   "/",
-  uploadMiddleware("eventCategory").fields([{ name: "coverImage", maxCount: 1 }]),
+  uploaded,
   validate(createEventCategorySchema),
   eventCategoryCtrl.create,
 );
 router.get("/:id", eventCategoryCtrl.getOne);
 router.patch(
   "/:id",
-  uploadMiddleware("eventCategory").fields([{ name: "coverImage", maxCount: 1 }]),
+  uploaded,
   validate(updateEventCategorySchema),
   eventCategoryCtrl.update,
 );

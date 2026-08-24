@@ -121,10 +121,7 @@ enum ProjectAmenityTypes {
   icon
   image
 }
-enum EventType {
-  album
-  gallery
-}
+
 
 model User {
   id                               String                     @id @default(cuid())
@@ -1045,7 +1042,6 @@ model Testimonials {
 
 model EventGalleries {
   id              String           @id @default(cuid())
-  slug            String?          @unique
   title           String?
   fileType        FileType         @default(image)
   categoryId      String?
@@ -1540,7 +1536,6 @@ model Event {
   id          String          @id @default(cuid())
   slug        String?         @unique
   title       String
-  type        EventType       @default(gallery)
   status      Boolean         @default(true)
   seq         Int             @default(0)
   createdAt   DateTime        @default(now())
@@ -1559,7 +1554,7 @@ model EventCategory {
   eventId     String
   event       Event            @relation(fields: [eventId], references: [id], onDelete: Cascade)
   name        String
-  slug        String?          @unique
+  slug        String? 
   files       Json?
   status      Boolean          @default(true)
   seq         Int              @default(0)

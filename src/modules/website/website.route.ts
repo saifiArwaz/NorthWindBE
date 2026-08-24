@@ -58,7 +58,7 @@ router.get("/home-loan-assistance", websiteCtrl.getHomeLoanAssistance);
 router.get("/partners", websiteCtrl.getPartners);
 router.get("/events", websiteCtrl.getEvents);
 router.get("/events/featured-galleries", websiteCtrl.getFeaturedGalleries);
-router.get("/events/category/:slug", websiteCtrl.getCategoryGalleries);
+router.get("/events/:eventSlug/category/:categorySlug", websiteCtrl.getCategoryGalleries);
 router.get("/brands", websiteCtrl.getBrands);
 router.get("/nri-why-us", websiteCtrl.getNriWhyUs);
 router.get("/investor-tabs", websiteCtrl.getInvestorTabs);

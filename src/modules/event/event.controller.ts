@@ -24,7 +24,7 @@ export const getAll = asyncHandler(async (req: Request, res: Response) => {
 
 export const getOne = asyncHandler(async (req: Request, res: Response) => {
   const id = req.params.id as string;
-  const record = await eventService.getEventByIdWithTree(id);
+  const record = await eventService.getEventById(id);
 
   if (!record) {
     throw new ApiError(404, "Event record not found");

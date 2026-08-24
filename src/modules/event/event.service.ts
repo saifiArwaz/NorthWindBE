@@ -20,7 +20,6 @@ export async function createEvent(data: IEventDTO) {
     data: {
       title: data.title,
       slug: slug,
-      type: data.type,
       status: data.status,
       ...(data.createdBy
         ? { creator: { connect: { id: data.createdBy } } }
@@ -58,42 +57,6 @@ export async function getEventById(id: string) {
   });
 }
 
-// Memory tree builder (no longer builds a tree since parentGalleryId was removed, just formats the response)
-export async function getEventByIdWithTree(id: string) {
-  const event = await prisma.event.findUnique({
-    where: { id, isDeleted: false },
-    include: {
-      categories: {
-        where: { isDeleted: false },
-        orderBy: { seq: "asc" },
-        include: {
-          events: { // These are the EventGalleries for this category
-            where: { isDeleted: false },
-            orderBy: { seq: "asc" },
-          },
-        },
-      },
-    },
-  });
-
-  if (!event) return null;
-
-  // Map to format response
-  const treeCategories = event.categories.map((category) => {
-    return {
-      ...category,
-      galleries: category.events,
-      events: undefined, // remove flat list from response
-    };
-  });
-
-  return {
-    ...event,
-    categories: treeCategories,
-  };
-}
-
-
 export async function updateEvent(id: string, data: IEventUpdateDTO) {
   let slug = data.slug;
   if (data.title && !slug) {
@@ -109,7 +72,6 @@ export async function updateEvent(id: string, data: IEventUpdateDTO) {
     Object.entries({
       title: data.title,
       slug: slug,
-      type: data.type,
       status: data.status,
       ...(data.updatedBy && {
         updatedUser: { connect: { id: data.updatedBy } },
@@ -151,47 +113,28 @@ export async function updateSeq(id: string, payload: any) {
   });
 }
 
-// Delete event soft deletes all categories and all galleries
+// Delete event blocks if it has categories or media
 export async function deleteEvent(id: string) {
   const event = await prisma.event.findUnique({
     where: { id },
     include: {
       categories: {
-        include: {
-          events: true, // galleries
-        }
+        where: { isDeleted: false },
       },
-      galleries: true,
+      galleries: {
+        where: { isDeleted: false },
+      },
     }
   });
 
   if (!event) return null;
 
-  // Collect all category IDs and gallery IDs
-  const categoryIds = event.categories.map(c => c.id);
-  const categoryGalleryIds = event.categories.flatMap(c => c.events.map(g => g.id));
-  const directGalleryIds = event.galleries.map(g => g.id);
-  const allGalleryIds = [...categoryGalleryIds, ...directGalleryIds];
+  if (event.categories.length > 0 || event.galleries.length > 0) {
+    throw new ApiError(400, "Event cannot be deleted because it has active categories or media.");
+  }
 
-  // Perform soft deletion in transaction
-  return prisma.$transaction(async (tx) => {
-    if (allGalleryIds.length > 0) {
-      await tx.eventGalleries.updateMany({
-        where: { id: { in: allGalleryIds } },
-        data: { isDeleted: true },
-      });
-    }
-
-    if (categoryIds.length > 0) {
-      await tx.eventCategory.updateMany({
-        where: { id: { in: categoryIds } },
-        data: { isDeleted: true },
-      });
-    }
-
-    return tx.event.update({
-      where: { id },
-      data: { isDeleted: true },
-    });
+  // Perform hard deletion
+  return prisma.event.delete({
+    where: { id },
   });
 }

@@ -15,7 +15,7 @@ export async function createEventCategory(data: IEventCategoryDTO) {
   }
 
   if (slug) {
-    const existing = await prisma.eventCategory.findUnique({ where: { slug } });
+    const existing = await prisma.eventCategory.findFirst({ where: { slug, eventId: data.eventId } });
     if (existing) throw new ApiError(400, "Slug already exists");
   }
 
@@ -35,7 +35,7 @@ export async function createEventCategory(data: IEventCategoryDTO) {
 
 export async function getAllList(page = 1, limit = 10, search = "", eventId?: string) {
   const where: any = { isDeleted: false };
-  
+
   if (eventId) {
     where.eventId = eventId;
   }
@@ -76,8 +76,14 @@ export async function updateEventCategory(
   }
 
   if (slug) {
-    const existing = await prisma.eventCategory.findUnique({ where: { slug } });
-    if (existing && existing.id !== id) throw new ApiError(400, "Slug already exists");
+    const existing = await prisma.eventCategory.findFirst({ 
+      where: { 
+        slug,
+        eventId: data.eventId,
+        NOT: { id }
+       } 
+    });
+    if (existing) throw new ApiError(400, "Slug already exists");
   }
 
   const prismaData = Object.fromEntries(
@@ -137,18 +143,12 @@ async function fetchCategoryGalleriesDescendants(categoryId: string): Promise<st
 
 export async function deleteEventCategory(id: string) {
   const galleryIds = await fetchCategoryGalleriesDescendants(id);
-  
-  return prisma.$transaction(async (tx) => {
-    if (galleryIds.length > 0) {
-      await tx.eventGalleries.updateMany({
-        where: { id: { in: galleryIds } },
-        data: { isDeleted: true }
-      });
-    }
 
-    return tx.eventCategory.update({
-      where: { id },
-      data: { isDeleted: true }
-    });
+  if (galleryIds.length > 0) {
+    throw new ApiError(400, "Category cannot be deleted because it has active media.");
+  }
+
+  return prisma.eventCategory.delete({
+    where: { id },
   });
 }

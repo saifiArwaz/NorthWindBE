@@ -828,7 +828,6 @@ export async function getEvents(page = 1, limit = 10, eventSlug?: string) {
         id: true,
         title: true,
         slug: true,
-        type: true,
         seq: true,
         status: true,
         categories: {
@@ -841,15 +840,28 @@ export async function getEvents(page = 1, limit = 10, eventSlug?: string) {
             files: true,
             seq: true,
             status: true,
+            events: {
+              where: { status: true, isDeleted: false },
+              orderBy: { seq: "asc" },
+              select: {
+                id: true,
+                title: true,
+                files: true,
+                alt: true,
+                watermark: true,
+                fileType: true,
+                seq: true,
+                status: true,
+              },
+            },
           },
         },
         galleries: {
-          where: { status: true, isDeleted: false },
+          where: { categoryId: null, status: true, isDeleted: false },
           orderBy: { seq: "asc" },
           select: {
             id: true,
             title: true,
-            slug: true,
             files: true,
             alt: true,
             watermark: true,
@@ -863,12 +875,14 @@ export async function getEvents(page = 1, limit = 10, eventSlug?: string) {
     { page, limit }
   );
 
-  // Clean up responses based on event type
+  // Map category events to galleries for the frontend
   eventsResult.data = eventsResult.data.map((event: any) => {
-    if (event.type === 'album') {
-      delete event.galleries;
-    } else if (event.type === 'gallery') {
-      delete event.categories;
+    if (event.categories) {
+      event.categories = event.categories.map((cat: any) => {
+        cat.galleries = cat.events;
+        delete cat.events;
+        return cat;
+      });
     }
     return event;
   });
@@ -876,9 +890,16 @@ export async function getEvents(page = 1, limit = 10, eventSlug?: string) {
   return eventsResult;
 }
 
-export async function getCategoryGalleries(slug: string, page = 1, limit = 10) {
+export async function getCategoryGalleries(eventSlug: string, categorySlug: string, page = 1, limit = 10) {
+  const event = await prisma.event.findFirst({
+    where: { slug: eventSlug, status: true, isDeleted: false },
+    select: { id: true, title: true, slug: true }
+  });
+
+  if (!event) return null;
+
   const category = await prisma.eventCategory.findFirst({
-    where: { slug, status: true, isDeleted: false },
+    where: { slug: categorySlug, eventId: event.id, status: true, isDeleted: false },
     select: {
       id: true,
       name: true,
@@ -899,7 +920,6 @@ export async function getCategoryGalleries(slug: string, page = 1, limit = 10) {
       select: {
         id: true,
         title: true,
-        slug: true,
         files: true,
         alt: true,
         watermark: true,
@@ -912,6 +932,7 @@ export async function getCategoryGalleries(slug: string, page = 1, limit = 10) {
   );
 
   return {
+    event,
     category,
     galleries: galleriesResult.data,
     pagination: galleriesResult.pagination
@@ -927,7 +948,6 @@ export async function getFeaturedGalleries(page = 1, limit = 10) {
       select: {
         id: true,
         title: true,
-        slug: true,
         files: true,
         alt: true,
         watermark: true,

@@ -20,8 +20,14 @@ export const create = asyncHandler(async (req: Request, res: Response) => {
     }
   });
 
+  const normalizedCategoryId =
+    typeof req.body.categoryId === "string" && req.body.categoryId.trim() !== ""
+      ? req.body.categoryId
+      : undefined;
+
   const record = await eventsGalleryService.createEventsGallery({
     ...req.body,
+    categoryId: normalizedCategoryId,
     files: filesByFieldname,
     createdBy: user?.id,
   });
@@ -140,12 +146,19 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
     }
   }
 
+  const normalizedCategoryId =
+    req.body.categoryId === ""
+      ? null
+      : req.body.categoryId !== undefined
+      ? req.body.categoryId
+      : undefined;
+
   /** 5. Build PATCH-safe payload */
   const updatePayload = Object.fromEntries(
     Object.entries({
       fileType: req.body.fileType,
       title:req.body.title,
-      categoryId: req.body.categoryId,
+      categoryId: normalizedCategoryId,
       eventId: req.body.eventId,
       files: filesByFieldname,
       alt: req.body.alt,
@@ -190,18 +203,18 @@ export const destroy = asyncHandler(async (req: Request, res: Response) => {
     throw new ApiError(404, "Event Gallery record not found");
   }
 
-  // const fileFields = [];
-  // if (item.files && typeof item.files === 'object') {
-  //      const filesObj = item.files as any;
-  //      for (const key of Object.keys(filesObj)) {
-  //           if (filesObj[key]) {
-  //                fileFields.push(filesObj[key]);
-  //           }
-  //      }
-  // }
-  // for (const file of fileFields) {
-  //      file && await deleteFromS3(file);
-  // }
+  const fileFields = [];
+  if (item.files && typeof item.files === 'object') {
+       const filesObj = item.files as any;
+       for (const key of Object.keys(filesObj)) {
+            if (filesObj[key]) {
+                 fileFields.push(filesObj[key]);
+            }
+       }
+  }
+  for (const file of fileFields) {
+       file && await deleteFromS3(file);
+  }
 
   await eventsGalleryService.deleteEventsGalleryById(id);
   successResponse(res, 200, "Event Gallery record deleted successfully");

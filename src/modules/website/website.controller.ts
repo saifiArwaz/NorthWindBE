@@ -754,11 +754,12 @@ export const getEvents = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const getCategoryGalleries = asyncHandler(async (req: Request, res: Response) => {
-  const slug = req.params.slug as string;
+  const eventSlug = req.params.eventSlug as string;
+  const categorySlug = req.params.categorySlug as string;
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;
 
-  const result = await websiteServices.getCategoryGalleries(slug, page, limit);
+  const result = await websiteServices.getCategoryGalleries(eventSlug, categorySlug, page, limit);
 
   if (!result) {
     throw new ApiError(404, "Category not found");
