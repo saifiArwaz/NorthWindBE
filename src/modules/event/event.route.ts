@@ -10,8 +10,8 @@ router.post("/", uploadMiddleware("events").none(), validate(createEventSchema),
 router.get("/", eventController.getAll);
 router.get("/:id", eventController.getOne);
 router.patch("/:id", uploadMiddleware("events").none(), validate(updateEventSchema), eventController.update);
-router.patch("/status/:id", uploadMiddleware("events").none(),  eventController.changeStatus);
-router.patch("/seq/:id", uploadMiddleware("events").none(), eventController.changeSeq);
+router.patch("/:id/status", uploadMiddleware("events").none(),  eventController.changeStatus);
+router.patch("/:id/seq", uploadMiddleware("events").none(), eventController.changeSeq);
 router.delete("/:id", eventController.destroy);
 
 export { router as eventRoutes };

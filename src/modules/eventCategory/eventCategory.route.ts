@@ -10,6 +10,7 @@ import { uploadMiddleware } from "../../middlewares/multer-s3.middleware.js";
 const router = Router();
 const uploaded = uploadMiddleware("mediaCoverage").fields([
   { name: "coverImage", maxCount: 1 },
+  { name: "desktopImage", maxCount: 1 },
 ]);
 
 router.get("/", eventCategoryCtrl.getAll);
