@@ -8,8 +8,7 @@ export const createContentByTypeSchema = z.object({
     description: z.any().optional(),
     files: z.any().optional(),
     alt: z.string().optional(),
-    list: z.any().optional(),
-    status: z.boolean().optional().default(true),
+    watermark: z.string().optional(),
   }),
 });
 
@@ -17,9 +16,9 @@ export const updateContentByTypeSchema = z.object({
   body: z.object({
     type: z.string().optional(),
     alt: z.string().optional(),
+    watermark: z.string().optional(),
     title: z.any().optional(),
     description: z.any().optional(),
     files: z.any().optional(),
-    list: z.any().optional(),
   }),
 });

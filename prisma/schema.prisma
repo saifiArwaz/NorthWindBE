@@ -1325,6 +1325,7 @@ model ContentByTypes {
   description Json?
   files       Json?
   alt         String?
+  watermark   String?
   seq         Int      @default(0)
   status      Boolean  @default(true)
   createdAt   DateTime @default(now())

@@ -14,6 +14,7 @@ export async function createContentByType(data: IContentByTypeCreateDTO) {
     type: data.type,
     title: data.title,
     alt: data.alt,
+    watermark: data.watermark,
     description: data.description,
     files: data.files,
     ...(data.createdBy ? { creator: { connect: { id: data.createdBy } } } : {}),
@@ -35,8 +36,6 @@ export async function getAllList(type = "", page = 1, limit = 10, search = "") {
   if (search) {
     where.OR = [
       { title: { contains: search, mode: "insensitive" } },
-      { subHeading: { contains: search, mode: "insensitive" } },
-      { shortDescription: { contains: search, mode: "insensitive" } },
     ];
   }
 
@@ -59,11 +58,12 @@ export async function updateContentByType(
 ) {
   const prismaData = Object.fromEntries(
     Object.entries({
+      type:data.type,
       title: data.title,
       description: data.description,
       files: data.files,
       alt: data.alt,
-      status: data.status,
+      watermark: data.watermark,
       ...(data.updatedBy && {
         updatedUser: { connect: { id: data.updatedBy } },
       }),

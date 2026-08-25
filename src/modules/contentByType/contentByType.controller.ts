@@ -194,10 +194,11 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
   /** 7. Build PATCH-safe payload */
   const updatePayload = Object.fromEntries(
     Object.entries({
+      type: req.body.type,
       title: req.body.title,
       description: req.body.description,
       alt: req.body.alt,
-      status: req.body.status,
+      watermark: req.body.watermark,
       files: filesByFieldname,
       updatedBy: user?.id,
     }).filter(([_, v]) => v !== undefined),

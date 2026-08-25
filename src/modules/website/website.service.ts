@@ -1118,6 +1118,7 @@ export async function getContetByType(type: string, query: any = {}) {
       description: true,
       files: true,
       alt: true,
+      watermark:true,
       seq: true,
       status: true,
     },
