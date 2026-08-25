@@ -4,7 +4,6 @@ import {
   IProjectContentDetailsUpdateDTO,
 } from "./projectContentDetails.interface.js";
 import { paginate } from "../../utils/pagination.utils.js";
-import { ProjectContentDetailsTypes } from "../../generated/prisma/enums.js";
 import { ApiError } from "../../utils/apiError.utils.js";
 
 export async function createProjectContentDetails(data: IProjectContentDetailsCreateDTO) {

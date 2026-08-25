@@ -4,7 +4,6 @@ import * as projectService from "./project.service.js";
 import { successResponse } from "../../utils/responseHandler.utils.js";
 import { ApiError } from "../../utils/apiError.utils.js";
 import { getFileUrl } from "../../utils/fileHandling.utils.js";
-import { MediaType } from "../../generated/prisma/enums.js";
 
 export const getProjects = asyncHandler(async (req: Request, res: Response) => {
   // Extract filters from query parameters
@@ -246,50 +245,6 @@ export const getProjectFloorPlansByProjectId = asyncHandler(
   },
 );
 
-export const getProjectMediasByProjectId = asyncHandler(
-  async (
-    req: Request<{ projectId: string }, any, any, { type?: string }>,
-    res: Response,
-  ) => {
-    const { projectId } = req.params;
-    const { type } = req.query;
-
-    if (!projectId) {
-      throw new ApiError(400, "projectId parameter is required");
-    }
-
-    let mediaType: MediaType | undefined = undefined;
-
-    if (type) {
-      mediaType = type.trim().toLowerCase() as MediaType;
-    }
-
-    const medias = await projectService.getProjectMediasByProjectId(
-      projectId,
-      mediaType,
-    );
-
-    // Handle presigned URLs for images
-    await Promise.all(
-      medias.map(async (item: any) => {
-        if (item.files && typeof item.files === "object") {
-          for (const [key, value] of Object.entries(item.files)) {
-            if (typeof value === "string" && value) {
-              (item.files as any)[key] = await getFileUrl(value);
-            }
-          }
-        }
-      }),
-    );
-
-    successResponse(
-      res,
-      200,
-      `Project Medias${mediaType ? ` (${mediaType})` : ""} fetched successfully`,
-      medias,
-    );
-  },
-);
 
 export const getProjectLocationAdvantageByProjectId = asyncHandler(
   async (req: Request<{ projectId: string }>, res: Response) => {
@@ -308,55 +263,6 @@ export const getProjectLocationAdvantageByProjectId = asyncHandler(
       "Project location advantages fetched successfully",
       locationAdvantages,
     );
-  },
-);
-
-export const getProjectReraByProjectId = asyncHandler(
-  async (req: Request<{ projectId: string }>, res: Response) => {
-    const { projectId } = req.params;
-
-    if (!projectId) {
-      throw new ApiError(400, "projectId parameter is required");
-    }
-
-    const projectReras =
-      await projectService.getProjectReraByProjectId(projectId);
-
-    await Promise.all(
-      projectReras.map(async (item: any) => {
-        if (item.files && typeof item.files === "object") {
-          for (const [key, value] of Object.entries(item.files)) {
-            if (typeof value === "string" && value) {
-              (item.files as any)[key] = await getFileUrl(value);
-            }
-          }
-        }
-      }),
-    );
-
-    successResponse(
-      res,
-      200,
-      "Project location advantages fetched successfully",
-      projectReras,
-    );
-  },
-);
-
-export const getProjectFaqsByProjectId = asyncHandler(
-  async (
-    req: Request<{ projectId: string }>, // <-- FIX: ADD TYPE HERE
-    res: Response,
-  ) => {
-    const { projectId } = req.params;
-
-    if (!projectId) {
-      throw new ApiError(400, "projectId parameter is required");
-    }
-
-    const faqs = await projectService.getProjectFaqsByProjectId(projectId);
-
-    successResponse(res, 200, "Project FAQs fetched successfully", faqs);
   },
 );
 

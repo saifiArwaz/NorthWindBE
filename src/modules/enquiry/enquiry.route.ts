@@ -7,8 +7,6 @@ router.get("/newsletter", enquiriesCtrl.getNewsletterEnquiry);
 router.get("/job-application", enquiriesCtrl.getJobApplication);
 router.get("/contact", enquiriesCtrl.getContactEnquiry);
 router.get("/projects", enquiriesCtrl.getProjectEnquiry);
-router.get("/orange-circle", enquiriesCtrl.getOrangeCircleEnquiry);
-router.get("/channel-partner", enquiriesCtrl.getChannelPartnerEnquiry);
 
 router.get(
   "/download-job-resume/:id",

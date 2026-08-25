@@ -1,5 +1,4 @@
 import z from "zod";
-import { PartnerType } from "../../generated/prisma/enums.js";
 
 export const createHomeLoanSchema = z.object({
   body: z.object({

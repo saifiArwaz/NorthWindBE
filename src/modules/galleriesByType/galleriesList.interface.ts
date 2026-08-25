@@ -4,6 +4,7 @@ export interface IGalleriesListCreateDTO {
   files?: string;
   alt?: string;
   watermark?: string;
+  link?: string;
   createdBy: string;
   updatedBy: string;
 }
@@ -14,5 +15,6 @@ export interface IGalleriesListUpdateDTO {
   files?: string;
   alt?: string;
   watermark?: string;
+  link?: string;
   updatedBy?: string;
 }

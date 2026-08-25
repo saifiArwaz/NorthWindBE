@@ -13,6 +13,7 @@ export async function createGalleriesList(data: IGalleriesListCreateDTO) {
     files: data.files,
     alt: data.alt,
     watermark: data.watermark,
+    link: data.link,
     createdBy: data.createdBy,
   };
   return prisma.galleriesList.create({ data: prismaData });
@@ -54,6 +55,7 @@ export async function updateGalleriesList(
       files: data.files,
       alt: data.alt,
       watermark: data.watermark,
+      link: data.link,
       ...(data.updatedBy && {
         updatedUser: { connect: { id: data.updatedBy } },
       }),

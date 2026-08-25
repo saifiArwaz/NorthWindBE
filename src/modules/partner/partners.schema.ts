@@ -1,5 +1,4 @@
 import z from "zod";
-import { PartnerType } from "../../generated/prisma/enums.js";
 
 export const createPartnersSchema = z.object({
   body: z.object({

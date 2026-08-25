@@ -56,26 +56,6 @@ export async function getContactEnquiry(page = 1, limit = 10, search = "") {
   );
 }
 
-export async function getChannelPartnerEnquiry(
-  page = 1,
-  limit = 10,
-  search = "",
-) {
-  const where = search
-    ? {
-        OR: [{ fullName: { contains: search, mode: "insensitive" } }],
-      }
-    : {};
-  return paginate(
-    prisma.channelPartnerEnquiry,
-    {
-      where,
-      orderBy: { dateAt: "desc" },
-    },
-    { page, limit },
-  );
-}
-
 export async function getProjectEnquiry(page = 1, limit = 10, search = "") {
   const where = search
     ? {
@@ -94,27 +74,6 @@ export async function getProjectEnquiry(page = 1, limit = 10, search = "") {
     { page, limit },
   );
 }
-
-export async function getOrangeCircleEnquiry(
-  page = 1,
-  limit = 10,
-  search = "",
-) {
-  const where = search
-    ? {
-        OR: [{ fullName: { contains: search, mode: "insensitive" } }],
-      }
-    : {};
-  return paginate(
-    prisma.orangeCircleEnquiry,
-    {
-      where,
-      orderBy: { dateAt: "desc" },
-    },
-    { page, limit },
-  );
-}
-
 export async function getJobApplicationById(id: string) {
   return await prisma.jobApplication.findUnique({
     where: { id },

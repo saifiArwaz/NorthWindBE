@@ -1,16 +1,10 @@
 import { prisma } from "../../config/prisma.config.js";
 import { paginate } from "../../utils/pagination.utils.js";
-import { ApiError } from "../../utils/apiError.utils.js";
 import {
-  CityContentDetailTypes,
-  csrContentTypes,
   FaqTypes,
   gallerieTypes,
-  PartnerType,
   PressType,
 } from "../../generated/prisma/enums.js";
-import { BUDGET_RANGES } from "../../utils/budget.utils.js";
-import { title } from "process";
 
 type GetUnderConstructionProps = {
   year?: string;
@@ -66,27 +60,6 @@ export async function getHomeValue() {
   });
 }
 
-export async function getAwardsYear() {
-  const awards = await prisma.awards.findMany({
-    where: {
-      status: true,
-      isDeleted: false,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-    select: {
-      createdAt: true,
-    },
-  });
-
-  // remove duplicates + empty values
-  const uniqueYears = [
-    ...new Set(awards.map((item) => item.createdAt?.getFullYear()).filter(Boolean)),
-  ];
-
-  return uniqueYears;
-}
 export async function getAwards(
   page: number = 1,
   limit: number = 10,
@@ -211,84 +184,6 @@ export async function getLatestBlogs(limit = 5) {
       createdAt: true,
     },
   });
-}
-
-export async function getBlogFaqsByBlogId(blogId: string) {
-  return (prisma as any).blogFaq.findMany({
-    where: {
-      blogId,
-      status: true,
-      isDeleted: false,
-    },
-    orderBy: { seq: "asc" },
-    select: {
-      id: true,
-      question: true,
-      answer: true,
-      seq: true,
-      status: true,
-    },
-  });
-}
-
-export async function getRelatedBlogs(
-  slug: string,
-  page = 1,
-  limit = 10,
-) {
-  const blog = await prisma.blogs.findFirst({
-    where: {
-      slug,
-      status: true,
-      isDeleted: false,
-    },
-    select: {
-      id: true,
-    },
-  });
-
-  if (!blog) {
-    throw new Error("Blog not found");
-  }
-
-  return paginate(
-    prisma.blogs,
-    {
-      where: {
-        id: {
-          not: blog.id,
-        },
-        status: true,
-        isDeleted: false,
-      },
-      orderBy: {
-        dateAt: "desc",
-      },
-    },
-    { page, limit },
-  );
-}
-
-export async function getBlogsByCategoryId(
-  categoryId: string,
-  page: number = 1,
-  limit: number = 10,
-) {
-  console.log("categoryId", categoryId);
-  return paginate(
-    prisma.blogs,
-    {
-      where: {
-        categoryId,
-        status: true,
-        isDeleted: false,
-      },
-      orderBy: {
-        dateAt: "desc",
-      },
-    },
-    { page, limit },
-  );
 }
 
 export async function getMediaCoverage(
@@ -424,53 +319,6 @@ export async function getFaqs(type?: string) {
   });
 }
 
-export async function getCsrContentGalleries(type?: string) {
-  const where: any = {
-    status: true,
-    isDeleted: false,
-  };
-
-  if (type) {
-    where.type = type as csrContentTypes;
-  }
-
-  return prisma.csrContentGalleries.findMany({
-    where: where,
-    orderBy: { seq: "asc" },
-    select: {
-      id: true,
-      type: true,
-      files: true,
-      alt: true,
-      watermark: true,
-      status: true,
-      seq: true,
-    },
-  });
-}
-
-export async function getCsrContent() {
-  return prisma.csrContentDetails.findMany({
-    where: {
-      status: true,
-      isDeleted: false,
-    },
-    orderBy: { seq: "asc" },
-    select: {
-      id: true,
-      title: true,
-      files: true,
-      alt: true,
-      shortDescription: true,
-      status: true,
-      seq: true,
-      watermark: true,
-      createdAt: true,
-      updatedAt: true,
-    },
-  });
-}
-
 export async function getGalleriesByType(type: string, fileType?: string) {
   const where: any = {
     status: true,
@@ -492,6 +340,7 @@ export async function getGalleriesByType(type: string, fileType?: string) {
       type: true,
       files: true,
       fileType: true,
+      link:true,
       alt: true,
       watermark: true,
       status: true,
@@ -500,133 +349,6 @@ export async function getGalleriesByType(type: string, fileType?: string) {
   });
 }
 
-export async function getUnderConstruction({
-  year,
-  month,
-  towerId,
-  projectSlug,
-}: GetUnderConstructionProps = {}) {
-  let dateFilter: any = undefined;
-
-  if (year) {
-    const yr = parseInt(year);
-    if (!isNaN(yr)) {
-      if (month) {
-        const mn = parseInt(month); // 1-12
-        if (!isNaN(mn)) {
-          const startDate = new Date(yr, mn - 1, 1);
-          const endDate = new Date(yr, mn, 0, 23, 59, 59, 999);
-          dateFilter = { gte: startDate, lte: endDate };
-        }
-      } else {
-        const startDate = new Date(yr, 0, 1);
-        const endDate = new Date(yr, 11, 31, 23, 59, 59, 999);
-        dateFilter = { gte: startDate, lte: endDate };
-      }
-    }
-  }
-
-  const whereCondition = {
-    status: true,
-    isDeleted: false,
-
-    ...(projectSlug && {
-      project: {
-        slug: projectSlug,
-      },
-    }),
-    ...(towerId && { towerId }),
-    ...(dateFilter && { dateAt: dateFilter }),
-  };
-
-  const [galleries, metadataRecords] = (await Promise.all([
-    // Gallery Data
-    prisma.constructionGalleries.findMany({
-      where: whereCondition,
-
-      orderBy: {
-        seq: "asc",
-      },
-
-      select: {
-        id: true,
-        fileType: true,
-        files: true,
-        alt: true,
-        watermark: true,
-        link: true,
-        isFeature: true,
-        status: true,
-        seq: true,
-        project: {
-          select: {
-            id: true,
-            projectName: true,
-            slug: true,
-          },
-        },
-      },
-    }),
-
-    // Get all records to extract distinct years, months, and towers
-    prisma.constructionGalleries.findMany({
-      where: {
-        status: true,
-        isDeleted: false,
-        ...(projectSlug && {
-          project: {
-            slug: projectSlug,
-          },
-        }),
-      },
-      select: {
-        dateAt: true,
-        project: {
-          select: {
-            id: true,
-            projectName: true,
-            slug: true,
-          },
-        },
-        tower: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-      },
-    }),
-  ])) as [any, any];
-
-  const yearsSet = new Set<number>();
-  const monthsSet = new Set<number>();
-  const towersMap = new Map<string, any>();
-  const projectsMap = new Map<string, any>();
-
-  for (const record of metadataRecords) {
-    if (record.dateAt) {
-      yearsSet.add(new Date(record.dateAt).getFullYear());
-      monthsSet.add(new Date(record.dateAt).getMonth() + 1);
-    }
-    if (record.tower) {
-      towersMap.set(record.tower.id, record.tower);
-    }
-    if (record.project) {
-      projectsMap.set(record.project.id, record.project);
-    }
-  }
-
-  return {
-    galleries,
-
-    filters: {
-      projects: Array.from(projectsMap.values()),
-      years: Array.from(yearsSet).sort((a, b) => b - a),
-      months: Array.from(monthsSet).sort((a, b) => a - b),
-      towers: Array.from(towersMap.values()),
-    },
-  };
-}
 
 export async function getMediakit() {
   return prisma.mediaKit.findMany({
@@ -719,29 +441,7 @@ export async function getTestimonials(
   });
 }
 
-export async function getBlogsCategories() {
-  const categories = await prisma.blogCategories.findMany({
-    where: {
-      status: true,
-      isDeleted: false,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-    select: {
-      id: true,
-      name: true,
-      slug: true,
-      status: true,
-      createdAt: true,
-      updatedAt: true,
-    },
-  });
-  return categories.map((category) => ({
-    ...category,
-    blogCount: 0,
-  }));
-}
+
 
 export async function getHomeLoan() {
   const where: any = {
@@ -974,50 +674,6 @@ export async function getBrands() {
   });
 }
 
-export async function getNriWhyUs() {
-  return prisma.nriWhy.findMany({
-    where: {
-      status: true,
-      isDeleted: false,
-    },
-    orderBy: {
-      seq: "asc",
-    },
-    select: {
-      id: true,
-      title: true,
-      files: true,
-      alt: true,
-      watermark: true,
-      shortDescription: true,
-      tags: true,
-      seq: true,
-      status: true,
-    },
-  });
-}
-
-export async function getInvestorTabs() {
-  return prisma.inverstorTabs.findMany({
-    where: {
-      status: true,
-      isDeleted: false,
-    },
-    orderBy: {
-      seq: "asc",
-    },
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      files: true,
-      alt: true,
-      seq: true,
-      status: true,
-    },
-  });
-}
-
 export async function getInvestorDocuments() {
   const where: any = {
     status: true,
@@ -1202,27 +858,6 @@ export async function getCities(citySlug: string) {
   return cities;
 }
 
-export async function getCitiesEcosystemLifestyle(type: string) {
-  const data = await prisma.cityEcosystemLifestyle.findMany({
-    where: {
-      isDeleted: false,
-      type: type as CityContentDetailTypes,
-    },
-    orderBy: { seq: "asc" },
-    select: {
-      id: true,
-      type: true,
-      heading: true,
-      shortDescription: true,
-      files: true,
-      alt: true,
-      watermark: true,
-      status: true,
-      seq: true,
-    },
-  });
-  return data;
-}
 
 export async function getProjectSubTypology() {
   const records = await prisma.projectSubTypology.findMany({
@@ -1242,34 +877,6 @@ export async function getProjectSubTypology() {
 }
 
 // filter services
-
-export async function getFilterBudget() {
-  const budgets = [];
-
-  for (const range of BUDGET_RANGES) {
-    const count = await prisma.projects.count({
-      where: {
-        status: true,
-        // price: {
-        //   gte: Number(range.min),
-        //   ...(range.max !== null ? { lte: Number(range.max) } : {}),
-        // },
-      },
-    });
-
-    if (count > 0) {
-      budgets.push({
-        key: range.key,
-        label: range.label,
-        min: range.min,
-        max: range.max,
-        count,
-      });
-    }
-  }
-
-  return budgets;
-}
 
 export async function getFilterPlatter() {
   return prisma.platter.findMany({
@@ -1431,27 +1038,6 @@ export async function getInstagramReelsForWebsite() {
   });
 }
 
-export async function getCareerGalleries(page: number = 1, limit: number = 10) {
-  return paginate(
-    prisma.careerGallery,
-    {
-      where: {
-        status: true,
-      },
-      orderBy: { seq: "asc" },
-      select: {
-        id: true,
-        files: true,
-        alt: true,
-        status: true,
-        seq: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    },
-    { page, limit },
-  );
-}
 
 export async function getSubTypologyByTypologySlug(typologySlug: string) {
   // Find the typology by slug
@@ -1768,53 +1354,6 @@ export async function getProjectsNameAndSlug(
   });
 }
 
-export async function getOfficesLocation() {
-  return prisma.officesLocation.findMany({
-    where: {
-      status: true,
-    },
-    orderBy: {
-      seq: "asc",
-    },
-    select: {
-      id: true,
-      city: true,
-      officeName: true,
-      list: true,
-      status: true,
-      seq: true,
-      createdAt: true,
-      updatedAt: true,
-    },
-  });
-}
-
-export async function getNews(page: number = 1, limit: number = 10) {
-  return paginate(
-    prisma.news,
-    {
-      where: {
-        status: true,
-      },
-      orderBy: {
-        dateAt: "desc",
-      },
-      select: {
-        id: true,
-        title: true,
-        newsLink: true,
-        watermark: true,
-        dateAt: true,
-        status: true,
-        seq: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    },
-    { page, limit },
-  );
-}
-
 export async function getProjectsByPlatterWithGallery(platter: string) {
   const platterEntity = await prisma.platter.findFirst({
     where: {
@@ -1843,53 +1382,6 @@ export async function getProjectsByPlatterWithGallery(platter: string) {
   });
 
   return projects;
-}
-
-export async function getPlatterForEnquiry() {
-  const where: any = {
-    status: true,
-  };
-
-  return prisma.platter.findMany({
-    where,
-    orderBy: { seq: "asc" },
-    select: {
-      id: true,
-      name: true,
-      slug: true,
-      seq: true,
-      status: true,
-    },
-  });
-}
-
-export async function getProjectLocationByPlatter(platterSlug: string) {
-  const projects = await prisma.projects.findMany({
-    where: {
-      platter: {
-        slug: platterSlug,
-        status: true,
-      },
-      status: true,
-      city: {
-        status: true,
-      },
-    },
-    select: {
-      city: {
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-        },
-      },
-    },
-    distinct: ["cityId"],
-  });
-
-  const uniqueCities = projects.map((p) => p.city).filter((c) => !!c);
-
-  return uniqueCities;
 }
 
 export async function getProjectsByCity(citySlug: string) {
@@ -1996,222 +1488,4 @@ export async function createProjectEnquiry(data: {
     },
   });
   return projectEnquiry;
-}
-
-export async function createOrangeCircleEnquiry(data: {
-  fullName: string;
-  emailAddress: string;
-  mobileNo: string;
-  companyName?: string;
-  role?: string;
-  affiliation?: string;
-  contactNo?: string;
-  query?: string;
-  campaignCode?: string;
-  remarks?: string;
-  AgencyName?: string;
-  utmcampaign?: string;
-  utmcontent?: string;
-  utmmedium?: string;
-  utmsource?: string;
-}) {
-  const projectEnquiry = await prisma.orangeCircleEnquiry.create({
-    data: {
-      fullName: data.fullName,
-      emailAddress: data.emailAddress,
-      mobileNo: data.mobileNo,
-      companyName: data.companyName || null,
-      role: data.role || null,
-      affiliation: data.affiliation || null,
-      contactNo: data.contactNo || null,
-      query: data.query || null,
-      campaignCode: data.campaignCode || null,
-      remarks: data.remarks || null,
-      AgencyName: data.AgencyName || null,
-      utmcampaign: data.utmcampaign || null,
-      utmcontent: data.utmcontent || null,
-      utmmedium: data.utmmedium || null,
-      utmsource: data.utmsource || null,
-    },
-  });
-  return projectEnquiry;
-}
-
-export async function createChannelPartnerEnquiry(data: {
-  fullName: string;
-  emailAddress: string;
-  mobileNo: string;
-  companyName?: string;
-  experience?: string;
-  agencyName: string;
-  location: string;
-  reraCertifiedNo?: string;
-  query?: string;
-}) {
-  const channelPartnerEnquiry = await prisma.channelPartnerEnquiry.create({
-    data: {
-      fullName: data.fullName,
-      emailAddress: data.emailAddress,
-      mobileNo: data.mobileNo,
-      companyName: data.companyName,
-      experience: data.experience,
-      agencyName: data.agencyName,
-      location: data.location,
-      reraCertifiedNo: data.reraCertifiedNo,
-      message: data.query,
-    },
-  });
-  return channelPartnerEnquiry;
-}
-
-export async function getSiteMap() {
-  const menuItems = await prisma.menuItem.findMany({
-    where: {
-      parentId: null,
-    },
-    select: {
-      id: true,
-      label: true,
-      seq: true,
-      page: {
-        select: {
-          id: true,
-          pageName: true,
-          slug: true,
-        },
-      },
-      children: {
-        select: {
-          id: true,
-          label: true,
-          seq: true,
-          page: {
-            select: {
-              id: true,
-              pageName: true,
-              slug: true,
-            },
-          },
-        },
-        orderBy: {
-          seq: "asc",
-        },
-      },
-    },
-    orderBy: {
-      seq: "asc",
-    },
-  });
-
-  const siteMap = menuItems.map((item) => ({
-    id: item.id,
-    label: item.label,
-    page: item.page,
-    children: (item.children || []).map((child) => ({
-      id: child.id,
-      label: child.label,
-      page: child.page,
-    })),
-  }));
-
-  return siteMap;
-}
-
-export async function getProjectForSitemapByStatus() {
-  const platters = await prisma.platter.findMany({
-    where: { status: true },
-    orderBy: { seq: "asc" },
-    select: {
-      id: true,
-      name: true,
-      slug: true,
-      seq: true,
-    },
-  });
-
-  const result: any[] = [];
-
-  for (const platter of platters) {
-    const statuses = await prisma.projectStatus.findMany({
-      where: {
-        status: true,
-        projects: {
-          some: {
-            platterId: platter.id,
-            status: true,
-          },
-        },
-      },
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-        status: true,
-        projects: {
-          where: {
-            platterId: platter.id,
-            status: true,
-          },
-          orderBy: { seq: "asc" },
-          select: {
-            id: true,
-            projectName: true,
-            slug: true,
-            isPage: true,
-            city: {
-              select: {
-                id: true,
-                name: true,
-                slug: true,
-              },
-            },
-            platter: {
-              select: {
-                id: true,
-                name: true,
-                slug: true,
-              },
-            },
-            status: true,
-            seq: true,
-          },
-        },
-      },
-    });
-
-    // 👉 Group projects by city
-    const formattedStatuses = statuses.map((status) => {
-      const cityMap: Record<string, any> = {};
-
-      for (const project of status.projects) {
-        const cityId = project.city?.id;
-
-        if (!cityId) continue;
-
-        if (!cityMap[cityId]) {
-          cityMap[cityId] = {
-            city: project.city,
-            projects: [],
-          };
-        }
-
-        cityMap[cityId].projects.push(project);
-      }
-
-      return {
-        id: status.id,
-        name: status.name,
-        slug: status.slug,
-        status: status.status,
-        cities: Object.values(cityMap), // 👈 grouped cities
-      };
-    });
-
-    result.push({
-      platter,
-      statuses: formattedStatuses,
-    });
-  }
-
-  return result;
 }

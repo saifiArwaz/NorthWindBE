@@ -4,8 +4,9 @@ import * as enquiryService from "./enquiry.service.js";
 import { successResponse } from "../../utils/responseHandler.utils.js";
 import {
   getFileUrl,
-  getPresignedUrlForDownload,
 } from "../../utils/fileHandling.utils.js";
+import fs from "fs";
+import path from "path";
 
 export const getJobApplication = asyncHandler(
   async (req: Request, res: Response) => {
@@ -63,26 +64,6 @@ export const getProjectEnquiry = asyncHandler(
   },
 );
 
-export const getOrangeCircleEnquiry = asyncHandler(
-  async (req: Request, res: Response) => {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-    const search = (req.query.search as string) || "";
-
-    const records = await enquiryService.getOrangeCircleEnquiry(
-      page,
-      limit,
-      search,
-    );
-    successResponse(
-      res,
-      200,
-      "Orange circle enquiry records fetch successfully",
-      records,
-    );
-  },
-);
-
 export const getContactEnquiry = asyncHandler(
   async (req: Request, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
@@ -94,26 +75,6 @@ export const getContactEnquiry = asyncHandler(
       res,
       200,
       "Contact enquiry records fetch successfully",
-      records,
-    );
-  },
-);
-
-export const getChannelPartnerEnquiry = asyncHandler(
-  async (req: Request, res: Response) => {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-    const search = (req.query.search as string) || "";
-
-    const records = await enquiryService.getChannelPartnerEnquiry(
-      page,
-      limit,
-      search,
-    );
-    successResponse(
-      res,
-      200,
-      "Channel partner enquiry records fetch successfully",
       records,
     );
   },
@@ -139,8 +100,27 @@ export const downloadResumeJobApplication = asyncHandler(
         });
       }
 
-      const url = await getPresignedUrlForDownload(jobApp.resume, 60 * 60 * 24);
-      return res.redirect(url);
+      let fileKey = jobApp.resume;
+
+      if (fileKey.includes("/files/")) {
+        fileKey = fileKey.split("/files/").slice(1).join("/files/");
+      } else if (
+        fileKey.startsWith("http://") ||
+        fileKey.startsWith("https://")
+      ) {
+        fileKey = fileKey.split("/").at(-1) || "";
+      }
+
+      const filePath = path.join(process.cwd(), "uploads", fileKey);
+
+      if (fs.existsSync(filePath)) {
+        return res.download(filePath);
+      } else {
+        return next({
+          status: 404,
+          message: "Resume file not found on server",
+        });
+      }
     } catch (error: any) {
       next(error);
     }

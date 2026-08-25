@@ -8,11 +8,15 @@ export const createGalleriesListSchema = z.object({
       .nativeEnum(FileType, { message: "File type is required" })
       .optional(),
     alt: z.string().optional().nullable(),
+    watermark: z.string().optional().nullable(),
+    link: z.string().optional().nullable(),
   }),
 });
 
 export const updateGalleriesListSchema = z.object({
   body: z.object({
     alt: z.string().optional().nullable(),
+    watermark: z.string().optional().nullable(),
+    link: z.string().optional().nullable(),
   }),
 });

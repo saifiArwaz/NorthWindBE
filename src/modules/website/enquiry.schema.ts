@@ -60,30 +60,4 @@ export const createProjectEnquirySchema = z.object({
   }),
 });
 
-export const createOrangeCircleEnquirySchema = z.object({
-  body: z.object({
-    fullName: z.string().min(1, "fullName is required"),
-    emailAddress: z.string().email("Invalid emailAddress"),
-    mobileNo: z.string().min(10, "mobileNo is required"),
-    companyName: z.string().optional(),
-    role: z.string().optional(),
-    affiliation: z.string().optional(),
-    contactNo: z.string().optional(),
-    query: z.string().optional(),
-  }),
-});
-
-export const createChannelPartnerEnquirySchema = z.object({
-  body: z.object({
-    fullName: z.string().min(1, "fullName is required"),
-    emailAddress: z.string().email("Invalid emailAddress"),
-    mobileNo: z.string().min(10, "mobileNo is required"),
-    agencyName: z.string().min(1, "agencyName is required"),
-    location: z.string().min(1, "location is required"),
-    companyName: z.string().optional(),
-    reraCertifiedNo: z.string().optional(),
-    experience: z.string().optional(),
-    query: z.string().optional(),
-  }),
-});
 

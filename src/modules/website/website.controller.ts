@@ -16,7 +16,6 @@ import {
   refreshInstagramToken,
 } from "../instagramReel/instagramToken.service.js";
 import axios from "axios";
-import { getSalesforceToken } from "../../utils/salesforce.utils.js";
 import { sendEmail } from "../../utils/email.utils.js";
 
 // new controller start here
@@ -133,12 +132,7 @@ export const getAwards = asyncHandler(async (req: Request, res: Response) => {
   successResponse(res, 200, "Awards fetched successfully", awards);
 });
 
-export const getAwardsYear = asyncHandler(
-  async (req: Request, res: Response) => {
-    const awards = await websiteServices.getAwardsYear();
-    successResponse(res, 200, "Awards Year fetched successfully", awards);
-  },
-);
+
 
 export const getBlogs = asyncHandler(async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
@@ -217,33 +211,6 @@ export const getBlogs = asyncHandler(async (req: Request, res: Response) => {
   successResponse(res, 200, "Blogs fetched successfully", blogs);
 });
 
-export const getBlogsByCategoryId = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { categoryId } = req.params;
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-    if (!categoryId) {
-      throw new ApiError(400, "Category ID is required");
-    }
-
-    const blogs = await websiteServices.getBlogsByCategoryId(categoryId as string, page, limit);
-    successResponse(res, 200, "Blogs fetched successfully", blogs);
-  },
-);
-
-export const getRelatedBlogs = asyncHandler(
-  async (req: Request<{ slug: string }>, res: Response) => {
-    const { slug } = req.params;
-    const page = Number(req.query.page) || 1;
-    const limit = Number(req.query.limit) || 10;
-    if (!slug) {
-      throw new ApiError(400, "Blog slug is required");
-    }
-    const blogs = await websiteServices.getRelatedBlogs(slug, page, limit);
-
-    successResponse(res, 200, "Related blogs fetched successfully", blogs);
-  },
-);
 
 export const getMediaCoverage = asyncHandler(
   async (req: Request, res: Response) => {
@@ -341,13 +308,6 @@ export const getLatestBlogs = asyncHandler(
   },
 );
 
-export const getBlogFaqsByBlogId = asyncHandler(
-  async (req: Request<{ blogId: string }>, res: Response) => {
-    const { blogId } = req.params;
-    const faqs = await websiteServices.getBlogFaqsByBlogId(blogId);
-    successResponse(res, 200, "Blog FAQs fetched successfully", faqs);
-  },
-);
 
 export const getTeam = asyncHandler(async (req: Request, res: Response) => {
   const isFounder = req.query.isFounder as string;
@@ -409,62 +369,6 @@ export const getFaqs = asyncHandler(
   }
 );
 
-export const getCsrContentGalleries = asyncHandler(
-  async (req: Request, res: Response) => {
-    const type = req.query.type as string | undefined;
-    const galleries = await websiteServices.getCsrContentGalleries(type);
-    await Promise.all(
-      galleries.map(async (item: any) => {
-        if (item.files && typeof item.files === "object") {
-          for (const key of Object.keys(item.files as any)) {
-            const value = (item.files as any)[key];
-            if (value) {
-              (item.files as any)[key] = await getFileUrl(value);
-            }
-          }
-        }
-      }),
-    );
-    successResponse(res, 200, "Csr content galleries fetched successfully", galleries);
-  },
-);
-
-export const getCsrContent = asyncHandler(
-  async (req: Request, res: Response) => {
-    const records = await websiteServices.getCsrContent();
-
-    await Promise.all(
-      records.map(async (item: any) => {
-        // 1. transform top-level files
-        if (item.files && typeof item.files === "object") {
-          for (const key of Object.keys(item.files)) {
-            const value = item.files[key];
-            if (value) {
-              item.files[key] = await getFileUrl(value);
-            }
-          }
-        }
-
-        // 2. transform csrContentGalleries files
-        if (Array.isArray(item.csrContentGalleries)) {
-          await Promise.all(
-            item.csrContentGalleries.map(async (gallery: any) => {
-              if (gallery.files && typeof gallery.files === "object") {
-                for (const key of Object.keys(gallery.files)) {
-                  const value = gallery.files[key];
-                  if (value) {
-                    gallery.files[key] = await getFileUrl(value);
-                  }
-                }
-              }
-            }),
-          );
-        }
-      }),
-    );
-    successResponse(res, 200, "Csr content fetched successfully", records);
-  },
-);
 
 export const getGalleriesByType = asyncHandler(
   async (req: Request, res: Response) => {
@@ -551,41 +455,35 @@ export const downloadMediaKitFile = asyncHandler(
   },
 );
 
-export const getUnderConstruction = asyncHandler(
+export const downloadFile = asyncHandler(
   async (req: Request, res: Response) => {
-    const year = req.query.year as string;
-    const month = req.query.month as string;
-    const towerId = req.query.towerId as string;
-    const projectSlug = req.query.projectSlug as string;
+    const { file } = req.query;
 
-    const underConstruction = await websiteServices.getUnderConstruction({
-      year,
-      month,
-      towerId,
-      projectSlug,
-    });
-    await Promise.all(
-      underConstruction.galleries.map(async (item: any) => {
-        if (item.files && typeof item.files === "object") {
-          for (const key of Object.keys(item.files as any)) {
-            const value = (item.files as any)[key];
-            if (value) {
-              (item.files as any)[key] = await getFileUrl(value);
-            }
-          }
-        }
-      }),
-    );
-    successResponse(
-      res,
-      200,
-      "Under construction fetched successfully",
-      underConstruction,
-    );
+    if (!file || typeof file !== "string") {
+      res.status(400).send("File query parameter is required");
+      return;
+    }
+
+    let fileKey = file;
+
+    if (fileKey.includes("/files/")) {
+      fileKey = fileKey.split("/files/").slice(1).join("/files/");
+    } else if (
+      fileKey.startsWith("http://") ||
+      fileKey.startsWith("https://")
+    ) {
+      fileKey = fileKey.split("/").at(-1) || "";
+    }
+
+    const filePath = path.join(process.cwd(), "uploads", fileKey);
+
+    if (fs.existsSync(filePath)) {
+      return res.download(filePath);
+    } else {
+      res.status(404).send("File not found");
+    }
   },
 );
-
-
 
 export const getSocialLinks = asyncHandler(
   async (req: Request, res: Response) => {
@@ -638,14 +536,6 @@ export const getTestimonials = asyncHandler(
       "Testimonials fetched successfully",
       testimonials,
     );
-  },
-);
-
-export const getBlogsCategories = asyncHandler(
-  async (req: Request, res: Response) => {
-    const records = await websiteServices.getBlogsCategories();
-
-    successResponse(res, 200, "Blogs categories fetched successfully", records);
   },
 );
 
@@ -850,43 +740,6 @@ export const getBrands = asyncHandler(async (req: Request, res: Response) => {
   successResponse(res, 200, "Brands fetched successfully", brands);
 });
 
-export const getNriWhyUs = asyncHandler(async (req: Request, res: Response) => {
-  const nriIndia = await websiteServices.getNriWhyUs();
-
-  await Promise.all(
-    nriIndia.map(async (item: any) => {
-      if (item.files && typeof item.files === "object") {
-        for (const [key, value] of Object.entries(item.files)) {
-          if (typeof value === "string" && value) {
-            (item.files as any)[key] = await getFileUrl(value);
-          }
-        }
-      }
-    }),
-  );
-
-  successResponse(res, 200, "NRI Why Us fetched successfully", nriIndia);
-});
-
-export const getInvestorTabs = asyncHandler(
-  async (req: Request, res: Response) => {
-    const record = await websiteServices.getInvestorTabs();
-
-    await Promise.all(
-      record.map(async (item: any) => {
-        if (item.files && typeof item.files === "object") {
-          for (const [key, value] of Object.entries(item.files)) {
-            if (typeof value === "string" && value) {
-              (item.files as any)[key] = await getFileUrl(value);
-            }
-          }
-        }
-      }),
-    );
-
-    successResponse(res, 200, "NRI Why Us fetched successfully", record);
-  },
-);
 
 export const getInvestorDocuments = asyncHandler(
   async (req: Request, res: Response) => {
@@ -970,33 +823,6 @@ export const getCityBySlug = asyncHandler(
   },
 );
 
-export const getCitiesEcosystemLifestyle = asyncHandler(
-  async (
-    req: Request<{ citySlug: string; type: string }>, // <-- ✅ ADD THIS LINE
-    res: Response,
-  ) => {
-    const { type } = req.params;
-
-    const data = await websiteServices.getCitiesEcosystemLifestyle(type);
-    await Promise.all(
-      data.map(async (item: any) => {
-        if (item.files && typeof item.files === "object") {
-          for (const [key, value] of Object.entries(item.files)) {
-            if (typeof value === "string" && value) {
-              (item.files as any)[key] = await getFileUrl(value);
-            }
-          }
-        }
-      }),
-    );
-    successResponse(
-      res,
-      200,
-      "Cities ecosystem lifestyle fetched successfully",
-      data,
-    );
-  },
-);
 
 export const getProjectSubTypology = asyncHandler(
   async (req: Request, res: Response) => {
@@ -1046,12 +872,7 @@ export const getFilterProjectStatus = asyncHandler(
   },
 );
 
-export const getFilterBudget = asyncHandler(
-  async (req: Request, res: Response) => {
-    const budgets = await websiteServices.getFilterBudget();
-    successResponse(res, 200, "Budgets fetched successfully", budgets);
-  },
-);
+
 // ------------------- project filter end---------------------
 
 export const getFilterJobs = asyncHandler(
@@ -1203,41 +1024,6 @@ export const getInstagramReels = asyncHandler(
       "Instagram reels fetched successfully",
       reelsData,
     );
-  },
-);
-
-export const getCareerGalleries = asyncHandler(
-  async (req: Request, res: Response) => {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-
-    const galleries = await websiteServices.getCareerGalleries(page, limit);
-
-    let items: unknown = galleries;
-    if (
-      galleries &&
-      typeof galleries === "object" &&
-      "data" in galleries &&
-      Array.isArray((galleries as any).data)
-    ) {
-      items = (galleries as any).data;
-    }
-
-    if (items && Array.isArray(items)) {
-      await Promise.all(
-        items.map(async (item: any) => {
-          if (item.files && typeof item.files === "object") {
-            for (const [key, value] of Object.entries(item.files)) {
-              if (typeof value === "string" && value) {
-                (item.files as any)[key] = await getFileUrl(value);
-              }
-            }
-          }
-        }),
-      );
-    }
-
-    successResponse(res, 200, "Career gallery fetched successfully", galleries);
   },
 );
 
@@ -1452,20 +1238,6 @@ export const getProjectsNameAndSlug = asyncHandler(
   },
 );
 
-export const getOfficesLocation = asyncHandler(
-  async (req: Request, res: Response) => {
-    const offices = await websiteServices.getOfficesLocation?.();
-    successResponse(res, 200, "Offices location fetched successfully", offices);
-  },
-);
-
-export const getNews = asyncHandler(async (req: Request, res: Response) => {
-  const page = parseInt(req.query.page as string) || 1;
-  const limit = parseInt(req.query.limit as string) || 10;
-  const news = await websiteServices.getNews?.(page, limit);
-  successResponse(res, 200, "News fetched successfully", news);
-});
-
 export const getProjectByPlatter = asyncHandler(
   async (req: Request, res: Response) => {
     const { platter } = req.params;
@@ -1487,32 +1259,6 @@ export const getProjectByPlatter = asyncHandler(
   },
 );
 
-export const getPlatterForEnquiry = asyncHandler(
-  async (req: Request, res: Response) => {
-    const platters = await websiteServices.getPlatterForEnquiry();
-    successResponse(
-      res,
-      200,
-      "Platters List for enquiry fetched successfully",
-      platters,
-    );
-  },
-);
-
-export const getProjectLocationByPlatter = asyncHandler(
-  async (req: Request<{ platter: string }>, res: Response) => {
-    const { platter } = req.params;
-
-    const projectLocations =
-      await websiteServices.getProjectLocationByPlatter(platter);
-    successResponse(
-      res,
-      200,
-      "Project location by platter fetched successfully",
-      projectLocations,
-    );
-  },
-);
 
 export const getProjectsByCity = asyncHandler(
   async (req: Request<{ city: string }>, res: Response) => {
@@ -1656,139 +1402,3 @@ export const createProjectEnquiry = asyncHandler(
   },
 );
 
-export const createOrangeCircleEnquiry = asyncHandler(
-  async (req: Request, res: Response) => {
-    const {
-      fullName,
-      emailAddress,
-      mobileNo,
-      companyName,
-      role,
-      affiliation,
-      contactNo,
-      query,
-      remarks,
-      AgencyName,
-      utmcampaign,
-      utmcontent,
-      utmmedium,
-      utmsource,
-    } = req.body;
-
-    const enquiry = await websiteServices.createOrangeCircleEnquiry({
-      fullName,
-      emailAddress,
-      mobileNo,
-      companyName,
-      role,
-      affiliation,
-      contactNo,
-      query,
-      utmcampaign,
-      utmcontent,
-      utmmedium,
-      utmsource,
-    });
-
-    try {
-      const salesforceToken = await getSalesforceToken();
-      await axios.post(
-        "https://sdplorg2023.my.salesforce.com/services/apexrest/DigitalAPI/",
-        {
-          req: {
-            firstName: fullName,
-            lastName: "",
-            email: emailAddress,
-            mobile: mobileNo,
-            campaignCode: process.env.SALESFORCE_CAMPAIGNCODE,
-            remarks: remarks || "New Digital Lead",
-            AgencyName: AgencyName || "Web",
-            utmcampaign: utmcampaign || "",
-            utmcontent: utmcontent || "",
-            utmmedium: utmmedium || "",
-            utmsource: utmsource || "",
-          },
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${salesforceToken}`,
-          },
-        },
-      );
-    } catch (error) {
-      logger.error("Salesforce API integration failed:", error);
-    }
-
-    successResponse(
-      res,
-      201,
-      "Orange circle enquiry submitted successfully",
-      enquiry,
-    );
-  },
-);
-
-export const getSitemap = asyncHandler(async (req: Request, res: Response) => {
-  const sitemap = await websiteServices.getSiteMap();
-  successResponse(res, 200, "Sitemap successfully", sitemap);
-});
-
-export const createChannelPartnerEnquiry = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { fullName, emailAddress, mobileNo, companyName, agencyName, location, reraCertifiedNo, experience, query } = req.body;
-
-    const enquiry = await websiteServices.createChannelPartnerEnquiry({
-      fullName,
-      emailAddress,
-      mobileNo,
-      companyName,
-      agencyName,
-      location,
-      reraCertifiedNo,
-      experience,
-      query,
-    });
-
-    try {
-      const toEmail = process.env.CLIENT_EMAIL_DESTINATION || process.env.SMTP_USER || "";
-      if (toEmail) {
-        await sendEmail(toEmail, "New Channel Partner Enquiry", "enquiry-lead", {
-          title: "Channel Partner Enquiry",
-          data: {
-            "Full Name": fullName,
-            "Email Address": emailAddress,
-            "Mobile No": mobileNo,
-            "Company Name": companyName,
-            "Agency Name": agencyName,
-            "Location": location,
-            "RERA Certified Number": reraCertifiedNo,
-            "Experience": experience,
-            "Message": query
-          }
-        });
-      }
-    } catch (error) {
-      logger.error("Failed to send channel partner email:", error);
-    }
-
-    successResponse(
-      res,
-      201,
-      "Channel partner enquiry submitted successfully",
-      enquiry,
-    );
-  },
-);
-
-export const getSitemapProjectsByStatus = asyncHandler(
-  async (req: Request<{ typologyId: string }>, res: Response) => {
-    const subTypologies = await websiteServices.getProjectForSitemapByStatus();
-    successResponse(
-      res,
-      200,
-      "Sub typologies fetched successfully",
-      subTypologies,
-    );
-  },
-);

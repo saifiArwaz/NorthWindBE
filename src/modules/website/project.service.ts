@@ -1,8 +1,5 @@
 import { prisma } from "../../config/prisma.config.js";
 import { paginate } from "../../utils/pagination.utils.js";
-import { ApiError } from "../../utils/apiError.utils.js";
-import { BUDGET_RANGES } from "../../utils/budget.utils.js";
-import { MediaType, ProjectContentDetailsTypes } from "../../generated/prisma/enums.js";
 
 // INTERFACE
 export interface ProjectFilterParams {
@@ -300,32 +297,6 @@ export async function getProjectFloorPlansByProjectId(
   });
 }
 
-export async function getProjectMediasByProjectId(
-  projectId: string,
-  type?: MediaType,
-) {
-  return prisma.projectMedia.findMany({
-    where: {
-      projectId,
-      status: true,
-      isDeleted: false,
-      mediaType: type as MediaType,
-    },
-    orderBy: { seq: "asc" },
-    select: {
-      id: true,
-      mediaType: true,
-      fileType: true,
-      files: true,
-      alt: true,
-      watermark: true,
-      link: true,
-      seq: true,
-      status: true,
-    },
-  });
-}
-
 export async function getProjectLocationAdvantageByProjectId(
   projectId: string,
 ) {
@@ -348,44 +319,6 @@ export async function getProjectLocationAdvantageByProjectId(
   });
 }
 
-export async function getProjectReraByProjectId(projectId: string) {
-  return prisma.projectRera.findMany({
-    where: {
-      projectId,
-      status: true,
-      isDeleted: false,
-    },
-    orderBy: { seq: "asc" },
-    select: {
-      id: true,
-      files: true,
-      alt: true,
-      watermark: true,
-      phase: true,
-      reraNumber: true,
-      status: true,
-      seq: true,
-    },
-  });
-}
-
-export async function getProjectFaqsByProjectId(projectId: string) {
-  return prisma.projectFaq.findMany({
-    where: {
-      projectId,
-      status: true,
-      isDeleted: false,
-    },
-    orderBy: { seq: "asc" },
-    select: {
-      id: true,
-      question: true,
-      answer: true,
-      seq: true,
-      status: true,
-    },
-  });
-}
 
 export async function getProjectContentDetailsByType(
   projectId: string,
