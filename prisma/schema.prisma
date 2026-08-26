@@ -71,6 +71,8 @@ enum FaqTypes {
   tax_benefit
   emi
   investor
+  career
+  home
 }
 
 
@@ -448,7 +450,7 @@ model Blogs {
   id          String    @id @default(cuid())
   title       String    @unique
   slug        String    @unique
-  dateAt      DateTime?
+  dateAt      DateTime? @default(now())
   description Json
   files       Json?
   alt         String?

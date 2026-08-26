@@ -131,7 +131,7 @@ export async function getBlogs(
     {
       where,
        orderBy: {
-       createdAt: "desc",
+       dateAt: "desc",
       },
       select: {
         id: true,
@@ -172,7 +172,7 @@ export async function getLatestBlogs(limit = 5) {
       isDeleted: false,
     },
     orderBy: {
-      createdAt: "desc",
+      dateAt: "desc",
     },
     take: limit,
     select: {
