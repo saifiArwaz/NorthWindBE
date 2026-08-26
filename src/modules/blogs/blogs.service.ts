@@ -67,7 +67,7 @@ export async function getAllBlog(
     prisma.blogs,
     {
       where,
-      orderBy: { createdAt: "desc" },
+      orderBy: [{ seq: "asc" },{ createdAt: "desc" }],
     },
     { page, limit },
   );

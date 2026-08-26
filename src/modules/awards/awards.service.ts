@@ -30,7 +30,7 @@ export async function getAllList(page = 1, limit = 10, search = "") {
     prisma.awards,
     {
       where,
-      orderBy: { createdAt: "desc" },
+      orderBy: [{ seq:"asc" }, { createdAt: "desc" }],
     },
     { page, limit },
   );

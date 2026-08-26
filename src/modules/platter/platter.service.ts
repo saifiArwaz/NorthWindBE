@@ -37,7 +37,7 @@ export async function getAllList(page = 1, limit = 10, search = "") {
     prisma.platter,
     {
       where,
-      orderBy: { createdAt: "desc" },
+      orderBy: { seq: "asc" },
     },
     { page, limit },
   );

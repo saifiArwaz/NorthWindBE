@@ -46,7 +46,7 @@ export async function getAllList(type = "", page = 1, limit = 10, search = "") {
     prisma.contentByTypes,
     {
       where,
-      orderBy: { createdAt: "desc" },
+      orderBy: [{ seq: "asc"},{ createdAt: "desc" }],
     },
     { page, limit },
   );

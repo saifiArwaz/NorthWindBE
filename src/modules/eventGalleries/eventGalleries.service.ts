@@ -47,7 +47,7 @@ export async function getAllList(page = 1, limit = 10, search = "", categoryId?:
     {
       where,
       orderBy: { createdAt: "desc" },
-      include: { category: { include: { event: { select: { id: true, title: true, type: true } } } } },
+      include: { category: { include: { event: { select: { id: true, title: true} } } } },
     },
     { page, limit },
   ) as any;

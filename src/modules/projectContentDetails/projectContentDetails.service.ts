@@ -40,7 +40,7 @@ export async function getAllList(projectId = "", page = 1, limit = 10, search = 
     prisma.projectContentDetails,
     {
       where,
-      orderBy: { createdAt: "desc" },
+      orderBy: { seq: "asc" },
     },
     { page, limit },
   );

@@ -40,7 +40,7 @@ export async function getAllList(page = 1, limit = 10, search = "", mediaType?: 
     prisma.mediaCoverage,
     {
       where,
-      orderBy: { createdAt: "desc" },
+      orderBy: [ { seq:"asc" }, { createdAt: "desc" } ],
     },
     { page, limit },
   );
