@@ -395,3 +395,21 @@ export const getProjectTowersByProjectId = asyncHandler(
     successResponse(res, 200, "Project towers fetched successfully", towers);
   }
 );
+
+
+export const getProjectFaqsByProjectId = asyncHandler(
+  async (
+    req: Request<{ projectId: string }>, // <-- FIX: ADD TYPE HERE
+    res: Response,
+  ) => {
+    const { projectId } = req.params;
+
+    if (!projectId) {
+      throw new ApiError(400, "projectId parameter is required");
+    }
+
+    const faqs = await projectService.getProjectFaqsByProjectId(projectId);
+
+    successResponse(res, 200, "Project FAQs fetched successfully", faqs);
+  },
+);

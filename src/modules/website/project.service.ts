@@ -467,3 +467,23 @@ export async function getProjectTowersByProjectId(projectId: string) {
     orderBy: { seq: "asc" },
   });
 }
+
+
+export async function getProjectFaqsByProjectId(projectId: string) {
+  return prisma.projectFaq.findMany({
+    where: {
+      projectId,
+      status: true,
+      isDeleted: false,
+    },
+    orderBy: { seq: "asc" },
+    select: {
+      id: true,
+      projectId:true,
+      question: true,
+      answer: true,
+      seq: true,
+      status: true,
+    },
+  });
+}

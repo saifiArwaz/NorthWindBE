@@ -88,6 +88,9 @@ router.get(
   "/project/:projectId/construction-updates",
   projectCtrl.getProjectConstructionUpdates,
 );
+
+router.get("/project/:projectId/faqs", projectCtrl.getProjectFaqsByProjectId);
+
 router.get("/project/:platterSlug/:slug", projectCtrl.getProjectDetailsBySlug);
 
 // filters routers

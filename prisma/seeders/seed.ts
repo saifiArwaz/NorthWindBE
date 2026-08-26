@@ -26,6 +26,7 @@ async function main() {
       { name: "Amenities", type: "amenities" },
       { name: "FloorPlan", type: "floorPlan" },
       { name: "Location Advantage", type: "locationadvantage" },
+      { name: "Faq", type: "faq" },
     ],
     skipDuplicates: true,
   });

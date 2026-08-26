@@ -57,6 +57,7 @@ import { ContentByTypeRoutes } from "./contentByType/contentByType.route.js";
 
 // new routes
 import {PartnersRoutes} from "./partner/partners.route.js";
+import { projectFaqRoutes } from "./projectFaq/projectFaq.route.js";
 
 
 const router = Router();
@@ -107,6 +108,7 @@ router.use("/admin/project-location", authenticate, projectLocationAdvRoutes);
 router.use("/admin/project-status", authenticate, ProjectStatusRoutes);
 router.use("/admin/project-content-details", authenticate, projectContentDetailsRoutes);
 router.use("/admin/project-tower", authenticate, ProjectTowerRoutes);
+router.use("/admin/project-faq", authenticate, projectFaqRoutes);
 
 // above new routes--------------------------------
 router.use("/admin/awards", authenticate, AwardsRoutes);

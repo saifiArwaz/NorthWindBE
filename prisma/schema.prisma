@@ -26,6 +26,7 @@ enum ProjectSectionTypes {
   floorPlan
   locationadvantage
   tower
+  faq
 }
 
 enum ProjectFloorPlanTypes {
@@ -167,6 +168,8 @@ model User {
   updatedPartner                   Partner[]                  @relation("Updatedpartner")
   CreatedProjectTower              ProjectTower[]             @relation("CreatedProjectTower")
   UpdatedProjectTower              ProjectTower[]             @relation("UpdatedProjectTower")
+  CreatedProjectsFaq               ProjectFaq[]               @relation("CreatedProjectsFaq")
+  UpdatedProjectsFaq               ProjectFaq[]               @relation("UpdatedProjectsFaq")
 }
 
 model RefreshToken {
@@ -530,7 +533,7 @@ model Projects {
   constructionGalleries    ConstructionGalleries[]
   projectTowers            ProjectTower[]
   projectEnquiry           projectEnquiry[]
-
+  projectFaqs              ProjectFaq[]
   seoFooterLinks SeoFooterLink[]
   isDeleted      Boolean         @default(false)
 
@@ -769,6 +772,24 @@ model ProjectTower {
   project           Projects                @relation(fields: [projectId], references: [id], onDelete: Cascade)
   galleries         ConstructionGalleries[]
   projectFloorplans ProjectFloorPlan[]
+}
+
+model ProjectFaq {
+  id          String   @id @default(cuid())
+  projectId   String
+  question    String
+  answer      String
+  link        String?  @db.Text
+  status      Boolean  @default(true)
+  seq         Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  project     Projects @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy   String?
+  creator     User?    @relation("CreatedProjectsFaq", fields: [createdBy], references: [id])
+  updatedBy   String?
+  updatedUser User?    @relation("UpdatedProjectsFaq", fields: [updatedBy], references: [id])
+  isDeleted   Boolean  @default(false)
 }
 
 model ConstructionGalleries {
