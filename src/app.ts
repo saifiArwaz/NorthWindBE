@@ -14,7 +14,7 @@ const app = express();
 app.set("trust proxy", 1);
 app.use(helmet());
 app.use(compression());
-const allowedOrigins = ["http://localhost:3000", "https://radhey-dynamic.vercel.app"];
+const allowedOrigins = ["http://localhost:3000", "https://northwind1.vercel.app"];
 
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
