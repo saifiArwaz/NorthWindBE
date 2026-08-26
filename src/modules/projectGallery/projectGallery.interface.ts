@@ -1,6 +1,7 @@
 export interface IProjectGalleryDTO {
   projectId: string;
   fileType: string;
+  title?: string;
   files?: string;
   link?: string;
   alt?: string;
@@ -10,6 +11,7 @@ export interface IProjectGalleryDTO {
 
 export interface IProjectGalleryUpdateDTO {
   fileType?: string;
+  title?: string;
   link?: string;
   files?: string;
   alt?: string;

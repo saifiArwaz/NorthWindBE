@@ -56,7 +56,7 @@ export async function getAllProjectSection(
     prisma.projectSection,
     {
       where,
-      orderBy: { createdAt: "desc" },
+      orderBy: { seq: "asc" },
     },
     { page, limit },
   );

@@ -231,6 +231,7 @@ export async function getProjectGalleriesByProjectId(
     orderBy: { seq: "asc" },
     select: {
       id: true,
+      title:true,
       fileType: true,
       files: true,
       alt: true,

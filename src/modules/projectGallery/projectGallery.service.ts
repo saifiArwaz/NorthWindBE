@@ -11,6 +11,7 @@ export async function createProjectGallery(data: IProjectGalleryDTO) {
   let prismaData: any = {
     projectId: data.projectId,
     fileType: data.fileType as FileType,
+    title: data.title,
     files: data.files,
     link: data.link,
     alt: data.alt,
@@ -50,6 +51,7 @@ export async function updateProjectGallery(
   const prismaData = Object.fromEntries(
     Object.entries({
       fileType: data.fileType as FileType,
+      title: data.title,
       files: data.files,
       alt: data.alt,
       watermark: data.watermark,

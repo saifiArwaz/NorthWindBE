@@ -681,6 +681,7 @@ model ProjectGallery {
   id          String   @id @default(cuid())
   projectId   String
   fileType    FileType
+  title       String?
   files       Json?
   alt         String?
   watermark   String?

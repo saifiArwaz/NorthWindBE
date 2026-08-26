@@ -157,6 +157,7 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
     Object.entries({
       projectId: req.body.projectId,
       fileType: req.body.fileType,
+      title: req.body.title,
       files: filesByFieldname,
       alt: req.body.alt,
       watermark: req.body.watermark,

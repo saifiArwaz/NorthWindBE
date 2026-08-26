@@ -39,7 +39,7 @@ export async function getAllList(
     {
       where,
       orderBy: {
-        createdAt: "desc",
+        sec: "asc",
       },
     },
     { page, limit },

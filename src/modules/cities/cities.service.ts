@@ -33,7 +33,7 @@ export async function getAllList(page = 1, limit = 10, search = "") {
     prisma.city,
     {
       where,
-      orderBy: { createdAt: "desc" },
+      orderBy: [{ seq: "asc" }, { createdAt: "desc" }],
     },
     { page, limit },
   );
