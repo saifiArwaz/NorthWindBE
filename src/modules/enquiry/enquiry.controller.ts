@@ -126,3 +126,19 @@ export const downloadResumeJobApplication = asyncHandler(
     }
   },
 );
+
+export const getFloorplanTowerEnquiry = asyncHandler(
+  async (req: Request, res: Response) => {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const search = (req.query.search as string) || "";
+
+    const records = await enquiryService.getFloorplanTowerEnquiry(page, limit, search);
+    successResponse(
+      res,
+      200,
+      "Floorplan and tower enquiry records fetch successfully",
+      records,
+    );
+  },
+);

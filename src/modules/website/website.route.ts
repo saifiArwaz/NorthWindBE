@@ -9,6 +9,8 @@ import {
   createNewsLetterEnquirySchema,
   createContactEnquirySchema,
   createProjectEnquirySchema,
+  createFloorplanTowerEnquirySchema,
+  verifyFloorplanTowerOtpSchema,
 } from "./enquiry.schema.js";
 
 const router = Router();
@@ -145,4 +147,17 @@ router.post(
   validate(createProjectEnquirySchema),
   websiteCtrl.createProjectEnquiry,
 );
+
+router.post(
+  "/enquiry/floorplan-tower",
+  validate(createFloorplanTowerEnquirySchema),
+  websiteCtrl.createFloorplanTowerEnquiry,
+);
+
+router.post(
+  "/enquiry/floorplan-tower/verify-otp",
+  validate(verifyFloorplanTowerOtpSchema),
+  websiteCtrl.verifyFloorplanTowerOtp,
+);
+
 export { router as WebsiteRoutes };

@@ -534,6 +534,7 @@ model Projects {
   constructionGalleries    ConstructionGalleries[]
   projectTowers            ProjectTower[]
   projectEnquiry           projectEnquiry[]
+  floorplanTowerEnquiry    floorplanTowerEnquiry[]
   projectFaqs              ProjectFaq[]
   seoFooterLinks SeoFooterLink[]
   isDeleted      Boolean         @default(false)
@@ -1080,6 +1081,18 @@ model projectEnquiry {
   dateAt       DateTime  @default(now())
 }
 
+model floorplanTowerEnquiry {
+  id           String    @id @default(cuid())
+  projectId    String?
+  projects     Projects? @relation(fields: [projectId], references: [id])
+  fullName     String
+  emailAddress String
+  mobileNo     String
+  message      String?
+  isVerified   Boolean   @default(false)
+  dateAt       DateTime  @default(now())
+}
+
 // new schemas by jatin
 
 model Partner {
@@ -1151,3 +1164,14 @@ model EventCategory {
   isDeleted   Boolean          @default(false)
   events      EventGalleries[] @relation("EventGalleryCategory")
 }
+
+model OtpVerification {
+  id           String   @id @default(cuid())
+  emailAddress String
+  otp          String
+  expiresAt    DateTime
+  isVerified   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+

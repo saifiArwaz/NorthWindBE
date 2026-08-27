@@ -1402,3 +1402,61 @@ export const createProjectEnquiry = asyncHandler(
   },
 );
 
+export const createFloorplanTowerEnquiry = asyncHandler(
+  async (req: Request, res: Response) => {
+    const {
+      projectId,
+      fullName,
+      emailAddress,
+      mobileNo,
+      message,
+    } = req.body;
+
+    const enquiry = await websiteServices.createFloorplanTowerEnquiry({
+      projectId,
+      fullName,
+      emailAddress,
+      mobileNo,
+      message,
+    });
+    
+    successResponse(
+      res,
+      201,
+      "Form submitted. OTP sent to email.",
+      enquiry,
+    );
+  },
+);
+
+export const verifyFloorplanTowerOtp = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { enquiryId, otp } = req.body;
+    
+    const enquiry = await websiteServices.verifyFloorplanTowerOtp({
+      enquiryId,
+      otp,
+    });
+    
+    successResponse(
+      res,
+      200,
+      "OTP verified successfully. Enquiry submitted.",
+      enquiry,
+    );
+  },
+);
+
+export const sendFloorplanTowerOtp = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { emailAddress } = req.body;
+    await websiteServices.sendFloorplanTowerOtp(emailAddress);
+    successResponse(
+      res,
+      200,
+      "OTP sent successfully",
+      null,
+    );
+  },
+);
+

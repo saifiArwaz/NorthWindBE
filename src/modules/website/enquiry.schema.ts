@@ -60,4 +60,40 @@ export const createProjectEnquirySchema = z.object({
   }),
 });
 
+export const createFloorplanTowerEnquirySchema = z.object({
+  body: z.object({
+    projectId: z
+      .string()
+      .min(1, "projectId is required")
+      .refine(
+        async (projectId) => {
+          const project = await prisma.projects.findUnique({
+            where: { id: projectId },
+          });
 
+          return !!project;
+        },
+        {
+          message: "Invalid projectId",
+        },
+      )
+      .optional(),
+    fullName: z.string().min(1, "fullName is required"),
+    emailAddress: z.string().email("Invalid emailAddress"),
+    mobileNo: z.string().min(10, "mobileNo is required"),
+    message: z.string().optional(),
+  }),
+});
+
+export const sendOtpSchema = z.object({
+  body: z.object({
+    emailAddress: z.string().email("Invalid emailAddress"),
+  }),
+});
+
+export const verifyFloorplanTowerOtpSchema = z.object({
+  body: z.object({
+    enquiryId: z.string().min(1, "enquiryId is required"),
+    otp: z.string().length(6, "OTP must be exactly 6 digits"),
+  }),
+});

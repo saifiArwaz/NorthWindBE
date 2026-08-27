@@ -5,6 +5,8 @@ import {
   gallerieTypes,
   PressType,
 } from "../../generated/prisma/enums.js";
+import { ApiError } from "../../utils/apiError.utils.js";
+import { sendEmail } from "../../utils/email.utils.js";
 
 type GetUnderConstructionProps = {
   year?: string;
@@ -1471,6 +1473,100 @@ export async function createContactEnquiry(data: {
       location: data.location || null,
 }});
   return projectEnquiry;
+}
+
+export async function sendFloorplanTowerOtp(emailAddress: string) {
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes validity
+
+  const existingOtp = await prisma.otpVerification.findFirst({
+    where: { emailAddress },
+  });
+
+  if (existingOtp) {
+    await prisma.otpVerification.update({
+      where: { id: existingOtp.id },
+      data: { otp, expiresAt, isVerified: false },
+    });
+  } else {
+    await prisma.otpVerification.create({
+      data: { emailAddress, otp, expiresAt },
+    });
+  }
+
+  await sendEmail(emailAddress, "Your Verification OTP", "otp-email", { otp });
+}
+
+export async function createFloorplanTowerEnquiry(data: {
+  projectId?: string;
+  fullName: string;
+  emailAddress: string;
+  mobileNo: string;
+  message?: string;
+}) {
+  const enquiry = await prisma.floorplanTowerEnquiry.create({
+    data: {
+      projectId: data.projectId || null,
+      fullName: data.fullName,
+      emailAddress: data.emailAddress,
+      mobileNo: data.mobileNo,
+      message: data.message || null,
+      isVerified: false,
+    },
+    include:{
+      projects:true
+    }
+  });
+
+  // Automatically trigger OTP generation and email
+  await sendFloorplanTowerOtp(data.emailAddress);
+
+  return enquiry;
+}
+
+export async function verifyFloorplanTowerOtp(data: {
+  enquiryId: string;
+  otp: string;
+}) {
+  const enquiry = await prisma.floorplanTowerEnquiry.findUnique({
+    where: { id: data.enquiryId },
+  });
+
+  if (!enquiry) {
+    throw new ApiError(404, "Enquiry not found.");
+  }
+
+  if (enquiry.isVerified) {
+    throw new ApiError(400, "Enquiry is already verified.");
+  }
+
+  const otpRecord = await prisma.otpVerification.findFirst({
+    where: { emailAddress: enquiry.emailAddress },
+  });
+
+  if (!otpRecord) {
+    throw new ApiError(400, "OTP not generated or expired.");
+  }
+
+  if (otpRecord.otp !== data.otp) {
+    throw new ApiError(400, "Invalid OTP.");
+  }
+
+  if (new Date() > otpRecord.expiresAt) {
+    throw new ApiError(400, "OTP has expired.");
+  }
+
+  const updatedEnquiry = await prisma.floorplanTowerEnquiry.update({
+    where: { id: enquiry.id },
+    data: { isVerified: true },
+  });
+
+  await prisma.otpVerification.update({
+    where: { id: otpRecord.id },
+    data: { isVerified: true },
+  });
+
+  return updatedEnquiry;
 }
 
 export async function createProjectEnquiry(data: {
