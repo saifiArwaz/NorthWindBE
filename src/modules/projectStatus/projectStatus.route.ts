@@ -24,6 +24,7 @@ router.patch(
   validate(updateProjectStatusSchema),
   projectStatusCtrl.update,
 );
+router.patch("/:id/seq", upload.none(), projectStatusCtrl.changeSeq);
 router.patch("/:id/status", upload.none(), projectStatusCtrl.changeStatus);
 router.delete("/:id", projectStatusCtrl.remove);
 

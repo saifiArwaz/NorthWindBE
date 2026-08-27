@@ -298,6 +298,7 @@ model ProjectStatus {
   slug        String
   status      Boolean    @default(true)
   projects    Projects[]
+  seq         Int        @default(0)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   createdBy   String?

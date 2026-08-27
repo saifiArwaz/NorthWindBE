@@ -923,11 +923,12 @@ export async function getLocations() {
       status: true,
       isDeleted: false,
     },
-    orderBy: { name: "asc" },
+    orderBy: { seq: "asc" },
     select: {
       id: true,
       name: true,
       slug: true,
+      seq:true,
     },
   });
 }
@@ -956,11 +957,12 @@ export async function getFilterProjectStatus() {
         some: { status: true },
       },
     },
-    orderBy: { name: "asc" },
+    orderBy: { seq: "asc" },
     select: {
       id: true,
       name: true,
       slug: true,
+      seq:true,
     },
   });
 }

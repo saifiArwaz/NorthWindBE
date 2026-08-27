@@ -37,7 +37,7 @@ export async function getAllList(page = 1, limit = 10, search = "") {
     prisma.projectStatus,
     {
       where,
-      orderBy: { createdAt: "desc" },
+      orderBy: { seq: "asc" },
     },
     { page, limit },
   );
@@ -80,6 +80,18 @@ export async function updateProjectStatus(
 export async function deleteProjectStatus(id: string) {
   return prisma.projectStatus.delete({
     where: { id },
+  });
+}
+
+export async function updateProjectStatusSeq(id: string, payload: any) {
+  let data: any = { ...payload };
+  if (payload.updatedBy) {
+    data.updatedUser = { connect: { id: payload.updatedBy } };
+    delete data.updatedBy;
+  }
+  return prisma.projectStatus.update({
+    where: { id },
+    data,
   });
 }
 
