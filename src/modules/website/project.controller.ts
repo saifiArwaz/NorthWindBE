@@ -413,3 +413,44 @@ export const getProjectFaqsByProjectId = asyncHandler(
     successResponse(res, 200, "Project FAQs fetched successfully", faqs);
   },
 );
+
+export const getProjectMasterPlanDataByProjectId = asyncHandler(
+  async (req: Request<{ projectId: string }>, res: Response) => {
+    const { projectId } = req.params;
+
+    if (!projectId) {
+      throw new ApiError(400, "projectId parameter is required");
+    }
+
+    const { categories } = await projectService.getProjectMasterPlanData(projectId);
+
+    successResponse(res, 200, "Project master plan data fetched successfully", { categories });
+  }
+);
+
+export const getProjectMasterPlanPinGalleriesByPinId = asyncHandler(
+  async (req: Request<{ pinId: string }>, res: Response) => {
+    const { pinId } = req.params;
+
+    if (!pinId) {
+      throw new ApiError(400, "pinId parameter is required");
+    }
+
+    const galleries = await projectService.getProjectMasterPlanPinGalleries(pinId);
+
+    await Promise.all(
+      galleries.map(async (gallery: any) => {
+        if (gallery.files && typeof gallery.files === "object") {
+          for (const [key, value] of Object.entries(gallery.files)) {
+            if (typeof value === "string" && value) {
+              (gallery.files as any)[key] = await getFileUrl(value);
+            }
+          }
+        }
+      })
+    );
+
+    successResponse(res, 200, "Project master plan pin galleries fetched successfully", galleries);
+  }
+);
+

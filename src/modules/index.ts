@@ -58,7 +58,9 @@ import { ContentByTypeRoutes } from "./contentByType/contentByType.route.js";
 // new routes
 import {PartnersRoutes} from "./partner/partners.route.js";
 import { projectFaqRoutes } from "./projectFaq/projectFaq.route.js";
-
+import { projectMasterPlanCategoryRoutes } from "./projectMasterPlanCategory/projectMasterPlanCategory.route.js";
+import { projectMasterPlanPinRoutes } from "./projectMasterPlanPin/projectMasterPlanPin.route.js";
+import { projectMasterPlanPinGalleryRoutes } from "./projectMasterPlanPinGallery/projectMasterPlanPinGallery.route.js";
 
 const router = Router();
 
@@ -109,6 +111,9 @@ router.use("/admin/project-status", authenticate, ProjectStatusRoutes);
 router.use("/admin/project-content-details", authenticate, projectContentDetailsRoutes);
 router.use("/admin/project-tower", authenticate, ProjectTowerRoutes);
 router.use("/admin/project-faq", authenticate, projectFaqRoutes);
+router.use("/admin/project-master-plan-category", authenticate, projectMasterPlanCategoryRoutes);
+router.use("/admin/project-master-plan-pin", authenticate, projectMasterPlanPinRoutes);
+router.use("/admin/project-master-plan-pin-gallery", authenticate, projectMasterPlanPinGalleryRoutes);
 
 // above new routes--------------------------------
 router.use("/admin/awards", authenticate, AwardsRoutes);

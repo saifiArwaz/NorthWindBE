@@ -487,3 +487,36 @@ export async function getProjectFaqsByProjectId(projectId: string) {
     },
   });
 }
+
+export async function getProjectMasterPlanData(projectId: string) {
+  const categories = await prisma.projectMasterPlanCategory.findMany({
+    where: {
+      projectId,
+      status: true,
+      isDeleted: false,
+    },
+    include: {
+      pins: {
+        where: {
+          status: true,
+          isDeleted: false,
+        },
+        orderBy: { seq: "asc" },
+      },
+    },
+    orderBy: { seq: "asc" },
+  });
+
+  return { categories };
+}
+
+export async function getProjectMasterPlanPinGalleries(pinId: string) {
+  return prisma.projectMasterPlanPinGallery.findMany({
+    where: {
+      pinId,
+      status: true,
+      isDeleted: false,
+    },
+    orderBy: { seq: "asc" },
+  });
+}

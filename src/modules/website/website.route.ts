@@ -92,6 +92,14 @@ router.get(
 );
 
 router.get("/project/:projectId/faqs", projectCtrl.getProjectFaqsByProjectId);
+router.get(
+  "/project/:projectId/master-plan-pin",
+  projectCtrl.getProjectMasterPlanDataByProjectId,
+);
+router.get(
+  "/project-master-plan-pin/:pinId/gallery",
+  projectCtrl.getProjectMasterPlanPinGalleriesByPinId,
+);
 
 router.get("/project/:platterSlug/:slug", projectCtrl.getProjectDetailsBySlug);
 
