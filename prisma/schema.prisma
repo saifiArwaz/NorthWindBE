@@ -493,7 +493,7 @@ model Projects {
   platterId                String
   type                     FileType                    @default(image)
   shortDescription         String?
-  typologyId               String
+  typologyId               String?
   projectStatusId          String
   location                 String?
   files                    Json?
@@ -512,7 +512,7 @@ model Projects {
   // mapping with other project sections one to many
   city                     City?                       @relation(fields: [cityId], references: [id])
   platter                  Platter                     @relation(fields: [platterId], references: [id])
-  typology                 Typology                    @relation(fields: [typologyId], references: [id])
+  typology                 Typology?                   @relation(fields: [typologyId], references: [id])
   projectStatus            ProjectStatus               @relation(fields: [projectStatusId], references: [id])
   projectSubTypology       ProjectSubTypology[]
   // project section realtion

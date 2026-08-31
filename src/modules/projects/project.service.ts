@@ -31,7 +31,7 @@ export async function createProject(data: IProjectsCreateDTO) {
     slug: slug,
     ...(data.cityId ? { city: { connect: { id: data.cityId } } } : {}),
     platter: { connect: { id: data.platterId } },
-    typology: { connect: { id: data.typologyId } },
+    ...(data.typologyId ? { typology: { connect: { id: data.typologyId } } } : {}),
     projectStatus: { connect: { id: data.projectStatusId } },
     files: data.files,
     brochure: data.brochure,

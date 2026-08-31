@@ -7,8 +7,8 @@ export const createProjectSchema = z
     body: z.object({
       projectName: z.string(),
       platterId: z.string(),
-      typologyId: z.string(),
-      subTypologyId: z.array(z.string()),
+      typologyId: z.string().optional(),
+      subTypologyId: z.array(z.string()).optional(),
       projectStatusId: z.string(),
       cityId: z.string().optional(),
       brochure: z.string().optional(),
@@ -65,16 +65,18 @@ export const createProjectSchema = z
     }
 
     // Check if Typology exists
-    const typology = await prisma.typology.findUnique({
-      where: { id: body.typologyId },
-    });
-
-    if (!typology) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Invalid typologyId",
-        path: ["body", "typologyId"],
+    if (body.typologyId) {
+      const typology = await prisma.typology.findUnique({
+        where: { id: body.typologyId },
       });
+
+      if (!typology) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Invalid typologyId",
+          path: ["body", "typologyId"],
+        });
+      }
     }
 
         //check if subtypology exists
