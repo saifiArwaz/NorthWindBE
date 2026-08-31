@@ -165,6 +165,7 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
       fileType: req.body.fileType,
       files: filesByFieldname,
       alt: req.body.alt,
+      link:req.body.link,
       watermark: req.body.watermark,
       updatedBy: user.id,
     }).filter(([_, v]) => v !== undefined),
