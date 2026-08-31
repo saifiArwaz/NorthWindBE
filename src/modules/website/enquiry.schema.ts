@@ -97,3 +97,17 @@ export const verifyFloorplanTowerOtpSchema = z.object({
     otp: z.string().length(6, "OTP must be exactly 6 digits"),
   }),
 });
+
+export const createLandOwnerConnectSchema = z.object({
+  body: z.object({
+    fullName: z.string().min(1, "fullName is required"),
+    mobileNo: z.string().min(1, "mobileNo is required"),
+    emailAddress: z.string().email("Invalid emailAddress").min(1, "emailAddress is required"),
+    landLocation: z.string().min(1, "landLocation is required"),
+    landArea: z.string().min(1, "landArea is required"),
+    landType: z.string().min(1, "landType is required"),
+    ownershipStatus: z.string().min(1, "ownershipStatus is required"),
+    additionalDetails: z.string().optional(),
+    pageUrl: z.string().optional(),
+  }),
+});

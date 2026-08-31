@@ -10,6 +10,7 @@ import {
   createContactEnquirySchema,
   createProjectEnquirySchema,
   createFloorplanTowerEnquirySchema,
+  createLandOwnerConnectSchema,
   verifyFloorplanTowerOtpSchema,
 } from "./enquiry.schema.js";
 
@@ -160,6 +161,12 @@ router.post(
   "/enquiry/floorplan-tower",
   validate(createFloorplanTowerEnquirySchema),
   websiteCtrl.createFloorplanTowerEnquiry,
+);
+
+router.post(
+  "/enquiry/land-owner-connect",
+  validate(createLandOwnerConnectSchema),
+  websiteCtrl.createLandOwnerConnectEnquiry,
 );
 
 router.post(

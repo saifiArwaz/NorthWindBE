@@ -1460,3 +1460,11 @@ export const sendFloorplanTowerOtp = asyncHandler(
   },
 );
 
+
+export const createLandOwnerConnectEnquiry = asyncHandler(
+  async (req: Request, res: Response) => {
+    const data = req.body;
+    const result = await websiteServices.createLandOwnerConnectEnquiry(data);
+    successResponse(res, 201, "Land owner connect details submitted successfully", result);
+  }
+);

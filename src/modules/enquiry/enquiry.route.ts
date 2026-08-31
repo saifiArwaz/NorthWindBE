@@ -14,4 +14,6 @@ router.get(
   enquiriesCtrl.downloadResumeJobApplication,
 );
 
+router.get("/land-owner-connect", enquiriesCtrl.getLandOwnerConnectEnquiry);
+
 export { router as EnquiriesRoutes };

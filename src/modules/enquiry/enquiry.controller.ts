@@ -142,3 +142,17 @@ export const getFloorplanTowerEnquiry = asyncHandler(
     );
   },
 );
+
+export const getLandOwnerConnectEnquiry = asyncHandler(
+  async (req: Request, res: Response) => {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const search = req.query.search as string;
+    const enquiries = await enquiryService.getLandOwnerConnectEnquiry(
+      page,
+      limit,
+      search,
+    );
+    successResponse(res, 200, "Land owner connect enquiries fetched successfully", enquiries);
+  }
+);

@@ -1231,3 +1231,16 @@ model ProjectMasterPlanPinGallery {
   creator     User?                @relation("CreatedProjectMasterPlanPinGallery", fields: [createdBy], references: [id])
   updatedUser User?                @relation("UpdatedProjectMasterPlanPinGallery", fields: [updatedBy], references: [id])
 }
+model landOwnerConnect {
+  id                String   @id @default(cuid())
+  fullName          String
+  mobileNo          String
+  emailAddress      String
+  landLocation      String
+  landArea          String
+  landType          String
+  ownershipStatus   String
+  additionalDetails String?
+  pageUrl           String?
+  dateAt            DateTime @default(now())
+}

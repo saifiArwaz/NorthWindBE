@@ -1587,3 +1587,29 @@ export async function createProjectEnquiry(data: {
   });
   return projectEnquiry;
 }
+
+export async function createLandOwnerConnectEnquiry(data: {
+  fullName: string;
+  mobileNo: string;
+  emailAddress: string;
+  landLocation: string;
+  landArea: string;
+  landType: string;
+  ownershipStatus: string;
+  additionalDetails?: string;
+  pageUrl?: string;
+}) {
+  return await prisma.landOwnerConnect.create({
+    data: {
+      fullName: data.fullName,
+      mobileNo: data.mobileNo,
+      emailAddress: data.emailAddress,
+      landLocation: data.landLocation,
+      landArea: data.landArea,
+      landType: data.landType,
+      ownershipStatus: data.ownershipStatus,
+      additionalDetails: data.additionalDetails || null,
+      pageUrl: data.pageUrl || null,
+    },
+  });
+}
