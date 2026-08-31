@@ -2,7 +2,6 @@ import { FileType } from "../../generated/prisma/enums.js";
 
 export interface IConstructionGalleryDTO {
   projectId?: string;
-  towerId?: string;
   title?: string;
   dateAt?: Date;
   fileType?: FileType | string;
@@ -14,7 +13,6 @@ export interface IConstructionGalleryDTO {
 
 export interface IConstructionGalleryUpdateDTO {
   projectId?: string;
-  towerId?: string;
   title?: string;
   dateAt?: Date;
   fileType?: FileType | string;

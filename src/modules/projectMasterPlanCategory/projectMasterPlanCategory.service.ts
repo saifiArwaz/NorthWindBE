@@ -5,7 +5,6 @@ import { IProjectMasterPlanCategoryDTO, IProjectMasterPlanCategoryUpdateDTO } fr
 export const createCategory = async (data: IProjectMasterPlanCategoryDTO) => {
   return await prisma.projectMasterPlanCategory.create({
     data: {
-      projectId: data.projectId,
       name: data.name,
       createdBy: data.createdBy,
     },
@@ -15,12 +14,10 @@ export const createCategory = async (data: IProjectMasterPlanCategoryDTO) => {
 export const getAllCategories = async (
   page: number,
   limit: number,
-  search: string,
-  projectId: string
+  search: string
 ) => {
   const whereClause: any = {
     isDeleted: false,
-    projectId: projectId,
   };
 
   if (search) {
@@ -76,3 +73,4 @@ export const updateStatus = async (
     data: { status, updatedBy },
   });
 };
+

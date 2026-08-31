@@ -19,17 +19,10 @@ export const getAll = asyncHandler(async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;
   const search = (req.query.search as string) || "";
-  const projectId = req.query.projectId as string;
-
-  if (!projectId) {
-    throw new ApiError(400, "Project Id required");
-  }
-
   const records = await categoryService.getAllCategories(
     page,
     limit,
-    search,
-    projectId
+    search
   );
   successResponse(res, 200, "Categories fetched successfully", records);
 });
@@ -129,3 +122,4 @@ export const changeStatus = asyncHandler(async (req: Request, res: Response) => 
   );
   successResponse(res, 200, "Status updated successfully", updatedRecord);
 });
+

@@ -1423,28 +1423,27 @@ export const createFloorplanTowerEnquiry = asyncHandler(
     successResponse(
       res,
       201,
-      "Form submitted. OTP sent to email.",
+      "Form submitted successfully.",
       enquiry,
     );
   },
 );
 
-export const verifyFloorplanTowerOtp = asyncHandler(
+export const verifySmsOtp = asyncHandler(
   async (req: Request, res: Response) => {
-    const { enquiryId, otp } = req.body;
+    const { mobileNo, otp } = req.body;
     
-    const enquiry = await websiteServices.verifyFloorplanTowerOtp({
-      enquiryId,
+    await websiteServices.verifySmsOtp({
+      mobileNo,
       otp,
     });
     
     successResponse(
       res,
       200,
-      "OTP verified successfully. Enquiry submitted.",
-      enquiry,
+      "OTP verified successfully.",
     );
-  },
+  }
 );
 
 export const sendFloorplanTowerOtp = asyncHandler(
@@ -1466,5 +1465,13 @@ export const createLandOwnerConnectEnquiry = asyncHandler(
     const data = req.body;
     const result = await websiteServices.createLandOwnerConnectEnquiry(data);
     successResponse(res, 201, "Land owner connect details submitted successfully", result);
+  }
+);
+
+export const sendSmsOtp = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { mobileNo } = req.body;
+    await websiteServices.sendSmsOtp(mobileNo);
+    successResponse(res, 200, "OTP sent successfully via SMS.");
   }
 );

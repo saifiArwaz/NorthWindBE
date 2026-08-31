@@ -81,7 +81,7 @@ export async function getJobApplicationById(id: string) {
 }
 
 export async function getFloorplanTowerEnquiry(page = 1, limit = 10, search = "") {
-  const where: any = { isVerified: true };
+  const where: any = {};
   if (search) {
     where.OR = [{ fullName: { contains: search, mode: "insensitive" } }];
   }
@@ -90,9 +90,6 @@ export async function getFloorplanTowerEnquiry(page = 1, limit = 10, search = ""
     {
       where,
       orderBy: { dateAt: "desc" },
-      include: {
-        projects: true,
-      },
     },
     { page, limit },
   );

@@ -7,6 +7,7 @@ import {
 } from "../../generated/prisma/enums.js";
 import { ApiError } from "../../utils/apiError.utils.js";
 import { sendEmail } from "../../utils/email.utils.js";
+const { sendSms, sendVerifyOtp, checkVerifyOtp } = await import("../../utils/twilio.utils.js");
 
 type GetUnderConstructionProps = {
   year?: string;
@@ -132,8 +133,8 @@ export async function getBlogs(
     prisma.blogs,
     {
       where,
-       orderBy: {
-       dateAt: "desc",
+      orderBy: {
+        dateAt: "desc",
       },
       select: {
         id: true,
@@ -216,7 +217,7 @@ export async function getMediaCoverage(
         mediaType: true,
         dateAt: true,
         description: true,
-        files:true,
+        files: true,
         link: true,
         status: true,
         seq: true,
@@ -342,7 +343,7 @@ export async function getGalleriesByType(type: string, fileType?: string) {
       type: true,
       files: true,
       fileType: true,
-      link:true,
+      link: true,
       alt: true,
       watermark: true,
       status: true,
@@ -366,7 +367,7 @@ export async function getMediakit() {
       logo: true,
       alt: true,
       title: true,
-      type:true,
+      type: true,
       watermark: true,
       listKit: true,
       status: true,
@@ -467,8 +468,8 @@ export async function getHomeLoan() {
   });
 }
 
-export async function getHomeLoanAssistance(){
-  const where : any = {
+export async function getHomeLoanAssistance() {
+  const where: any = {
     status: true,
     isDeleted: false,
   }
@@ -477,9 +478,9 @@ export async function getHomeLoanAssistance(){
     orderBy: {
       seq: "asc"
     },
-    select:{
+    select: {
       id: true,
-      title:true,
+      title: true,
       files: true,
       alt: true,
       watermark: true,
@@ -776,7 +777,7 @@ export async function getContetByType(type: string, query: any = {}) {
       description: true,
       files: true,
       alt: true,
-      watermark:true,
+      watermark: true,
       seq: true,
       status: true,
     },
@@ -930,7 +931,7 @@ export async function getLocations() {
       id: true,
       name: true,
       slug: true,
-      seq:true,
+      seq: true,
     },
   });
 }
@@ -964,7 +965,7 @@ export async function getFilterProjectStatus() {
       id: true,
       name: true,
       slug: true,
-      seq:true,
+      seq: true,
     },
   });
 }
@@ -1003,7 +1004,7 @@ export async function getFilterTowers(projectId: string) {
     select: {
       id: true,
       name: true,
-      title:true,
+      title: true,
     },
     orderBy: { seq: "asc" },
   });
@@ -1460,7 +1461,7 @@ export async function createContactEnquiry(data: {
   emailAddress: string;
   mobileNo: string;
   query?: string;
-  location?:string;
+  location?: string;
   pageUrl?: string;
 }) {
   const projectEnquiry = await prisma.contactEnquiry.create({
@@ -1471,8 +1472,36 @@ export async function createContactEnquiry(data: {
       query: data.query || null,
       pageUrl: data.pageUrl || null,
       location: data.location || null,
-}});
+    }
+  });
   return projectEnquiry;
+}
+
+export async function sendSmsOtp(mobileNo: string) {
+  if (process.env.TWILIO_VERIFY_SERVICE_SID) {
+    await sendVerifyOtp(mobileNo);
+    return;
+  }
+
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes validity
+
+  const existingOtp = await prisma.otpVerification.findFirst({
+    where: { mobileNo },
+  });
+
+  if (existingOtp) {
+    await prisma.otpVerification.update({
+      where: { id: existingOtp.id },
+      data: { otp, expiresAt, isVerified: false },
+    });
+  } else {
+    await prisma.otpVerification.create({
+      data: { mobileNo, otp, expiresAt },
+    });
+  }
+
+  await sendSms(mobileNo, `Your verification code is: ${otp}`);
 }
 
 export async function sendFloorplanTowerOtp(emailAddress: string) {
@@ -1513,35 +1542,25 @@ export async function createFloorplanTowerEnquiry(data: {
       message: data.message || null,
       isVerified: false,
     },
-    include:{
-      projects:true
+    include: {
+      projects: true
     }
   });
-
-  // Automatically trigger OTP generation and email
-  await sendFloorplanTowerOtp(data.emailAddress);
 
   return enquiry;
 }
 
-export async function verifyFloorplanTowerOtp(data: {
-  enquiryId: string;
-  otp: string;
-}) {
-  const enquiry = await prisma.floorplanTowerEnquiry.findUnique({
-    where: { id: data.enquiryId },
-  });
-
-  if (!enquiry) {
-    throw new ApiError(404, "Enquiry not found.");
-  }
-
-  if (enquiry.isVerified) {
-    throw new ApiError(400, "Enquiry is already verified.");
+export async function verifySmsOtp(data: { mobileNo: string; otp: string }) {
+  if (process.env.TWILIO_VERIFY_SERVICE_SID) {
+    const isApproved = await checkVerifyOtp(data.mobileNo, data.otp);
+    if (!isApproved) {
+      throw new ApiError(400, "Invalid or expired OTP.");
+    }
+    return true;
   }
 
   const otpRecord = await prisma.otpVerification.findFirst({
-    where: { emailAddress: enquiry.emailAddress },
+    where: { mobileNo: data.mobileNo },
   });
 
   if (!otpRecord) {
@@ -1556,17 +1575,12 @@ export async function verifyFloorplanTowerOtp(data: {
     throw new ApiError(400, "OTP has expired.");
   }
 
-  const updatedEnquiry = await prisma.floorplanTowerEnquiry.update({
-    where: { id: enquiry.id },
-    data: { isVerified: true },
-  });
-
   await prisma.otpVerification.update({
     where: { id: otpRecord.id },
     data: { isVerified: true },
   });
 
-  return updatedEnquiry;
+  return true;
 }
 
 export async function createProjectEnquiry(data: {
@@ -1613,3 +1627,4 @@ export async function createLandOwnerConnectEnquiry(data: {
     },
   });
 }
+

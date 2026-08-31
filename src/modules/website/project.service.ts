@@ -349,7 +349,6 @@ export async function getProjectContentDetailsByType(
 
 export async function getProjectConstructionUpdates(
   projectId: string,
-  towerId?: string,
   year?: number,
   month?: number
 ) {
@@ -367,95 +366,50 @@ export async function getProjectConstructionUpdates(
     name: project.projectName,
   };
 
-  if (towerId) {
-    const tower = await prisma.projectTower.findFirst({
-      where: {
-        id: towerId,
-        projectId,
-        status: true,
-        isDeleted: false,
-      },
-      select: {
-        id: true,
-        projectId: true,
-        name: true,
-      },
-    });
+  let dateFilter: any = undefined;
 
-    if (!tower) {
-      throw new Error("Tower not found or does not belong to this project");
+  if (year) {
+    if (month) {
+      // Use UTC dates to avoid any timezone shifts
+      const startDate = new Date(Date.UTC(year, month - 1, 1));
+      const endDate = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999));
+      dateFilter = { gte: startDate, lte: endDate };
+    } else {
+      const startDate = new Date(Date.UTC(year, 0, 1));
+      const endDate = new Date(Date.UTC(year, 11, 31, 23, 59, 59, 999));
+      dateFilter = { gte: startDate, lte: endDate };
     }
-
-    let dateFilter: any = undefined;
-
-    if (year) {
-      if (month) {
-        // Use UTC dates to avoid any timezone shifts
-        const startDate = new Date(Date.UTC(year, month - 1, 1));
-        const endDate = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999));
-        dateFilter = { gte: startDate, lte: endDate };
-      } else {
-        const startDate = new Date(Date.UTC(year, 0, 1));
-        const endDate = new Date(Date.UTC(year, 11, 31, 23, 59, 59, 999));
-        dateFilter = { gte: startDate, lte: endDate };
-      }
-    }
-
-    let galleries = await prisma.constructionGalleries.findMany({
-      where: {
-        projectId,
-        towerId,
-        status: true,
-        isDeleted: false,
-        ...(dateFilter ? { dateAt: dateFilter } : {}),
-      },
-      select: {
-        id: true,
-        title: true,
-        files: true,
-        alt: true,
-        watermark: true,
-        seq: true,
-        dateAt: true,
-      },
-      orderBy: { seq: "asc" },
-    });
-
-    if (!year && month) {
-      galleries = galleries.filter(g => {
-        if (!g.dateAt) return false;
-        return new Date(g.dateAt).getUTCMonth() + 1 === month;
-      });
-    }
-
-    return {
-      project: projectData,
-      tower,
-      galleries,
-    };
   }
 
-  const towers = await prisma.projectTower.findMany({
+  let galleries = await prisma.constructionGalleries.findMany({
     where: {
       projectId,
       status: true,
       isDeleted: false,
+      ...(dateFilter ? { dateAt: dateFilter } : {}),
     },
     select: {
       id: true,
-      name: true,
       title: true,
       files: true,
-      list: true,
+      alt: true,
+      watermark: true,
+      seq: true,
+      dateAt: true,
     },
-    orderBy: {
-      seq: "asc",
-    },
+    orderBy: { seq: "asc" },
   });
+
+  if (!year && month) {
+    galleries = galleries.filter(g => {
+      if (!g.dateAt) return false;
+      return new Date(g.dateAt).getUTCMonth() + 1 === month;
+    });
+  }
 
   return {
     project: projectData,
-    towers,
+    galleries,
   };
 }
 
@@ -493,13 +447,20 @@ export async function getProjectFaqsByProjectId(projectId: string) {
 export async function getProjectMasterPlanData(projectId: string) {
   const categories = await prisma.projectMasterPlanCategory.findMany({
     where: {
-      projectId,
       status: true,
       isDeleted: false,
+      pins: {
+        some: {
+          projectId,
+          status: true,
+          isDeleted: false,
+        }
+      }
     },
     include: {
       pins: {
         where: {
+          projectId,
           status: true,
           isDeleted: false,
         },

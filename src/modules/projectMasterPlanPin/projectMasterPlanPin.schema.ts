@@ -4,7 +4,7 @@ import { prisma } from "../../config/prisma.config.js";
 export const createProjectMasterPlanPinSchema = z.object({
   body: z.object({
     projectId: z.string().min(1, "Project ID is required"),
-    categoryId: z.string().optional(),
+    categoryId: z.string().min(1, "Category ID is required"),
     title: z.string().min(1, "Title is required"),
     coordinates: z.any().optional(),
   }),
@@ -21,24 +21,16 @@ export const createProjectMasterPlanPinSchema = z.object({
     });
   }
 
-  if (data.body.categoryId) {
-    const category = await prisma.projectMasterPlanCategory.findUnique({
-      where: { id: data.body.categoryId },
-    });
+  const category = await prisma.projectMasterPlanCategory.findUnique({
+    where: { id: data.body.categoryId },
+  });
 
-    if (!category) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["body", "categoryId"],
-        message: "Category not found",
-      });
-    } else if (category.projectId !== data.body.projectId) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["body", "categoryId"],
-        message: "Category does not belong to the specified project",
-      });
-    }
+  if (!category) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["body", "categoryId"],
+      message: "Category not found",
+    });
   }
 
   const existingPin = await prisma.projectMasterPlanPin.findFirst({
@@ -108,12 +100,6 @@ export const updateProjectMasterPlanPinSchema = z.object({
         path: ["body", "categoryId"],
         message: "Category not found",
       });
-    } else if (category.projectId !== currentProjectId) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["body", "categoryId"],
-        message: "Category does not belong to the specified project",
-      });
     }
   }
 
@@ -136,3 +122,5 @@ export const updateProjectMasterPlanPinSchema = z.object({
     }
   }
 });
+
+

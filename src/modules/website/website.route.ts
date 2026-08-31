@@ -11,7 +11,8 @@ import {
   createProjectEnquirySchema,
   createFloorplanTowerEnquirySchema,
   createLandOwnerConnectSchema,
-  verifyFloorplanTowerOtpSchema,
+  verifyOtpSchema,
+  sendOtpSchema,
 } from "./enquiry.schema.js";
 
 const router = Router();
@@ -170,9 +171,16 @@ router.post(
 );
 
 router.post(
-  "/enquiry/floorplan-tower/verify-otp",
-  validate(verifyFloorplanTowerOtpSchema),
-  websiteCtrl.verifyFloorplanTowerOtp,
+  "/enquiry/send-otp",
+  validate(sendOtpSchema),
+  websiteCtrl.sendSmsOtp,
+);
+
+router.post(
+  "/enquiry/verify-otp",
+  validate(verifyOtpSchema),
+  websiteCtrl.verifySmsOtp,
 );
 
 export { router as WebsiteRoutes };
+

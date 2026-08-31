@@ -330,23 +330,9 @@ export const getProjectConstructionUpdates = asyncHandler(
     }
     const record = await projectService.getProjectConstructionUpdates(
       projectId as string,
-      towerId as string | undefined,
       parsedYear,
       parsedMonth
     );
-
-    // Resolve tower file URLs
-    if (record.towers) {
-      for (const tower of record.towers) {
-        if (tower.files && typeof tower.files === "object") {
-          for (const [key, value] of Object.entries(tower.files)) {
-            if (value && typeof value === "string") {
-              (tower.files as any)[key] = await getFileUrl(value);
-            }
-          }
-        }
-      }
-    }
 
     // Resolve gallery file URLs
     if (record.galleries) {

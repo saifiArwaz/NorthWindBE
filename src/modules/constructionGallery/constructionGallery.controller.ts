@@ -48,7 +48,7 @@ export const getAll = asyncHandler(async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;
   const search = (req.query.search as string) || "";
-  const { projectId, towerId } = req.query;
+  const { projectId } = req.query;
 
   if (!projectId) {
     throw new ApiError(400, "Project Id is required");
@@ -63,7 +63,6 @@ export const getAll = asyncHandler(async (req: Request, res: Response) => {
     limit,
     search,
     projectId as string,
-    towerId as string | undefined
   );
   await Promise.all(
     records.data.map(async (data: any) => {
@@ -161,7 +160,6 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
   const updatePayload = Object.fromEntries(
     Object.entries({
       projectId: req.body.projectId,
-      towerId: req.body.towerId,
       title: req.body.title,
       dateAt: new Date (req.body.dateAt),
       fileType: req.body.fileType,

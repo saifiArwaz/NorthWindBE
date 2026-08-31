@@ -1,6 +1,6 @@
 export interface IProjectMasterPlanPinDTO {
   projectId: string;
-  categoryId?: string;
+  categoryId: string;
   title: string;
   coordinates?: any;
   createdBy?: string;

@@ -41,6 +41,7 @@
     "@types/passport": "^1.0.17",
     "@types/passport-jwt": "^4.0.1",
     "@types/pg": "^8.16.0",
+    "@types/twilio": "^3.19.2",
     "eslint": "^9.39.2",
     "express-async-errors": "^3.1.1",
     "prettier": "^3.7.4",
@@ -73,6 +74,7 @@
     "passport-jwt": "^4.0.1",
     "pg": "^8.16.3",
     "slugify": "^1.6.6",
+    "twilio": "^6.1.0",
     "winston": "^3.19.0",
     "zod": "^4.3.5"
   }

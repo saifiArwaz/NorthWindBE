@@ -87,13 +87,13 @@ export const createFloorplanTowerEnquirySchema = z.object({
 
 export const sendOtpSchema = z.object({
   body: z.object({
-    emailAddress: z.string().email("Invalid emailAddress"),
+    mobileNo: z.string().min(1, "mobileNo is required"),
   }),
 });
 
-export const verifyFloorplanTowerOtpSchema = z.object({
+export const verifyOtpSchema = z.object({
   body: z.object({
-    enquiryId: z.string().min(1, "enquiryId is required"),
+    mobileNo: z.string().min(1, "mobileNo is required"),
     otp: z.string().length(6, "OTP must be exactly 6 digits"),
   }),
 });
@@ -111,3 +111,5 @@ export const createLandOwnerConnectSchema = z.object({
     pageUrl: z.string().optional(),
   }),
 });
+
+
