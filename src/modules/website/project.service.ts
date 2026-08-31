@@ -6,7 +6,7 @@ export interface ProjectFilterParams {
   search?: string;
   platterIds?: string;
   cityIds?: string;
-  isHome?:boolean;
+  isHome?: boolean;
   subTypologyIds?: string;
   projectStatusIds?: string;
   isPage?: boolean;
@@ -32,7 +32,7 @@ export async function getProjects(params: ProjectFilterParams = {}) {
   if (platterIds) {
     where.platter = { slug: platterIds };
   }
- if (isHome !== undefined) {
+  if (isHome !== undefined) {
     where.isHome = Boolean(isHome);
   }
   if (cityIds) {
@@ -40,6 +40,8 @@ export async function getProjects(params: ProjectFilterParams = {}) {
   }
   if (projectStatusIds) {
     where.projectStatus = { slug: projectStatusIds };
+  } else {
+    where.projectStatus = { slug: { not: "completed" } };
   }
 
   if (search?.trim()) {
@@ -81,7 +83,7 @@ export async function getProjects(params: ProjectFilterParams = {}) {
         otherDetails: true,
         isPage: true,
         isFeature: true,
-        isHome:true,
+        isHome: true,
         status: true,
         seq: true,
         platter: {
@@ -202,17 +204,17 @@ export async function getProjectBySlug(platterSlug: string, slug: string) {
     },
   });
   if (project?.projectSection) {
-          if (project && Array.isArray(project.projectSection)) {
-               const sectionObject: { [type: string]: any } = {};
-               for (const section of project.projectSection) {
-                    if (section.type) {
-                         sectionObject[section.type] = section;
-                    }
-               }
-               (project as any).projectSectionByType = sectionObject;
-          }
-     }
-     return project;
+    if (project && Array.isArray(project.projectSection)) {
+      const sectionObject: { [type: string]: any } = {};
+      for (const section of project.projectSection) {
+        if (section.type) {
+          sectionObject[section.type] = section;
+        }
+      }
+      (project as any).projectSectionByType = sectionObject;
+    }
+  }
+  return project;
 }
 
 export async function getProjectGalleriesByProjectId(
@@ -231,7 +233,7 @@ export async function getProjectGalleriesByProjectId(
     orderBy: { seq: "asc" },
     select: {
       id: true,
-      title:true,
+      title: true,
       fileType: true,
       files: true,
       alt: true,
@@ -311,7 +313,7 @@ export async function getProjectLocationAdvantageByProjectId(
     select: {
       id: true,
       projectId: true,
-      name:true,
+      name: true,
       durationUnit: true,
       duration: true,
       status: true,
@@ -479,7 +481,7 @@ export async function getProjectFaqsByProjectId(projectId: string) {
     orderBy: { seq: "asc" },
     select: {
       id: true,
-      projectId:true,
+      projectId: true,
       question: true,
       answer: true,
       seq: true,
