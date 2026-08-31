@@ -14,6 +14,7 @@ export async function createConstructionGallery(data: IConstructionGalleryDTO) {
     fileType: data.fileType as FileType,
     files: data.files,
     alt: data.alt,
+    link: data.link,
     watermark: data.watermark,
     createdBy: data.createdBy,
   };
@@ -51,6 +52,7 @@ export async function updateConstructionGallery(
       fileType: data.fileType as FileType,
       files: data.files,
       alt: data.alt,
+      link: data.link,
       watermark: data.watermark,
       projectId: data.projectId,
       updatedBy: data.updatedBy,

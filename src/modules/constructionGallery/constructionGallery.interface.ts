@@ -7,6 +7,7 @@ export interface IConstructionGalleryDTO {
   fileType?: FileType | string;
   files?: string;
   alt?: string;
+  link?: string;
   watermark?: string;
   createdBy?: string;
 }
@@ -18,6 +19,7 @@ export interface IConstructionGalleryUpdateDTO {
   fileType?: FileType | string;
   files?: string;
   alt?: string;
+  link?: string;
   watermark?: string;
   updatedBy?: string;
 }

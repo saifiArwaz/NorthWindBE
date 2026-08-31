@@ -6,6 +6,7 @@ export const createconstructionGallerySchema = z.object({
     .object({
       projectId: z.string().min(1, "Project Id field is required"),
       title: z.string().optional(),
+      link: z.string().optional(),
       dateAt: z.preprocess(
         (val) => (typeof val === "string" || typeof val === "number" ? new Date(val) : val),
         z.date().optional()
@@ -31,6 +32,7 @@ export const createconstructionGallerySchema = z.object({
 export const updateconstructionGallerySchema = z.object({
   body: z.object({
     title: z.string().optional(),
+    link: z.string().optional(),
     dateAt: z.preprocess(
       (val) => (typeof val === "string" || typeof val === "number" ? new Date(val) : val),
       z.date().optional()

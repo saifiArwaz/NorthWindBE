@@ -393,6 +393,7 @@ export async function getProjectConstructionUpdates(
       title: true,
       files: true,
       alt: true,
+      link: true,
       watermark: true,
       seq: true,
       dateAt: true,
