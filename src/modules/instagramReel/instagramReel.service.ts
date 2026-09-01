@@ -1,6 +1,9 @@
 import { prisma } from "../../config/prisma.config.js";
 import { paginate } from "../../utils/pagination.utils.js";
-import { IInstagramReelCreateDTO } from "./instagramReel.interface.js";
+import {
+  IInstagramReelCreateDTO,
+  IInstagramReelUpdateDTO,
+} from "./instagramReel.interface.js";
 
 export async function createInstagramReel(data: IInstagramReelCreateDTO) {
   const prismaData: any = {
@@ -36,6 +39,24 @@ export async function getAllList(page = 1, limit = 10, search = "") {
 export async function getInstagramReelById(id: string) {
   return prisma.instagramReel.findUnique({
     where: { id },
+  });
+}
+
+export async function updateInstagramReel(
+  id: string,
+  data: IInstagramReelUpdateDTO,
+) {
+  const prismaData: any = {
+    ...(data.reelId !== undefined && { reelId: data.reelId }),
+    ...(data.thumbnail_url !== undefined && { thumbnail_url: data.thumbnail_url }),
+    ...(data.updatedBy && {
+      updatedUser: { connect: { id: data.updatedBy } },
+    }),
+  };
+
+  return prisma.instagramReel.update({
+    where: { id },
+    data: prismaData,
   });
 }
 
