@@ -652,6 +652,7 @@ export async function getFeaturedGalleries(page = 1, limit = 10) {
         fileType: true,
         seq: true,
         status: true,
+        isFeature: true,
       }
     },
     { page, limit }

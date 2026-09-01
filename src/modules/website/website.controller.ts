@@ -598,7 +598,7 @@ export const getEvents = asyncHandler(async (req: Request, res: Response) => {
 
   // Helper to process files for an event array
   const processFiles = async (event: any) => {
-    // 1. Process category cover images (if album)
+    // 1. Process category cover images & category galleries (if album)
     if (event.categories && Array.isArray(event.categories)) {
       await Promise.all(
         event.categories.map(async (category: any) => {
@@ -607,6 +607,22 @@ export const getEvents = asyncHandler(async (req: Request, res: Response) => {
               Object.keys(category.files).map(async (key) => {
                 if (category.files[key]) {
                   category.files[key] = await getFileUrl(category.files[key]);
+                }
+              })
+            );
+          }
+
+          if (category.galleries && Array.isArray(category.galleries)) {
+            await Promise.all(
+              category.galleries.map(async (gallery: any) => {
+                if (gallery.files && typeof gallery.files === "object") {
+                  await Promise.all(
+                    Object.keys(gallery.files).map(async (key) => {
+                      if (gallery.files[key]) {
+                        gallery.files[key] = await getFileUrl(gallery.files[key]);
+                      }
+                    })
+                  );
                 }
               })
             );
