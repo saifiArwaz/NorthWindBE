@@ -26,12 +26,18 @@ export async function createProject(data: IProjectsCreateDTO) {
   const existing = await prisma.projects.findUnique({ where: { slug: slug } });
   if (existing) throw new ApiError(400, "Slug already exists");
 
+  const subTypologyList = (data.subTypologyId ?? []).filter(
+    (id: string) => id && id.trim() !== "",
+  );
+
   const prismaData: any = {
     projectName: data.projectName,
     slug: slug,
     ...(data.cityId ? { city: { connect: { id: data.cityId } } } : {}),
     platter: { connect: { id: data.platterId } },
-    ...(data.typologyId ? { typology: { connect: { id: data.typologyId } } } : {}),
+    ...(data.typologyId && data.typologyId.trim() !== ""
+      ? { typology: { connect: { id: data.typologyId } } }
+      : {}),
     projectStatus: { connect: { id: data.projectStatusId } },
     files: data.files,
     brochure: data.brochure,
@@ -46,10 +52,10 @@ export async function createProject(data: IProjectsCreateDTO) {
     ...(data.updatedBy
       ? { updatedUser: { connect: { id: data.updatedBy } } }
       : {}),
-    ...(data.subTypologyId && data.subTypologyId.length > 0
+    ...(subTypologyList.length > 0
       ? {
           projectSubTypology: {
-            create: data.subTypologyId.map((id: string) => ({
+            create: subTypologyList.map((id: string) => ({
               subTypologyId: id,
             })),
           },
@@ -60,10 +66,10 @@ export async function createProject(data: IProjectsCreateDTO) {
   return prisma.projects.create({
     data: prismaData,
     include: {
-      typology:true,
-      city:true,
-      projectStatus:true,
-      platter:true,
+      typology: true,
+      city: true,
+      projectStatus: true,
+      platter: true,
       projectSubTypology: {
         include: { subTypology: true },
       },
@@ -124,17 +130,21 @@ export async function getProjectById(id: string) {
   return prisma.projects.findUnique({
     where: { id },
     include: {
-        city: true,
-        platter: true,
-        typology: true,
-        projectSubTypology: {
-          include: { subTypology: true },
-        },
+      city: true,
+      platter: true,
+      typology: true,
+      projectSubTypology: {
+        include: { subTypology: true },
       },
+    },
   });
 }
 
 export async function updateProject(id: string, data: IProjectsUpdateDTO) {
+  const subTypologyList = (data.subTypologyId ?? []).filter(
+    (id: string) => id && id.trim() !== "",
+  );
+
   const prismaData = Object.fromEntries(
     Object.entries({
       projectName: data.projectName,
@@ -148,9 +158,9 @@ export async function updateProject(id: string, data: IProjectsUpdateDTO) {
         platter: { connect: { id: data.platterId } },
       }),
 
-      ...(data.typologyId && {
-        typology: { connect: { id: data.typologyId } },
-      }),
+      ...(data.typologyId && data.typologyId.trim() !== ""
+        ? { typology: { connect: { id: data.typologyId } } }
+        : { typology: { disconnect: true } }),
 
       ...(data.projectStatusId && {
         projectStatus: { connect: { id: data.projectStatusId } },
@@ -162,15 +172,16 @@ export async function updateProject(id: string, data: IProjectsUpdateDTO) {
         },
       }),
 
-      ...(data.subTypologyId &&
-        data.subTypologyId.length > 0 && {
-          projectSubTypology: {
-            deleteMany: {},
-            create: data.subTypologyId.map((id: string) => ({
+      ...(data.subTypologyId !== undefined && {
+        projectSubTypology: {
+          deleteMany: {},
+          ...(subTypologyList.length > 0 && {
+            create: subTypologyList.map((id: string) => ({
               subTypologyId: id,
             })),
-          },
-        }),
+          }),
+        },
+      }),
 
       location: data.location,
       files: data.files,
@@ -185,14 +196,14 @@ export async function updateProject(id: string, data: IProjectsUpdateDTO) {
   return prisma.projects.update({
     where: { id },
     data: prismaData,
-   include: {
-        city: true,
-        platter: true,
-        typology: true,
-        projectSubTypology: {
-          include: { subTypology: true },
-        },
+    include: {
+      city: true,
+      platter: true,
+      typology: true,
+      projectSubTypology: {
+        include: { subTypology: true },
       },
+    },
   });
 }
 

@@ -1,5 +1,4 @@
 import z from "zod";
-import { FileType } from "../../generated/prisma/enums.js";
 import { prisma } from "../../config/prisma.config.js";
 
 export const createProjectSchema = z
@@ -7,8 +6,8 @@ export const createProjectSchema = z
     body: z.object({
       projectName: z.string(),
       platterId: z.string(),
-      typologyId: z.string().optional(),
-      subTypologyId: z.array(z.string()).optional(),
+      typologyId: z.string().optional().nullable(),
+      subTypologyId: z.union([z.array(z.string()), z.string()]).optional().nullable(),
       projectStatusId: z.string(),
       cityId: z.string().optional(),
       brochure: z.string().optional(),
@@ -40,18 +39,6 @@ export const createProjectSchema = z
       }
     }
 
-    // check locality
-    // const locality = await prisma.locality.findUnique({
-    //   where: { id: body.localityId },
-    // });
-    // if (!locality) {
-    //   ctx.addIssue({
-    //     code: z.ZodIssueCode.custom,
-    //     message: "Invalid localityId",
-    //     path: ["body", "localityId"],
-    //   });
-    // }
-
     // Check if Platter exists
     const platter = await prisma.platter.findUnique({
       where: { id: body.platterId },
@@ -64,10 +51,10 @@ export const createProjectSchema = z
       });
     }
 
-    // Check if Typology exists
-    if (body.typologyId) {
+    // Check if Typology exists (only if non-empty string)
+    if (body.typologyId && body.typologyId.trim() !== "") {
       const typology = await prisma.typology.findUnique({
-        where: { id: body.typologyId },
+        where: { id: body.typologyId.trim() },
       });
 
       if (!typology) {
@@ -79,23 +66,30 @@ export const createProjectSchema = z
       }
     }
 
-        //check if subtypology exists
-          if (body.subTypologyId && body.subTypologyId.length > 0) {
-               const subTypologies = await prisma.subTypology.findMany({
-                    where: {
-                         id: {
-                              in: body.subTypologyId,
-                         },
-                    },
-               });
-               if (subTypologies.length !== body.subTypologyId.length) {
-                    ctx.addIssue({
-                         code: z.ZodIssueCode.custom,
-                         message: "One or more subTypologyIds are invalid",
-                         path: ["body", "subTypologyId"],
-                    });
-               }
-          }
+    // Check if subtypology exists (filter out empty strings)
+    const rawSubIds = Array.isArray(body.subTypologyId)
+      ? body.subTypologyId
+      : body.subTypologyId
+      ? [body.subTypologyId]
+      : [];
+    const subIds = rawSubIds.filter((id) => typeof id === "string" && id.trim() !== "");
+
+    if (subIds.length > 0) {
+      const subTypologies = await prisma.subTypology.findMany({
+        where: {
+          id: {
+            in: subIds,
+          },
+        },
+      });
+      if (subTypologies.length !== subIds.length) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "One or more subTypologyIds are invalid",
+          path: ["body", "subTypologyId"],
+        });
+      }
+    }
 
     // Check if Status exists
     const status = await prisma.projectStatus.findUnique({
@@ -114,8 +108,8 @@ export const updateProjectSchema = z.object({
   body: z.object({
     projectName: z.string().optional(),
     platterId: z.string().optional(),
-    typologyId: z.string().optional(),
-    subTypologyId: z.array(z.string()).optional(),
+    typologyId: z.string().optional().nullable(),
+    subTypologyId: z.union([z.array(z.string()), z.string()]).optional().nullable(),
     projectStatusId: z.string().optional(),
     cityId: z.string().optional(),
     brochure: z.string().optional(),
