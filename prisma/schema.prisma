@@ -737,6 +737,7 @@ model EventGalleries {
   eventId     String?
   event       Event?         @relation("EventGalleryEvent", fields: [eventId], references: [id], onDelete: Cascade)
   files       Json?
+  link        String?
   alt         String?
   watermark   String?
   status      Boolean        @default(true)
