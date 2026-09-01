@@ -445,18 +445,22 @@ export async function getProjectFaqsByProjectId(projectId: string) {
   });
 }
 
-export async function getProjectMasterPlanData(projectId: string) {
+export async function getProjectMasterPlanData(
+  projectId: string,
+  categoryId?: string,
+) {
   const categories = await prisma.projectMasterPlanCategory.findMany({
     where: {
       status: true,
       isDeleted: false,
+      ...(categoryId ? { id: categoryId } : {}),
       pins: {
         some: {
           projectId,
           status: true,
           isDeleted: false,
-        }
-      }
+        },
+      },
     },
     include: {
       pins: {

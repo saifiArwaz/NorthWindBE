@@ -403,12 +403,16 @@ export const getProjectFaqsByProjectId = asyncHandler(
 export const getProjectMasterPlanDataByProjectId = asyncHandler(
   async (req: Request<{ projectId: string }>, res: Response) => {
     const { projectId } = req.params;
+    const { categoryId } = req.query;
 
     if (!projectId) {
       throw new ApiError(400, "projectId parameter is required");
     }
 
-    const { categories } = await projectService.getProjectMasterPlanData(projectId);
+    const { categories } = await projectService.getProjectMasterPlanData(
+      projectId,
+      categoryId as string | undefined,
+    );
 
     successResponse(res, 200, "Project master plan data fetched successfully", { categories });
   }

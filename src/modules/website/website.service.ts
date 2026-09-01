@@ -205,7 +205,7 @@ export async function getMediaCoverage(
     where.isHome = Boolean(filter.isHome);
   }
 
-  let orderBy: any = { dateAt: "desc" };
+  let orderBy: any = { seq: "asc" };
   return paginate(
     prisma.mediaCoverage,
     {
@@ -909,12 +909,13 @@ export async function getFilterProjectsWithGallery() {
       },
     },
     orderBy: {
-      projectName: "asc",
+      seq: "asc",
     },
     select: {
       id: true,
       projectName: true,
       slug: true,
+      seq: true,
     },
   });
 }
@@ -968,6 +969,96 @@ export async function getFilterProjectStatus() {
       seq: true,
     },
   });
+}
+
+export async function getFilterMasterPlanCategories(projectId?: string) {
+  return prisma.projectMasterPlanCategory.findMany({
+    where: {
+      status: true,
+      isDeleted: false,
+    },
+    orderBy: { seq: "asc" },
+    select: {
+      id: true,
+      name: true,
+      seq: true,
+    },
+  });
+}
+
+export async function getFilterCsrCategories() {
+  return prisma.csrCategory.findMany({
+    where: {
+      status: true,
+      isDeleted: false,
+    },
+    orderBy: { seq: "asc" },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      seq: true,
+    },
+  });
+}
+
+export async function getCsrGalleryData(
+  categoryId?: string,
+  page = 1,
+  limit = 12,
+) {
+  const categories = await prisma.csrCategory.findMany({
+    where: {
+      status: true,
+      isDeleted: false,
+    },
+    orderBy: { seq: "asc" },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      seq: true,
+    },
+  });
+
+  const where: any = {
+    status: true,
+    isDeleted: false,
+    ...(categoryId && categoryId !== "all" ? { categoryId } : {}),
+  };
+
+  const paginatedResult = await paginate(
+    prisma.csrGallery,
+    {
+      where,
+      orderBy: { seq: "asc" },
+      select: {
+        id: true,
+        title: true,
+        categoryId: true,
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+        files: true,
+        link: true,
+        alt: true,
+        watermark: true,
+        seq: true,
+        createdAt: true,
+      },
+    },
+    { page, limit },
+  );
+
+  return {
+    categories,
+    galleries: paginatedResult.data,
+    pagination: paginatedResult.pagination,
+  };
 }
 
 export async function getFilterJobs() {

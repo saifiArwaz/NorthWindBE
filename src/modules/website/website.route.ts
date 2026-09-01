@@ -60,6 +60,7 @@ router.get("/city/:citySlug", websiteCtrl.getCityBySlug);
 
 router.get("/jobs", websiteCtrl.getJobs);
 router.get("/content-list/:type", websiteCtrl.getContetByType);
+router.get("/csr-gallery", websiteCtrl.getCsrGallery);
 
 // projects routes-------------------
 router.get("/projects", projectCtrl.getProjects);
@@ -111,6 +112,11 @@ router.get("/filter/platter", websiteCtrl.getFilterPlatter);
 router.get("/filter/location", websiteCtrl.getFilterLocations);
 router.get("/filter/sub-typology", websiteCtrl.getFilterSubTypology);
 router.get("/filter/project-status", websiteCtrl.getFilterProjectStatus);
+router.get(
+  "/filter/master-plan-category",
+  websiteCtrl.getFilterMasterPlanCategories,
+);
+router.get("/filter/csr-category", websiteCtrl.getFilterCsrCategories);
 router.get("/filter/job", websiteCtrl.getFilterJobs);
 router.get("/filter/towers/:projectId", websiteCtrl.getFilterTowers);
 router.get("/filter/construction-years/:projectId", websiteCtrl.getFilterConstructionYears);

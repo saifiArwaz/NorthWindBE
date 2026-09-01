@@ -872,6 +872,58 @@ export const getFilterProjectStatus = asyncHandler(
   },
 );
 
+export const getFilterMasterPlanCategories = asyncHandler(
+  async (req: Request, res: Response) => {
+    const categories = await websiteServices.getFilterMasterPlanCategories();
+    successResponse(
+      res,
+      200,
+      "Master plan categories fetched successfully",
+      categories,
+    );
+  },
+);
+
+export const getFilterCsrCategories = asyncHandler(
+  async (req: Request, res: Response) => {
+    const categories = await websiteServices.getFilterCsrCategories();
+    successResponse(
+      res,
+      200,
+      "CSR categories fetched successfully",
+      categories,
+    );
+  },
+);
+
+export const getCsrGallery = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { categoryId, page, limit } = req.query;
+
+    const data = await websiteServices.getCsrGalleryData(
+      categoryId as string | undefined,
+      page ? Number(page) : 1,
+      limit ? Number(limit) : 12,
+    );
+
+    if (data.galleries && Array.isArray(data.galleries)) {
+      await Promise.all(
+        data.galleries.map(async (item: any) => {
+          if (item.files && typeof item.files === "object") {
+            for (const [key, value] of Object.entries(item.files)) {
+              if (typeof value === "string" && value) {
+                item.files[key] = await getFileUrl(value);
+              }
+            }
+          }
+        }),
+      );
+    }
+
+    successResponse(res, 200, "CSR Gallery fetched successfully", data);
+  },
+);
+
 
 // ------------------- project filter end---------------------
 

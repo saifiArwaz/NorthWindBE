@@ -166,6 +166,10 @@ model User {
   UpdatedProjectMasterPlanCategory   ProjectMasterPlanCategory[]   @relation("UpdatedProjectMasterPlanCategory")
   CreatedProjectMasterPlanPinGallery ProjectMasterPlanPinGallery[] @relation("CreatedProjectMasterPlanPinGallery")
   UpdatedProjectMasterPlanPinGallery ProjectMasterPlanPinGallery[] @relation("UpdatedProjectMasterPlanPinGallery")
+  CreatedCsrCategory                 CsrCategory[]                 @relation("CreatedCsrCategory")
+  UpdatedCsrCategory                 CsrCategory[]                 @relation("UpdatedCsrCategory")
+  CreatedCsrGallery                  CsrGallery[]                  @relation("CreatedCsrGallery")
+  UpdatedCsrGallery                  CsrGallery[]                  @relation("UpdatedCsrGallery")
 }
 
 model RefreshToken {
@@ -1239,3 +1243,40 @@ model landOwnerConnect {
   pageUrl           String?
   dateAt            DateTime @default(now())
 }
+
+model CsrCategory {
+  id          String       @id @default(cuid())
+  name        String
+  slug        String?      @unique
+  status      Boolean      @default(true)
+  seq         Int          @default(0)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  createdBy   String?
+  updatedBy   String?
+  creator     User?        @relation("CreatedCsrCategory", fields: [createdBy], references: [id])
+  updatedUser User?        @relation("UpdatedCsrCategory", fields: [updatedBy], references: [id])
+  isDeleted   Boolean      @default(false)
+  galleries   CsrGallery[]
+}
+
+model CsrGallery {
+  id          String       @id @default(cuid())
+  title       String?
+  categoryId  String?
+  category    CsrCategory? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  files       Json?
+  link        String?
+  alt         String?
+  watermark   String?
+  status      Boolean      @default(true)
+  seq         Int          @default(0)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  createdBy   String?
+  updatedBy   String?
+  creator     User?        @relation("CreatedCsrGallery", fields: [createdBy], references: [id])
+  updatedUser User?        @relation("UpdatedCsrGallery", fields: [updatedBy], references: [id])
+  isDeleted   Boolean      @default(false)
+}
+
