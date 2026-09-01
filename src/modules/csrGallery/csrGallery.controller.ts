@@ -19,14 +19,9 @@ export const create = asyncHandler(async (req: Request, res: Response) => {
     }
   });
 
-  const normalizedCategoryId =
-    typeof req.body.categoryId === "string" && req.body.categoryId.trim() !== ""
-      ? req.body.categoryId.trim()
-      : undefined;
-
   const record = await csrGalleryService.createCsrGallery({
     ...req.body,
-    categoryId: normalizedCategoryId,
+    categoryId: req.body.categoryId.trim(),
     files: filesByFieldname,
     createdBy: user?.id,
   });

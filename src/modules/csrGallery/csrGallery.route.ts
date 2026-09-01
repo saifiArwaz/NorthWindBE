@@ -6,11 +6,7 @@ import { createCsrGallerySchema, updateCsrGallerySchema } from "./csrGallery.sch
 
 const router = Router();
 
-const uploaded = uploadMiddleware("csr").fields([
-  { name: "desktopImage", maxCount: 1 },
-  { name: "mobileImage", maxCount: 1 },
-  { name: "thumbnail", maxCount: 1 },
-]);
+const uploaded = uploadMiddleware("csr").any();
 
 router.get("/", csrGalleryCtrl.getAll);
 router.post(

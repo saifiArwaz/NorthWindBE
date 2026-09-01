@@ -17,7 +17,9 @@ export async function createCsrGallery(data: ICsrGalleryCreateDTO) {
 
   return prisma.csrGallery.create({
     data: prismaData,
-    include: { category: true },
+    include: { category: {
+      select: { id: true, name: true, slug: true },
+    } },
   });
 }
 
@@ -47,7 +49,6 @@ export async function getAllList(
     {
       where,
       orderBy: { seq: "asc" },
-      include: { category: true },
     },
     { page, limit },
   );
@@ -56,7 +57,6 @@ export async function getAllList(
 export async function getCsrGalleryById(id: string) {
   return prisma.csrGallery.findUnique({
     where: { id, isDeleted: false },
-    include: { category: true },
   });
 }
 

@@ -1007,27 +1007,13 @@ export async function getCsrGalleryData(
   page = 1,
   limit = 12,
 ) {
-  const categories = await prisma.csrCategory.findMany({
-    where: {
-      status: true,
-      isDeleted: false,
-    },
-    orderBy: { seq: "asc" },
-    select: {
-      id: true,
-      name: true,
-      slug: true,
-      seq: true,
-    },
-  });
-
   const where: any = {
     status: true,
     isDeleted: false,
-    ...(categoryId && categoryId !== "all" ? { categoryId } : {}),
+    ...(categoryId && categoryId ? { categoryId } : {}),
   };
 
-  const paginatedResult = await paginate(
+  return await paginate(
     prisma.csrGallery,
     {
       where,
@@ -1035,16 +1021,7 @@ export async function getCsrGalleryData(
       select: {
         id: true,
         title: true,
-        categoryId: true,
-        category: {
-          select: {
-            id: true,
-            name: true,
-            slug: true,
-          },
-        },
         files: true,
-        link: true,
         alt: true,
         watermark: true,
         seq: true,
@@ -1053,12 +1030,6 @@ export async function getCsrGalleryData(
     },
     { page, limit },
   );
-
-  return {
-    categories,
-    galleries: paginatedResult.data,
-    pagination: paginatedResult.pagination,
-  };
 }
 
 export async function getFilterJobs() {

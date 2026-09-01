@@ -900,15 +900,15 @@ export const getCsrGallery = asyncHandler(
   async (req: Request, res: Response) => {
     const { categoryId, page, limit } = req.query;
 
-    const data = await websiteServices.getCsrGalleryData(
+    const galleries = await websiteServices.getCsrGalleryData(
       categoryId as string | undefined,
       page ? Number(page) : 1,
       limit ? Number(limit) : 12,
     );
 
-    if (data.galleries && Array.isArray(data.galleries)) {
+    if (galleries && Array.isArray(galleries)) {
       await Promise.all(
-        data.galleries.map(async (item: any) => {
+        galleries.map(async (item: any) => {
           if (item.files && typeof item.files === "object") {
             for (const [key, value] of Object.entries(item.files)) {
               if (typeof value === "string" && value) {
@@ -920,7 +920,7 @@ export const getCsrGallery = asyncHandler(
       );
     }
 
-    successResponse(res, 200, "CSR Gallery fetched successfully", data);
+    successResponse(res, 200, "CSR Gallery fetched successfully", galleries);
   },
 );
 

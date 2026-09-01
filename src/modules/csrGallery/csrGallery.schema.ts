@@ -5,16 +5,14 @@ export const createCsrGallerySchema = z
   .object({
     body: z.object({
       title: z.string().optional().nullable(),
-      categoryId: z.string().optional().nullable(),
+      categoryId: z.string().min(1, "Category ID is required"),
       link: z.string().optional().nullable(),
       alt: z.string().optional().nullable(),
-      watermark: z.string().optional().nullable(),
-      files: z.any().optional(),
-    }),
+      watermark: z.string().optional().nullable(),    }),
   })
   .superRefine(async (data, ctx) => {
     const categoryId = data.body.categoryId;
-    if (categoryId && typeof categoryId === "string" && categoryId.trim() !== "") {
+    if (categoryId) {
       const category = await prisma.csrCategory.findFirst({
         where: { id: categoryId.trim(), isDeleted: false },
       });
@@ -41,8 +39,6 @@ export const updateCsrGallerySchema = z
       link: z.string().optional().nullable(),
       alt: z.string().optional().nullable(),
       watermark: z.string().optional().nullable(),
-      status: z.union([z.boolean(), z.string()]).optional(),
-      files: z.any().optional(),
     }),
   })
   .superRefine(async (data, ctx) => {

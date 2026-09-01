@@ -1,6 +1,6 @@
 export interface ICsrGalleryCreateDTO {
   title?: string;
-  categoryId?: string;
+  categoryId: string;
   files?: Record<string, string>;
   link?: string;
   alt?: string;
