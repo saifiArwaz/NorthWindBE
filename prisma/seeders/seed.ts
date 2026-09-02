@@ -5,8 +5,8 @@ async function main() {
 
   const projectStatuses = await prisma.projectStatus.createMany({
     data: [
-      { name: "On Going", slug: "on-going" },
-      { name: "Up Coming", slug: "up-coming" },
+      { name: "OnGoing", slug: "ongoing" },
+      { name: "UpComing", slug: "upcoming" },
       { name: "Completed", slug: "completed" },
     ],
     skipDuplicates: true,

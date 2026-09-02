@@ -66,6 +66,8 @@ enum FaqTypes {
   investor
   career
   home
+  platter
+  homeloan
 }
 
 model User {
