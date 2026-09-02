@@ -118,6 +118,10 @@ export const updateProjectSchema = z.object({
     alt: z.string().optional(),
     watermark: z.string().optional(),
     location: z.string().optional(),
+    isPastProject: z.preprocess(
+      (val) => val === "true" || val === true || val === 1 || val === "1",
+      z.boolean().optional(),
+    ),
     seoTags: z.record(z.string(), z.unknown()).optional(),
     otherDetails: z.record(z.string(), z.unknown()).optional(),
   }),
