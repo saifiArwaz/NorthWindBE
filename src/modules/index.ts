@@ -64,6 +64,7 @@ import { projectMasterPlanPinRoutes } from "./projectMasterPlanPin/projectMaster
 import { projectMasterPlanPinGalleryRoutes } from "./projectMasterPlanPinGallery/projectMasterPlanPinGallery.route.js";
 import { CsrCategoryRoutes } from "./csrCategory/csrCategory.route.js";
 import { CsrGalleryRoutes } from "./csrGallery/csrGallery.route.js";
+import { LegacyProjectRoutes } from "./legacyProjects/legacyProjects.route.js";
 
 const router = Router();
 
@@ -129,7 +130,9 @@ router.use("/admin/enquiry", authenticate, EnquiriesRoutes);
 router.use("/admin/menu", authenticate, menuItemRoutes);
 
 // new routes ---------------
-router.use("/admin/partner", authenticate, PartnersRoutes)
+router.use("/admin/partner", authenticate, PartnersRoutes);
+router.use("/admin/legacy-projects", authenticate, LegacyProjectRoutes);
+router.use("/admin/past-projects", authenticate, LegacyProjectRoutes);
 // Website Routes
 router.use("/website", WebsiteRoutes);
 router.use("/seo", SeoRoutes);

@@ -61,6 +61,7 @@ router.get("/city/:citySlug", websiteCtrl.getCityBySlug);
 router.get("/jobs", websiteCtrl.getJobs);
 router.get("/content-list/:type", websiteCtrl.getContetByType);
 router.get("/csr-gallery", websiteCtrl.getCsrGallery);
+router.get("/legacy-projects", websiteCtrl.getLegacyProjects);
 
 // projects routes-------------------
 router.get("/projects", projectCtrl.getProjects);

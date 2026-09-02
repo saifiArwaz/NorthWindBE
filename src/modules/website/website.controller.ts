@@ -104,10 +104,14 @@ export const getAwards = asyncHandler(async (req: Request, res: Response) => {
   const limit = parseInt(req.query.limit as string) || 10;
   const search =
     typeof req.query.search === "string" ? req.query.search : undefined;
+  const isHome = req.query.isHome;
   const filter: any = {};
 
   if (search) {
     filter.search = search;
+  }
+  if (isHome !== undefined) {
+    filter.isHome = isHome === "true" || isHome === "1";
   }
   const awards = await websiteServices.getAwards(page, limit, filter);
 
@@ -1542,3 +1546,42 @@ export const sendSmsOtp = asyncHandler(
     successResponse(res, 200, "OTP sent successfully via SMS.");
   }
 );
+
+export const getLegacyProjects = asyncHandler(
+  async (req: Request, res: Response) => {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const search = (req.query.search as string) || "";
+    const category = req.query.category as any;
+
+    const records = await websiteServices.getLegacyProjects(
+      page,
+      limit,
+      search,
+      category,
+    );
+
+    await Promise.all(
+      records.data.map(async (data: any) => {
+        if (data.files && typeof data.files === "object") {
+          const filesObj = data.files as any;
+          await Promise.all(
+            Object.keys(filesObj).map(async (key) => {
+              if (filesObj[key]) {
+                filesObj[key] = await getFileUrl(filesObj[key]);
+              }
+            }),
+          );
+        }
+      }),
+    );
+
+    successResponse(
+      res,
+      200,
+      "Legacy projects fetched successfully",
+      records,
+    );
+  },
+);
+

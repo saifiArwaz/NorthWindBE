@@ -70,6 +70,12 @@ enum FaqTypes {
   homeloan
 }
 
+enum LegacyProjectCategory {
+  legacy
+  ongoing
+  old
+}
+
 model User {
   id                                 String                        @id @default(cuid())
   email                              String                        @unique
@@ -175,6 +181,8 @@ model User {
   UpdatedCsrGallery                  CsrGallery[]                  @relation("UpdatedCsrGallery")
   CreatedProjectZone                 ProjectZone[]                 @relation("CreatedProjectZone")
   UpdatedProjectZone                 ProjectZone[]                 @relation("UpdatedProjectZone")
+  CreatedLegacyProject               LegacyProject[]               @relation("CreatedLegacyProject")
+  UpdatedLegacyProject               LegacyProject[]               @relation("UpdatedLegacyProject")
 }
 
 model RefreshToken {
@@ -409,6 +417,7 @@ model Awards {
   alt         String?
   watermark   String?
   status      Boolean  @default(true) //true->active, false->Inactive
+  isHome      Boolean  @default(false)
   seq         Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -1307,4 +1316,25 @@ model ProjectZone {
   updatedUser User?    @relation("UpdatedProjectZone", fields: [updatedBy], references: [id])
   isDeleted   Boolean  @default(false)
 }
+
+model LegacyProject {
+  id          String                @id @default(cuid())
+  name        String
+  category    LegacyProjectCategory @default(legacy)
+  location    String?
+  description Json?
+  files       Json?
+  alt         String?
+  watermark   String?
+  status      Boolean               @default(true)
+  seq         Int                   @default(0)
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  createdBy   String?
+  creator     User?                 @relation("CreatedLegacyProject", fields: [createdBy], references: [id])
+  updatedBy   String?
+  updatedUser User?                 @relation("UpdatedLegacyProject", fields: [updatedBy], references: [id])
+  isDeleted   Boolean               @default(false)
+}
+
 

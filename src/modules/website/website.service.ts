@@ -71,6 +71,7 @@ export async function getAwards(
   const where: any = {
     status: true,
     isDeleted: false,
+    ...(filter.isHome !== undefined ? { isHome: Boolean(filter.isHome) } : {}),
   };
   if (filter.search) {
     where.OR = [
@@ -91,6 +92,7 @@ export async function getAwards(
         files: true,
         alt: true,
         watermark: true,
+        isHome: true,
         status: true,
         seq: true,
       },
@@ -1695,4 +1697,47 @@ export async function createLandOwnerConnectEnquiry(data: {
     },
   });
 }
+
+export async function getLegacyProjects(
+  page = 1,
+  limit = 10,
+  search = "",
+  category?: any,
+) {
+  const where: any = {
+    status: true,
+    isDeleted: false,
+    ...(category ? { category } : {}),
+    ...(search
+      ? {
+          OR: [
+            { name: { contains: search, mode: "insensitive" } },
+            { location: { contains: search, mode: "insensitive" } },
+          ],
+        }
+      : {}),
+  };
+
+  return paginate(
+    prisma.legacyProject,
+    {
+      where,
+      orderBy: [{ seq: "asc" }, { createdAt: "desc" }],
+      select: {
+        id: true,
+        name: true,
+        category: true,
+        location: true,
+        description: true,
+        files: true,
+        alt: true,
+        watermark: true,
+        seq: true,
+        status: true,
+      },
+    },
+    { page, limit },
+  );
+}
+
 

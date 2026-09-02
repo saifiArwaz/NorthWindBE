@@ -101,3 +101,20 @@ export async function updateStatus(
   });
 }
 
+export async function updateIsHome(
+  id: string,
+  isHome: boolean,
+  updatedBy?: string,
+) {
+  return prisma.awards.update({
+    where: { id },
+    data: {
+      isHome: Boolean(isHome),
+      ...(updatedBy && {
+        updatedUser: { connect: { id: updatedBy } },
+      }),
+    },
+  });
+}
+
+

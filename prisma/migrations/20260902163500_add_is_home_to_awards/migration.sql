@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Awards" ADD COLUMN "isHome" BOOLEAN NOT NULL DEFAULT false;

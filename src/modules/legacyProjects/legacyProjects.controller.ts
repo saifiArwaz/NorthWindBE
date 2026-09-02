@@ -1,9 +1,10 @@
 import asyncHandler from "express-async-handler";
 import type { Request, Response } from "express";
-import * as awardService from "./awards.service.js";
+import * as legacyProjectService from "./legacyProjects.service.js";
 import { successResponse } from "../../utils/responseHandler.utils.js";
 import { ApiError } from "../../utils/apiError.utils.js";
 import { deleteFromS3, getFileUrl } from "../../utils/fileHandling.utils.js";
+import { LegacyProjectCategory } from "../../generated/prisma/enums.js";
 
 export const create = asyncHandler(async (req: Request, res: Response) => {
   const user = req.user as { id?: string };
@@ -19,35 +20,39 @@ export const create = asyncHandler(async (req: Request, res: Response) => {
     }
   });
 
-  const record = await awardService.createAward({
+  const data: any = {
     ...req.body,
-    year: req.body.year ? new Date(req.body.year) : new Date(),
     files: filesByFieldname,
     createdBy: user?.id,
-  });
+  };
 
-  if (record) {
-    if (record.files && typeof record.files === "object") {
-      const filesObj = record.files as any;
-      await Promise.all(
-        Object.keys(filesObj).map(async (key) => {
-          if (filesObj[key]) {
-            filesObj[key] = await getFileUrl(filesObj[key]);
-          }
-        }),
-      );
-    }
+  const record = await legacyProjectService.createLegacyProject(data);
+  if (record && record.files && typeof record.files === "object") {
+    const filesObj = record.files as any;
+    await Promise.all(
+      Object.keys(filesObj).map(async (key) => {
+        if (filesObj[key]) {
+          filesObj[key] = await getFileUrl(filesObj[key]);
+        }
+      }),
+    );
   }
-
-  successResponse(res, 200, "Award created successfully", record);
+  successResponse(res, 200, "Legacy Project created successfully", record);
 });
 
 export const getAll = asyncHandler(async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;
   const search = (req.query.search as string) || "";
+  const category = req.query.category as LegacyProjectCategory | undefined;
 
-  const records = await awardService.getAllList(page, limit, search);
+  const records = await legacyProjectService.getAllList(
+    page,
+    limit,
+    search,
+    category,
+  );
+
   await Promise.all(
     records.data.map(async (data: any) => {
       if (data.files && typeof data.files === "object") {
@@ -63,18 +68,23 @@ export const getAll = asyncHandler(async (req: Request, res: Response) => {
     }),
   );
 
-  successResponse(res, 200, "Award records fetched successfully", records);
+  successResponse(
+    res,
+    200,
+    "Legacy Project records fetched successfully",
+    records,
+  );
 });
 
 export const getOne = asyncHandler(async (req: Request, res: Response) => {
   const id = req.params.id as string;
-  const record = await awardService.getAwardById(id);
+  const record = await legacyProjectService.getLegacyProjectById(id);
 
   if (!record) {
-    throw new ApiError(404, "Record not found");
+    throw new ApiError(404, "Legacy Project not found");
   }
 
-  if (record?.files && typeof record.files === "object") {
+  if (record && record.files && typeof record.files === "object") {
     const filesObj = record.files as any;
     await Promise.all(
       Object.keys(filesObj).map(async (key) => {
@@ -85,16 +95,17 @@ export const getOne = asyncHandler(async (req: Request, res: Response) => {
     );
   }
 
-  successResponse(res, 200, "Get edit Award record", record);
+  successResponse(res, 200, "Get Legacy Project record", record);
 });
 
 export const update = asyncHandler(async (req: Request, res: Response) => {
   const user = req.user as { id?: string };
   const id = req.params.id as string;
-  const oldRecord = await awardService.getAwardById(id);
+
+  const oldRecord = await legacyProjectService.getLegacyProjectById(id);
 
   if (!oldRecord) {
-    throw new ApiError(404, "Record not found");
+    throw new ApiError(404, "Legacy Project not found");
   }
 
   /** 1. Normalize uploaded files */
@@ -130,27 +141,30 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
     }
   }
 
+  /** 5. Build PATCH-safe payload */
   const updatePayload = Object.fromEntries(
     Object.entries({
-      title: req.body.title,
-      publication: req.body.publication,
+      name: req.body.name,
+      category: req.body.category,
+      location: req.body.location,
       description: req.body.description,
       files: filesByFieldname,
       alt: req.body.alt,
       watermark: req.body.watermark,
-      status: req.body.status,
-      seq: req.body.seq,
       updatedBy: user.id,
     }).filter(([_, v]) => v !== undefined),
   );
 
-  const updatedRecord = await awardService.updateAward(id, updatePayload);
+  const updatedRecord = await legacyProjectService.updateLegacyProject(
+    id,
+    updatePayload,
+  );
 
   for (const file of filesToDelete) {
     await deleteFromS3(file);
   }
 
-  if (updatedRecord?.files && typeof updatedRecord.files === "object") {
+  if (updatedRecord && updatedRecord.files && typeof updatedRecord.files === "object") {
     const filesObj = updatedRecord.files as any;
     await Promise.all(
       Object.keys(filesObj).map(async (key) => {
@@ -161,19 +175,37 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
     );
   }
 
-  successResponse(res, 200, "Award updated successfully", updatedRecord);
+  successResponse(
+    res,
+    200,
+    "Legacy Project updated successfully",
+    updatedRecord,
+  );
 });
 
-export const remove = asyncHandler(async (req: Request, res: Response) => {
+export const destroy = asyncHandler(async (req: Request, res: Response) => {
   const id = req.params.id as string;
-  const item = await awardService.getAwardById(id);
+  const item = await legacyProjectService.getLegacyProjectById(id);
 
   if (!item) {
-    throw new ApiError(404, "Award record not found");
+    throw new ApiError(404, "Legacy Project not found");
   }
 
-  await awardService.deleteAward(id);
-  successResponse(res, 200, "Award record deleted successfully");
+  const fileFields: string[] = [];
+  if (item.files && typeof item.files === "object") {
+    const filesObj = item.files as any;
+    for (const key of Object.keys(filesObj)) {
+      if (filesObj[key]) {
+        fileFields.push(filesObj[key]);
+      }
+    }
+  }
+  for (const file of fileFields) {
+    file && (await deleteFromS3(file));
+  }
+
+  await legacyProjectService.deleteLegacyProject(id);
+  successResponse(res, 200, "Legacy Project record deleted successfully");
 });
 
 export const changeSeq = asyncHandler(
@@ -185,21 +217,26 @@ export const changeSeq = asyncHandler(
     const { id } = req.params;
     const { seq } = req.body;
 
-    let payload: any = { updatedBy: user.id };
-
-    if (isNaN(seq)) {
+    if (isNaN(Number(seq))) {
       throw new ApiError(400, "Seq value must be a number");
     }
 
-    payload.seq = Number(seq);
-
-    const record = await awardService.getAwardById(id);
+    const record = await legacyProjectService.getLegacyProjectById(id);
     if (!record) {
-      throw new ApiError(404, "Award record not found");
+      throw new ApiError(404, "Legacy Project not found");
     }
 
-    const updatedProject = await awardService.updateAwardSeq(id, payload);
-    successResponse(res, 200, "Award seq successfully", updatedProject);
+    const updatedProject = await legacyProjectService.updateSeq(id, {
+      seq: Number(seq),
+      updatedBy: user.id,
+    });
+
+    successResponse(
+      res,
+      200,
+      "Legacy Project seq updated successfully",
+      updatedProject,
+    );
   },
 );
 
@@ -235,12 +272,12 @@ export const changeStatus = asyncHandler(
       status = status === 1;
     }
 
-    const record = await awardService.getAwardById(id);
+    const record = await legacyProjectService.getLegacyProjectById(id);
     if (!record) {
-      throw new ApiError(404, "Award record not found");
+      throw new ApiError(404, "Legacy Project not found");
     }
 
-    const updatedRecord = await awardService.updateStatus(
+    const updatedRecord = await legacyProjectService.updateStatus(
       id,
       status as boolean,
       user?.id,
@@ -249,52 +286,3 @@ export const changeStatus = asyncHandler(
     successResponse(res, 200, "Status updated successfully", updatedRecord);
   },
 );
-
-export const changeIsHome = asyncHandler(
-  async (req: Request<{ id: string }>, res: Response) => {
-    const user = req.user as any;
-    const { id } = req.params;
-    let { isHome } = req.body;
-
-    if (
-      !(
-        typeof isHome === "boolean" ||
-        isHome === "true" ||
-        isHome === "false" ||
-        isHome === 1 ||
-        isHome === 0 ||
-        isHome === "1" ||
-        isHome === "0"
-      )
-    ) {
-      throw new ApiError(
-        400,
-        "isHome value must be a boolean (true or false), 1/0 or 'true'/'false'",
-      );
-    }
-
-    if (typeof isHome === "string") {
-      if (isHome === "true") isHome = true;
-      else if (isHome === "false") isHome = false;
-      else if (isHome === "1") isHome = true;
-      else if (isHome === "0") isHome = false;
-    } else if (typeof isHome === "number") {
-      isHome = isHome === 1;
-    }
-
-    const record = await awardService.getAwardById(id);
-    if (!record) {
-      throw new ApiError(404, "Award record not found");
-    }
-
-    const updatedRecord = await awardService.updateIsHome(
-      id,
-      isHome as boolean,
-      user?.id,
-    );
-
-    successResponse(res, 200, "isHome updated successfully", updatedRecord);
-  },
-);
-
-
