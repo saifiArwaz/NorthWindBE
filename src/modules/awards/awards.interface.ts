@@ -1,5 +1,6 @@
 export interface IAwardDTO {
   title: string;
+  publication?: string;
   files?: string;
   description?: string;
   alt?: string;
@@ -9,6 +10,7 @@ export interface IAwardDTO {
 
 export interface IAwardUpdateDTO {
   title?: string;
+  publication?: string;
   files?: string;
   description?: string;
   alt?: string;

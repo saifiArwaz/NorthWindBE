@@ -28,6 +28,7 @@ enum ProjectSectionTypes {
   locationadvantage
   tower
   faq
+  sustainability
 }
 
 enum ProjectFloorPlanTypes {
@@ -398,6 +399,7 @@ model City {
 model Awards {
   id          String   @id @default(cuid())
   title       String
+  publication String?
   description String?
   files       Json?
   alt         String?

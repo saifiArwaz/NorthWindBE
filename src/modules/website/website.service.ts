@@ -73,10 +73,10 @@ export async function getAwards(
     isDeleted: false,
   };
   if (filter.search) {
-    where.title = {
-      contains: filter.search,
-      mode: "insensitive",
-    };
+    where.OR = [
+      { title: { contains: filter.search, mode: "insensitive" } },
+      { publication: { contains: filter.search, mode: "insensitive" } },
+    ];
   }
   return paginate(
     prisma.awards,
@@ -86,6 +86,7 @@ export async function getAwards(
       select: {
         id: true,
         title: true,
+        publication: true,
         description: true,
         files: true,
         alt: true,

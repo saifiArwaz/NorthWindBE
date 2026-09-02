@@ -6,6 +6,7 @@ import { ApiError } from "../../utils/apiError.utils.js";
 export async function createAward(data: IAwardDTO) {
   const prismaData: any = {
     title: data.title,
+    publication: data.publication,
     description: data.description,
     files: data.files,
     alt: data.alt,
@@ -19,7 +20,10 @@ export async function createAward(data: IAwardDTO) {
 export async function getAllList(page = 1, limit = 10, search = "") {
   const where = search
     ? {
-        OR: [{ title: { contains: search, mode: "insensitive" } }],
+        OR: [
+          { title: { contains: search, mode: "insensitive" } },
+          { publication: { contains: search, mode: "insensitive" } },
+        ],
       }
     : {};
 
@@ -46,6 +50,7 @@ export async function updateAward(id: string, data: IAwardUpdateDTO) {
   const prismaData = Object.fromEntries(
     Object.entries({
       title: data.title,
+      publication: data.publication,
       description: data.description,
       files: data.files,
       alt: data.alt,
