@@ -56,9 +56,9 @@ router.patch(
   projectCtrl.chooseIsPageProject,
 );
 router.patch(
-  "/:id/isPastProject",
+  "/:id/isPast",
   uploadMiddleware("projects").none(),
-  projectCtrl.chooseIsPastProject,
+  projectCtrl.chooseIsPast,
 );
 router.delete("/:id", projectCtrl.remove);
 router.delete("/:id/file", uploaded, projectCtrl.destroySinglefile);

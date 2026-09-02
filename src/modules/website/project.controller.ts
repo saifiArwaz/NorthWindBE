@@ -13,7 +13,7 @@ export const getProjects = asyncHandler(async (req: Request, res: Response) => {
     cityIds,
     projectStatusIds,
     isHome,
-    isPastProject,
+    isPast,
     page,
     limit,
   } = req.query;
@@ -29,8 +29,8 @@ export const getProjects = asyncHandler(async (req: Request, res: Response) => {
   if (isHome !== undefined) {
     filterParams.isHome = isHome;
   }
-  if (isPastProject !== undefined) {
-    filterParams.isPastProject = isPastProject;
+  if (isPast !== undefined) {
+    filterParams.isPast = isPast;
   }
   if (cityIds !== undefined) {
     filterParams.cityIds = cityIds;

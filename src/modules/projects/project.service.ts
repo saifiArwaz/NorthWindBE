@@ -306,15 +306,15 @@ export async function updateProjectIsHome(
   });
 }
 
-export async function updateProjectIsPastProject(
+export async function updateProjectIsPast(
   id: string,
-  isPastProject: boolean,
+  isPast: boolean,
   updatedBy: string,
 ) {
   return prisma.projects.update({
     where: { id },
     data: {
-      isPastProject: Boolean(isPastProject),
+      isPast: Boolean(isPast),
       ...(updatedBy && {
         updatedUser: {
           connect: { id: updatedBy },

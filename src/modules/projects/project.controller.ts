@@ -558,36 +558,36 @@ export const chooseIsPageProject = asyncHandler(
   },
 );
 
-export const chooseIsPastProject = asyncHandler(
+export const chooseIsPast = asyncHandler(
   async (req: Request<{ id: string }>, res: Response) => {
     const user = req.user!;
     const { id } = req.params;
-    let { isPastProject } = req.body;
+    let { isPast } = req.body;
 
     if (
       !(
-        typeof isPastProject === "boolean" ||
-        isPastProject === "true" ||
-        isPastProject === "false" ||
-        isPastProject === 1 ||
-        isPastProject === 0 ||
-        isPastProject === "1" ||
-        isPastProject === "0"
+        typeof isPast === "boolean" ||
+        isPast === "true" ||
+        isPast === "false" ||
+        isPast === 1 ||
+        isPast === 0 ||
+        isPast === "1" ||
+        isPast === "0"
       )
     ) {
       throw new ApiError(
         400,
-        "isPastProject value must be a boolean (true or false), 1/0 or 'true'/'false'",
+        "isPast value must be a boolean (true or false), 1/0 or 'true'/'false'",
       );
     }
 
-    if (typeof isPastProject === "string") {
-      if (isPastProject === "true") isPastProject = true;
-      else if (isPastProject === "false") isPastProject = false;
-      else if (isPastProject === "1") isPastProject = true;
-      else if (isPastProject === "0") isPastProject = false;
-    } else if (typeof isPastProject === "number") {
-      isPastProject = isPastProject === 1;
+    if (typeof isPast === "string") {
+      if (isPast === "true") isPast = true;
+      else if (isPast === "false") isPast = false;
+      else if (isPast === "1") isPast = true;
+      else if (isPast === "0") isPast = false;
+    } else if (typeof isPast === "number") {
+      isPast = isPast === 1;
     }
 
     const project = await projectService.getProjectById(id);
@@ -595,16 +595,16 @@ export const chooseIsPastProject = asyncHandler(
       throw new ApiError(404, "project not found");
     }
 
-    const updatedproject = await projectService.updateProjectIsPastProject(
+    const updatedproject = await projectService.updateProjectIsPast(
       id,
-      isPastProject,
+      isPast,
       user.id,
     );
 
     successResponse(
       res,
       200,
-      "isPastProject column updated successfully",
+      "isPast column updated successfully",
       serializeBigInt(updatedproject),
     );
   },

@@ -510,7 +510,7 @@ model Projects {
   brochure                 String?
   seoTags                  Json?
   otherDetails             Json?
-  isPastProject            Boolean                     @default(false)
+  isPast                   Boolean                     @default(false)
   isPage                   Boolean                     @default(false)
   isFeature                Boolean                     @default(false)
   isHome                   Boolean                     @default(false)

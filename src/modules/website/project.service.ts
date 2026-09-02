@@ -7,7 +7,7 @@ export interface ProjectFilterParams {
   platterIds?: string;
   cityIds?: string;
   isHome?: boolean;
-  isPastProject?: boolean;
+  isPast?: boolean;
   subTypologyIds?: string;
   projectStatusIds?: string;
   isPage?: boolean;
@@ -22,7 +22,7 @@ export async function getProjects(params: ProjectFilterParams = {}) {
     platterIds,
     cityIds,
     isHome,
-    isPastProject,
+    isPast,
     projectStatusIds,
     page = 1,
     limit = 10,
@@ -37,15 +37,15 @@ export async function getProjects(params: ProjectFilterParams = {}) {
   if (isHome !== undefined) {
     where.isHome = Boolean(isHome);
   }
-  if (isPastProject !== undefined) {
-    where.isPastProject = Boolean(isPastProject);
+  if (isPast !== undefined) {
+    where.isPast = Boolean(isPast);
   }
   if (cityIds) {
     where.city = { slug: cityIds };
   }
   if (projectStatusIds) {
     where.projectStatus = { slug: projectStatusIds };
-  } else if (!isPastProject) {
+  } else if (!isPast) {
     where.projectStatus = { slug: { not: "completed" } };
   }
 
@@ -89,7 +89,7 @@ export async function getProjects(params: ProjectFilterParams = {}) {
         isPage: true,
         isFeature: true,
         isHome: true,
-        isPastProject: true,
+        isPast: true,
         status: true,
         seq: true,
         platter: {
