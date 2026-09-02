@@ -8,6 +8,7 @@ async function main() {
       { name: "OnGoing", slug: "ongoing" },
       { name: "UpComing", slug: "upcoming" },
       { name: "Completed", slug: "completed" },
+      { name: "PastProject", slug: "pastproject" }
     ],
     skipDuplicates: true,
   });
