@@ -86,6 +86,10 @@ router.get(
   projectCtrl.getProjectContentDetailsByType,
 );
 router.get(
+  "/project/:projectId/zones",
+  projectCtrl.getProjectZonesByProjectId,
+);
+router.get(
   "/project/:projectId/towers",
   projectCtrl.getProjectTowersByProjectId,
 );

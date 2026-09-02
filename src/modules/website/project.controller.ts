@@ -195,6 +195,33 @@ export const getProjectAmenitiesByProjectId = asyncHandler(
   },
 );
 
+export const getProjectZonesByProjectId = asyncHandler(
+  async (req: Request<{ projectId: string }>, res: Response) => {
+    const { projectId } = req.params;
+
+    if (!projectId) {
+      throw new ApiError(400, "projectId parameter is required");
+    }
+
+    const record = await projectService.getProjectZonesByProjectId(projectId);
+
+    await Promise.all(
+      record.map(async (item: any) => {
+        if (item.files && typeof item.files === "object") {
+          for (const [key, value] of Object.entries(item.files)) {
+            if (typeof value === "string" && value) {
+              (item.files as any)[key] = await getFileUrl(value);
+            }
+          }
+        }
+      }),
+    );
+
+    successResponse(res, 200, "Project zones fetched successfully", record);
+  },
+);
+
+
 export const getProjectFloorPlansByProjectId = asyncHandler(
   async (
     req: Request<{ projectId: string }, any, any, { type?: string; towerId?: string }>,

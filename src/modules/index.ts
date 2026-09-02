@@ -42,6 +42,7 @@ import { projectLocationAdvRoutes } from "./projectLocationAdvantage/projectLoca
 import { menuItemRoutes } from "./menu/menu.route.js";
 import projectContentDetailsRoutes from "./projectContentDetails/projectContentDetails.route.js";
 import { ProjectTowerRoutes } from "./projectTower/projectTower.route.js";
+import { ProjectZoneRoutes } from "./projectZone/projectZone.route.js";
 
 // Website Routes
 import { WebsiteRoutes } from "./website/website.route.js";
@@ -112,6 +113,7 @@ router.use("/admin/project-location", authenticate, projectLocationAdvRoutes);
 router.use("/admin/project-status", authenticate, ProjectStatusRoutes);
 router.use("/admin/project-content-details", authenticate, projectContentDetailsRoutes);
 router.use("/admin/project-tower", authenticate, ProjectTowerRoutes);
+router.use("/admin/project-zone", authenticate, ProjectZoneRoutes);
 router.use("/admin/project-faq", authenticate, projectFaqRoutes);
 router.use("/admin/project-master-plan-category", authenticate, projectMasterPlanCategoryRoutes);
 router.use("/admin/project-master-plan-pin", authenticate, projectMasterPlanPinRoutes);

@@ -273,6 +273,27 @@ export async function getProjectAmenitiesByProjectId(projectId: string) {
   });
 }
 
+export async function getProjectZonesByProjectId(projectId: string) {
+  return prisma.projectZone.findMany({
+    where: {
+      projectId,
+      status: true,
+      isDeleted: false,
+    },
+    orderBy: [{ seq: "asc" }, { createdAt: "asc" }],
+    select: {
+      id: true,
+      projectId: true,
+      name: true,
+      files: true,
+      alt: true,
+      watermark: true,
+      seq: true,
+      status: true,
+    },
+  });
+}
+
 export async function getProjectFloorPlansByProjectId(
   projectId: string,
   type?: string,

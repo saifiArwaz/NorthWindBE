@@ -173,6 +173,8 @@ model User {
   UpdatedCsrCategory                 CsrCategory[]                 @relation("UpdatedCsrCategory")
   CreatedCsrGallery                  CsrGallery[]                  @relation("CreatedCsrGallery")
   UpdatedCsrGallery                  CsrGallery[]                  @relation("UpdatedCsrGallery")
+  CreatedProjectZone                 ProjectZone[]                 @relation("CreatedProjectZone")
+  UpdatedProjectZone                 ProjectZone[]                 @relation("UpdatedProjectZone")
 }
 
 model RefreshToken {
@@ -543,6 +545,7 @@ model Projects {
   projectFaqs              ProjectFaq[]
   seoFooterLinks           SeoFooterLink[]
   masterPlanPins           ProjectMasterPlanPin[]
+  projectZones             ProjectZone[]
   isDeleted                Boolean                     @default(false)
 
   @@index([projectName, slug, cityId, typologyId])
@@ -1284,5 +1287,24 @@ model CsrGallery {
   creator     User?        @relation("CreatedCsrGallery", fields: [createdBy], references: [id])
   updatedUser User?        @relation("UpdatedCsrGallery", fields: [updatedBy], references: [id])
   isDeleted   Boolean      @default(false)
+}
+
+model ProjectZone {
+  id          String   @id @default(cuid())
+  projectId   String
+  name        String
+  files       Json?
+  alt         String?
+  watermark   String?
+  status      Boolean  @default(true)
+  seq         Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  project     Projects @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy   String?
+  creator     User?    @relation("CreatedProjectZone", fields: [createdBy], references: [id])
+  updatedBy   String?
+  updatedUser User?    @relation("UpdatedProjectZone", fields: [updatedBy], references: [id])
+  isDeleted   Boolean  @default(false)
 }
 
