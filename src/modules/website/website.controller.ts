@@ -921,10 +921,9 @@ export const getCsrGallery = asyncHandler(
       page ? Number(page) : 1,
       limit ? Number(limit) : 12,
     );
-
-    if (galleries && Array.isArray(galleries)) {
+    if (galleries.data && Array.isArray(galleries.data)) {
       await Promise.all(
-        galleries.map(async (item: any) => {
+        galleries.data.map(async (item: any) => {
           if (item.files && typeof item.files === "object") {
             for (const [key, value] of Object.entries(item.files)) {
               if (typeof value === "string" && value) {
