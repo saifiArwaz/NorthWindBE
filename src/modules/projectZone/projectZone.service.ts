@@ -10,9 +10,11 @@ export async function createProjectZone(data: IProjectZoneCreateDTO) {
   const prismaData: any = {
     projectId: data.projectId,
     name: data.name,
+    title: data.title,
     files: data.files,
     alt: data.alt,
     watermark: data.watermark,
+    list: data.list,
     createdBy: data.createdBy,
   };
 
@@ -78,9 +80,11 @@ export async function updateProjectZone(
   const prismaData: any = {
     ...(data.projectId !== undefined ? { projectId: data.projectId } : {}),
     ...(data.name !== undefined ? { name: data.name.trim() } : {}),
+    ...(data.title !== undefined ? { title: data.title } : {}),
     ...(data.files !== undefined ? { files: data.files } : {}),
     ...(data.alt !== undefined ? { alt: data.alt } : {}),
     ...(data.watermark !== undefined ? { watermark: data.watermark } : {}),
+    ...(data.list !== undefined ? { list: data.list } : {}),
     ...(data.updatedBy ? { updatedBy: data.updatedBy } : {}),
   };
 

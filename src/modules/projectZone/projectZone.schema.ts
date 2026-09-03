@@ -6,8 +6,10 @@ export const createProjectZoneSchema = z.object({
     .object({
       projectId: z.string().min(1, "Project Id field is required"),
       name: z.string().min(1, "Name field is required"),
+      title: z.string().optional(),
       alt: z.string().optional(),
       watermark: z.string().optional(),
+      list: z.any().optional(),
     })
     .superRefine(async (data, ctx) => {
       const project = await prisma.projects.findUnique({
@@ -50,8 +52,10 @@ export const updateProjectZoneSchema = z
     body: z.object({
       projectId: z.string().optional(),
       name: z.string().optional(),
+      title: z.string().optional(),
       alt: z.string().optional(),
       watermark: z.string().optional(),
+      list: z.any().optional(),
     }),
   })
   .superRefine(async (data, ctx) => {

@@ -29,6 +29,7 @@ enum ProjectSectionTypes {
   tower
   faq
   sustainability
+  zone
 }
 
 enum ProjectFloorPlanTypes {
@@ -1302,9 +1303,11 @@ model ProjectZone {
   id          String   @id @default(cuid())
   projectId   String
   name        String
+  title       String?
   files       Json?
   alt         String?
   watermark   String?
+  list        Json?
   status      Boolean  @default(true)
   seq         Int      @default(0)
   createdAt   DateTime @default(now())

@@ -28,6 +28,7 @@ async function main() {
       { name: "Location Advantage", type: "locationadvantage" },
       { name: "Faq", type: "faq" },
       { name: "Sustainability", type: "sustainability" },
+      { name: "Zone", type: "zone" },
     ],
     skipDuplicates: true,
   });

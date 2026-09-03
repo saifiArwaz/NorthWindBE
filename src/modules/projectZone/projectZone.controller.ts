@@ -157,9 +157,11 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
   const updatePayload = Object.fromEntries(
     Object.entries({
       name: req.body.name,
+      title: req.body.title,
       files: filesByFieldname,
       alt: req.body.alt,
       watermark: req.body.watermark,
+      list: req.body.list,
       updatedBy: user.id,
     }).filter(([_, v]) => v !== undefined),
   );
