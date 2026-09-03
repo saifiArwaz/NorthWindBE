@@ -7,7 +7,7 @@ import {
 } from "../../generated/prisma/enums.js";
 import { ApiError } from "../../utils/apiError.utils.js";
 import { sendEmail } from "../../utils/email.utils.js";
-const { sendSms, sendVerifyOtp, checkVerifyOtp } = await import("../../utils/twilio.utils.js");
+import { sendWhatsappOtp } from "../../utils/fast2sms.utils.js";
 
 type GetUnderConstructionProps = {
   year?: string;
@@ -1548,11 +1548,6 @@ export async function createContactEnquiry(data: {
 }
 
 export async function sendSmsOtp(mobileNo: string) {
-  if (process.env.TWILIO_VERIFY_SERVICE_SID) {
-    await sendVerifyOtp(mobileNo);
-    return;
-  }
-
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes validity
 
@@ -1571,7 +1566,7 @@ export async function sendSmsOtp(mobileNo: string) {
     });
   }
 
-  await sendSms(mobileNo, `Your verification code is: ${otp}`);
+  await sendWhatsappOtp(mobileNo, otp);
 }
 
 export async function sendFloorplanTowerOtp(emailAddress: string) {
@@ -1621,14 +1616,6 @@ export async function createFloorplanTowerEnquiry(data: {
 }
 
 export async function verifySmsOtp(data: { mobileNo: string; otp: string }) {
-  if (process.env.TWILIO_VERIFY_SERVICE_SID) {
-    const isApproved = await checkVerifyOtp(data.mobileNo, data.otp);
-    if (!isApproved) {
-      throw new ApiError(400, "Invalid or expired OTP.");
-    }
-    return true;
-  }
-
   const otpRecord = await prisma.otpVerification.findFirst({
     where: { mobileNo: data.mobileNo },
   });
