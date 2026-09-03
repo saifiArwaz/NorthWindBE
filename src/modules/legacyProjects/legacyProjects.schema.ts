@@ -1,11 +1,11 @@
 import z from "zod";
 
-const categoryEnum = z.enum(["legacy", "ongoing", "old"]);
+const categoryEnum = z.enum(["upcoming", "ongoing", "old"]);
 
 export const createLegacyProjectSchema = z.object({
   body: z.object({
     name: z.string().min(1, "Name field is required"),
-    category: categoryEnum.optional().default("legacy"),
+    category: categoryEnum.optional().default("upcoming"),
     location: z.string().optional(),
     description: z.union([z.string(), z.record(z.string(), z.unknown())]).optional(),
     alt: z.string().optional(),

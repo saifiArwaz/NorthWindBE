@@ -5,7 +5,7 @@ CREATE TYPE "LegacyProjectCategory" AS ENUM ('legacyProject', 'ongoingProject', 
 CREATE TABLE "LegacyProject" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "category" "LegacyProjectCategory" NOT NULL DEFAULT 'legacyProject',
+    "category" "LegacyProjectCategory" NOT NULL DEFAULT 'upcoming',
     "location" TEXT,
     "description" JSONB,
     "files" JSONB,

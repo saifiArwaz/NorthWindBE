@@ -72,7 +72,7 @@ enum FaqTypes {
 }
 
 enum LegacyProjectCategory {
-  legacy
+  upcoming
   ongoing
   old
 }
@@ -1323,7 +1323,7 @@ model ProjectZone {
 model LegacyProject {
   id          String                @id @default(cuid())
   name        String
-  category    LegacyProjectCategory @default(legacy)
+  category    LegacyProjectCategory @default(upcoming)
   location    String?
   description Json?
   files       Json?
