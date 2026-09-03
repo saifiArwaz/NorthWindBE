@@ -72,9 +72,10 @@ enum FaqTypes {
 }
 
 enum LegacyProjectCategory {
-  upcoming
+  legacy
   ongoing
   old
+  upcoming
 }
 
 model User {
