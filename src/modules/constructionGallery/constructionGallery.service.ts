@@ -9,12 +9,12 @@ import { FileType } from "../../generated/prisma/enums.js";
 export async function createConstructionGallery(data: IConstructionGalleryDTO) {
   let prismaData: any = {
     projectId: data.projectId,
-    towerId: data.towerId,
     title: data.title,
     dateAt: data.dateAt,
     fileType: data.fileType as FileType,
     files: data.files,
     alt: data.alt,
+    link: data.link,
     watermark: data.watermark,
     createdBy: data.createdBy,
   };
@@ -24,7 +24,6 @@ export async function createConstructionGallery(data: IConstructionGalleryDTO) {
 export async function getAllList(page = 1, limit = 10, search = "", projectId: string, towerId?: string) {
   const where: any = {
     projectId,
-    ...(towerId && { towerId }),
     ...(search && {
       OR: [{ alt: { contains: search, mode: "insensitive" } }],
     }),
@@ -48,12 +47,12 @@ export async function updateConstructionGallery(
 ) {
   const prismaData = Object.fromEntries(
     Object.entries({
-      towerId: data.towerId,
       title: data.title,
       dateAt: data.dateAt,
       fileType: data.fileType as FileType,
       files: data.files,
       alt: data.alt,
+      link: data.link,
       watermark: data.watermark,
       projectId: data.projectId,
       updatedBy: data.updatedBy,

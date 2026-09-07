@@ -10,6 +10,7 @@ export const createEventGallerySchema = z.object({
     categoryId: z.string().optional(),
     eventId: z.string().optional(),
     watermark: z.string().optional(),
+    link: z.string().optional().nullable(),
   }).refine((data) => data.eventId, {
     message: "Event ID is required",
     path: ["eventId"],
@@ -57,6 +58,7 @@ export const updateEventGallerySchema = z.object({
     fileType: z.nativeEnum(FileType).optional(),
     eventId: z.string().optional(),
     watermark: z.string().optional(),
+    link: z.string().optional().nullable(),
     status: z.coerce.boolean().optional(),
   }),
 }).superRefine(async (data, ctx) => {

@@ -13,6 +13,7 @@ export const getProjects = asyncHandler(async (req: Request, res: Response) => {
     cityIds,
     projectStatusIds,
     isHome,
+    isPast,
     page,
     limit,
   } = req.query;
@@ -25,8 +26,11 @@ export const getProjects = asyncHandler(async (req: Request, res: Response) => {
   if (platterIds !== undefined) {
     filterParams.platterIds = platterIds;
   }
-  if(isHome !== undefined){
-    filterParams.isHome = isHome
+  if (isHome !== undefined) {
+    filterParams.isHome = isHome;
+  }
+  if (isPast !== undefined) {
+    filterParams.isPast = isPast;
   }
   if (cityIds !== undefined) {
     filterParams.cityIds = cityIds;
@@ -191,6 +195,33 @@ export const getProjectAmenitiesByProjectId = asyncHandler(
   },
 );
 
+export const getProjectZonesByProjectId = asyncHandler(
+  async (req: Request<{ projectId: string }>, res: Response) => {
+    const { projectId } = req.params;
+
+    if (!projectId) {
+      throw new ApiError(400, "projectId parameter is required");
+    }
+
+    const record = await projectService.getProjectZonesByProjectId(projectId);
+
+    await Promise.all(
+      record.map(async (item: any) => {
+        if (item.files && typeof item.files === "object") {
+          for (const [key, value] of Object.entries(item.files)) {
+            if (typeof value === "string" && value) {
+              (item.files as any)[key] = await getFileUrl(value);
+            }
+          }
+        }
+      }),
+    );
+
+    successResponse(res, 200, "Project zones fetched successfully", record);
+  },
+);
+
+
 export const getProjectFloorPlansByProjectId = asyncHandler(
   async (
     req: Request<{ projectId: string }, any, any, { type?: string; towerId?: string }>,
@@ -330,23 +361,9 @@ export const getProjectConstructionUpdates = asyncHandler(
     }
     const record = await projectService.getProjectConstructionUpdates(
       projectId as string,
-      towerId as string | undefined,
       parsedYear,
       parsedMonth
     );
-
-    // Resolve tower file URLs
-    if (record.towers) {
-      for (const tower of record.towers) {
-        if (tower.files && typeof tower.files === "object") {
-          for (const [key, value] of Object.entries(tower.files)) {
-            if (value && typeof value === "string") {
-              (tower.files as any)[key] = await getFileUrl(value);
-            }
-          }
-        }
-      }
-    }
 
     // Resolve gallery file URLs
     if (record.galleries) {
@@ -395,3 +412,66 @@ export const getProjectTowersByProjectId = asyncHandler(
     successResponse(res, 200, "Project towers fetched successfully", towers);
   }
 );
+
+
+export const getProjectFaqsByProjectId = asyncHandler(
+  async (
+    req: Request<{ projectId: string }>, // <-- FIX: ADD TYPE HERE
+    res: Response,
+  ) => {
+    const { projectId } = req.params;
+
+    if (!projectId) {
+      throw new ApiError(400, "projectId parameter is required");
+    }
+
+    const faqs = await projectService.getProjectFaqsByProjectId(projectId);
+
+    successResponse(res, 200, "Project FAQs fetched successfully", faqs);
+  },
+);
+
+export const getProjectMasterPlanDataByProjectId = asyncHandler(
+  async (req: Request<{ projectId: string }>, res: Response) => {
+    const { projectId } = req.params;
+    const { categoryId } = req.query;
+
+    if (!projectId) {
+      throw new ApiError(400, "projectId parameter is required");
+    }
+
+    const { categories } = await projectService.getProjectMasterPlanData(
+      projectId,
+      categoryId as string | undefined,
+    );
+
+    successResponse(res, 200, "Project master plan data fetched successfully", { categories });
+  }
+);
+
+export const getProjectMasterPlanPinGalleriesByPinId = asyncHandler(
+  async (req: Request<{ pinId: string }>, res: Response) => {
+    const { pinId } = req.params;
+
+    if (!pinId) {
+      throw new ApiError(400, "pinId parameter is required");
+    }
+
+    const galleries = await projectService.getProjectMasterPlanPinGalleries(pinId);
+
+    await Promise.all(
+      galleries.map(async (gallery: any) => {
+        if (gallery.files && typeof gallery.files === "object") {
+          for (const [key, value] of Object.entries(gallery.files)) {
+            if (typeof value === "string" && value) {
+              (gallery.files as any)[key] = await getFileUrl(value);
+            }
+          }
+        }
+      })
+    );
+
+    successResponse(res, 200, "Project master plan pin galleries fetched successfully", galleries);
+  }
+);
+

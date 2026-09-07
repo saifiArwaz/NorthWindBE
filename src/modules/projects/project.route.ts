@@ -55,6 +55,11 @@ router.patch(
   uploadMiddleware("projects").none(),
   projectCtrl.chooseIsPageProject,
 );
+router.patch(
+  "/:id/isPast",
+  uploadMiddleware("projects").none(),
+  projectCtrl.chooseIsPast,
+);
 router.delete("/:id", projectCtrl.remove);
 router.delete("/:id/file", uploaded, projectCtrl.destroySinglefile);
 

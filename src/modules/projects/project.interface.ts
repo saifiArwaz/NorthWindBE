@@ -2,8 +2,8 @@ export interface IProjectsCreateDTO {
   projectName: string;
   slug: string;
   platterId: string;
-  typologyId: string;
-  subTypologyId: string[];
+  typologyId?: string;
+  subTypologyId?: string[];
   projectStatusId: string;
   cityId?: string;
   location?: string;

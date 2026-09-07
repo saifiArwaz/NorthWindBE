@@ -5,6 +5,9 @@ import {
   gallerieTypes,
   PressType,
 } from "../../generated/prisma/enums.js";
+import { ApiError } from "../../utils/apiError.utils.js";
+import { sendEmail } from "../../utils/email.utils.js";
+import { sendWhatsappOtp } from "../../utils/fast2sms.utils.js";
 
 type GetUnderConstructionProps = {
   year?: string;
@@ -68,12 +71,13 @@ export async function getAwards(
   const where: any = {
     status: true,
     isDeleted: false,
+    ...(filter.isHome !== undefined ? { isHome: Boolean(filter.isHome) } : {}),
   };
   if (filter.search) {
-    where.title = {
-      contains: filter.search,
-      mode: "insensitive",
-    };
+    where.OR = [
+      { title: { contains: filter.search, mode: "insensitive" } },
+      { publication: { contains: filter.search, mode: "insensitive" } },
+    ];
   }
   return paginate(
     prisma.awards,
@@ -83,10 +87,12 @@ export async function getAwards(
       select: {
         id: true,
         title: true,
+        publication: true,
         description: true,
         files: true,
         alt: true,
         watermark: true,
+        isHome: true,
         status: true,
         seq: true,
       },
@@ -130,8 +136,8 @@ export async function getBlogs(
     prisma.blogs,
     {
       where,
-       orderBy: {
-       createdAt: "desc",
+      orderBy: {
+        dateAt: "desc",
       },
       select: {
         id: true,
@@ -172,7 +178,7 @@ export async function getLatestBlogs(limit = 5) {
       isDeleted: false,
     },
     orderBy: {
-      createdAt: "desc",
+      dateAt: "desc",
     },
     take: limit,
     select: {
@@ -202,7 +208,7 @@ export async function getMediaCoverage(
     where.isHome = Boolean(filter.isHome);
   }
 
-  let orderBy: any = { dateAt: "desc" };
+  let orderBy: any = { seq: "asc" };
   return paginate(
     prisma.mediaCoverage,
     {
@@ -214,7 +220,7 @@ export async function getMediaCoverage(
         mediaType: true,
         dateAt: true,
         description: true,
-        files:true,
+        files: true,
         link: true,
         status: true,
         seq: true,
@@ -340,7 +346,7 @@ export async function getGalleriesByType(type: string, fileType?: string) {
       type: true,
       files: true,
       fileType: true,
-      link:true,
+      link: true,
       alt: true,
       watermark: true,
       status: true,
@@ -364,7 +370,7 @@ export async function getMediakit() {
       logo: true,
       alt: true,
       title: true,
-      type:true,
+      type: true,
       watermark: true,
       listKit: true,
       status: true,
@@ -465,8 +471,8 @@ export async function getHomeLoan() {
   });
 }
 
-export async function getHomeLoanAssistance(){
-  const where : any = {
+export async function getHomeLoanAssistance() {
+  const where: any = {
     status: true,
     isDeleted: false,
   }
@@ -475,9 +481,9 @@ export async function getHomeLoanAssistance(){
     orderBy: {
       seq: "asc"
     },
-    select:{
+    select: {
       id: true,
-      title:true,
+      title: true,
       files: true,
       alt: true,
       watermark: true,
@@ -542,6 +548,7 @@ export async function getEvents(page = 1, limit = 10, eventSlug?: string) {
                 id: true,
                 title: true,
                 files: true,
+                link: true,
                 alt: true,
                 watermark: true,
                 fileType: true,
@@ -558,6 +565,7 @@ export async function getEvents(page = 1, limit = 10, eventSlug?: string) {
             id: true,
             title: true,
             files: true,
+            link: true,
             alt: true,
             watermark: true,
             fileType: true,
@@ -616,6 +624,7 @@ export async function getCategoryGalleries(eventSlug: string, categorySlug: stri
         id: true,
         title: true,
         files: true,
+        link: true,
         alt: true,
         watermark: true,
         fileType: true,
@@ -644,11 +653,13 @@ export async function getFeaturedGalleries(page = 1, limit = 10) {
         id: true,
         title: true,
         files: true,
+        link: true,
         alt: true,
         watermark: true,
         fileType: true,
         seq: true,
         status: true,
+        isFeature: true,
       }
     },
     { page, limit }
@@ -691,6 +702,29 @@ export async function getInvestorDocuments() {
       type: true,
       dateAt: true,
       files: true,
+      status: true,
+      seq: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+}
+
+export async function getInvestorAppreciations() {
+  const where: any = {
+    status: true,
+    isDeleted: false,
+  };
+
+  return prisma.investorAppreciation.findMany({
+    where,
+    orderBy: {
+      seq: "asc",
+    },
+    select: {
+      id: true,
+      year: true,
+      bsp: true,
       status: true,
       seq: true,
       createdAt: true,
@@ -774,7 +808,7 @@ export async function getContetByType(type: string, query: any = {}) {
       description: true,
       files: true,
       alt: true,
-      watermark:true,
+      watermark: true,
       seq: true,
       status: true,
     },
@@ -906,12 +940,13 @@ export async function getFilterProjectsWithGallery() {
       },
     },
     orderBy: {
-      projectName: "asc",
+      seq: "asc",
     },
     select: {
       id: true,
       projectName: true,
       slug: true,
+      seq: true,
     },
   });
 }
@@ -923,11 +958,12 @@ export async function getLocations() {
       status: true,
       isDeleted: false,
     },
-    orderBy: { name: "asc" },
+    orderBy: { seq: "asc" },
     select: {
       id: true,
       name: true,
       slug: true,
+      seq: true,
     },
   });
 }
@@ -956,13 +992,75 @@ export async function getFilterProjectStatus() {
         some: { status: true },
       },
     },
-    orderBy: { name: "asc" },
+    orderBy: { seq: "asc" },
     select: {
       id: true,
       name: true,
       slug: true,
+      seq: true,
     },
   });
+}
+
+export async function getFilterMasterPlanCategories(projectId?: string) {
+  return prisma.projectMasterPlanCategory.findMany({
+    where: {
+      status: true,
+      isDeleted: false,
+    },
+    orderBy: { seq: "asc" },
+    select: {
+      id: true,
+      name: true,
+      seq: true,
+    },
+  });
+}
+
+export async function getFilterCsrCategories() {
+  return prisma.csrCategory.findMany({
+    where: {
+      status: true,
+      isDeleted: false,
+    },
+    orderBy: { seq: "asc" },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      seq: true,
+    },
+  });
+}
+
+export async function getCsrGalleryData(
+  categoryId?: string,
+  page = 1,
+  limit = 12,
+) {
+  const where: any = {
+    status: true,
+    isDeleted: false,
+    ...(categoryId && categoryId ? { categoryId } : {}),
+  };
+
+  return await paginate(
+    prisma.csrGallery,
+    {
+      where,
+      orderBy: { seq: "asc" },
+      select: {
+        id: true,
+        title: true,
+        files: true,
+        alt: true,
+        watermark: true,
+        seq: true,
+        createdAt: true,
+      },
+    },
+    { page, limit },
+  );
 }
 
 export async function getFilterJobs() {
@@ -999,7 +1097,7 @@ export async function getFilterTowers(projectId: string) {
     select: {
       id: true,
       name: true,
-      title:true,
+      title: true,
     },
     orderBy: { seq: "asc" },
   });
@@ -1456,7 +1554,7 @@ export async function createContactEnquiry(data: {
   emailAddress: string;
   mobileNo: string;
   query?: string;
-  location?:string;
+  location?: string;
   pageUrl?: string;
 }) {
   const projectEnquiry = await prisma.contactEnquiry.create({
@@ -1467,8 +1565,102 @@ export async function createContactEnquiry(data: {
       query: data.query || null,
       pageUrl: data.pageUrl || null,
       location: data.location || null,
-}});
+    }
+  });
   return projectEnquiry;
+}
+
+export async function sendSmsOtp(mobileNo: string) {
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes validity
+
+  const existingOtp = await prisma.otpVerification.findFirst({
+    where: { mobileNo },
+  });
+
+  if (existingOtp) {
+    await prisma.otpVerification.update({
+      where: { id: existingOtp.id },
+      data: { otp, expiresAt, isVerified: false },
+    });
+  } else {
+    await prisma.otpVerification.create({
+      data: { mobileNo, otp, expiresAt },
+    });
+  }
+
+  await sendWhatsappOtp(mobileNo, otp);
+}
+
+export async function sendFloorplanTowerOtp(emailAddress: string) {
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes validity
+
+  const existingOtp = await prisma.otpVerification.findFirst({
+    where: { emailAddress },
+  });
+
+  if (existingOtp) {
+    await prisma.otpVerification.update({
+      where: { id: existingOtp.id },
+      data: { otp, expiresAt, isVerified: false },
+    });
+  } else {
+    await prisma.otpVerification.create({
+      data: { emailAddress, otp, expiresAt },
+    });
+  }
+
+  await sendEmail(emailAddress, "Your Verification OTP", "otp-email", { otp });
+}
+
+export async function createFloorplanTowerEnquiry(data: {
+  projectId?: string;
+  fullName: string;
+  emailAddress: string;
+  mobileNo: string;
+  message?: string;
+}) {
+  const enquiry = await prisma.floorplanTowerEnquiry.create({
+    data: {
+      projectId: data.projectId || null,
+      fullName: data.fullName,
+      emailAddress: data.emailAddress,
+      mobileNo: data.mobileNo,
+      message: data.message || null,
+      isVerified: false,
+    },
+    include: {
+      projects: true
+    }
+  });
+
+  return enquiry;
+}
+
+export async function verifySmsOtp(data: { mobileNo: string; otp: string }) {
+  const otpRecord = await prisma.otpVerification.findFirst({
+    where: { mobileNo: data.mobileNo },
+  });
+
+  if (!otpRecord) {
+    throw new ApiError(400, "OTP not generated or expired.");
+  }
+
+  if (otpRecord.otp !== data.otp) {
+    throw new ApiError(400, "Invalid OTP.");
+  }
+
+  if (new Date() > otpRecord.expiresAt) {
+    throw new ApiError(400, "OTP has expired.");
+  }
+
+  await prisma.otpVerification.update({
+    where: { id: otpRecord.id },
+    data: { isVerified: true },
+  });
+
+  return true;
 }
 
 export async function createProjectEnquiry(data: {
@@ -1489,3 +1681,73 @@ export async function createProjectEnquiry(data: {
   });
   return projectEnquiry;
 }
+
+export async function createLandOwnerConnectEnquiry(data: {
+  fullName: string;
+  mobileNo: string;
+  emailAddress: string;
+  landLocation: string;
+  landArea: string;
+  landType: string;
+  ownershipStatus: string;
+  additionalDetails?: string;
+  pageUrl?: string;
+}) {
+  return await prisma.landOwnerConnect.create({
+    data: {
+      fullName: data.fullName,
+      mobileNo: data.mobileNo,
+      emailAddress: data.emailAddress,
+      landLocation: data.landLocation,
+      landArea: data.landArea,
+      landType: data.landType,
+      ownershipStatus: data.ownershipStatus,
+      additionalDetails: data.additionalDetails || null,
+      pageUrl: data.pageUrl || null,
+    },
+  });
+}
+
+export async function getLegacyProjects(
+  page = 1,
+  limit = 10,
+  search = "",
+  category?: any,
+) {
+  const where: any = {
+    status: true,
+    isDeleted: false,
+    ...(category ? { category } : {}),
+    ...(search
+      ? {
+          OR: [
+            { name: { contains: search, mode: "insensitive" } },
+            { location: { contains: search, mode: "insensitive" } },
+          ],
+        }
+      : {}),
+  };
+
+  return paginate(
+    prisma.legacyProject,
+    {
+      where,
+      orderBy: [{ seq: "asc" }, { createdAt: "desc" }],
+      select: {
+        id: true,
+        name: true,
+        category: true,
+        location: true,
+        description: true,
+        files: true,
+        alt: true,
+        watermark: true,
+        seq: true,
+        status: true,
+      },
+    },
+    { page, limit },
+  );
+}
+
+

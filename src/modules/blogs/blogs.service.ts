@@ -67,7 +67,7 @@ export async function getAllBlog(
     prisma.blogs,
     {
       where,
-      orderBy: [{ seq: "asc" },{ createdAt: "desc" }],
+      orderBy: [{ seq: "asc" }, { dateAt: "desc" }],
     },
     { page, limit },
   );
@@ -93,12 +93,12 @@ export async function updateBlog(id: string, data: IBlogUpdateDTO) {
   if (data.title) {
     const existing = await prisma.blogs.findFirst({
       where: {
-        slug,
+        title: data.title,
         NOT: { id },
       },
     });
     if (existing) {
-      throw new ApiError(400, "Slug already exists");
+      throw new ApiError(400, "Title already exists");
     }
   }
   const prismaData = Object.fromEntries(

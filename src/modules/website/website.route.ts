@@ -9,6 +9,10 @@ import {
   createNewsLetterEnquirySchema,
   createContactEnquirySchema,
   createProjectEnquirySchema,
+  createFloorplanTowerEnquirySchema,
+  createLandOwnerConnectSchema,
+  verifyOtpSchema,
+  sendOtpSchema,
 } from "./enquiry.schema.js";
 
 const router = Router();
@@ -52,10 +56,16 @@ router.get(
   "/investor-documents",
   websiteCtrl.getInvestorDocuments,
 );
+router.get(
+  "/investor-appreciation",
+  websiteCtrl.getInvestorAppreciations,
+);
 router.get("/city/:citySlug", websiteCtrl.getCityBySlug);
 
 router.get("/jobs", websiteCtrl.getJobs);
 router.get("/content-list/:type", websiteCtrl.getContetByType);
+router.get("/csr-gallery", websiteCtrl.getCsrGallery);
+router.get("/legacy-projects", websiteCtrl.getLegacyProjects);
 
 // projects routes-------------------
 router.get("/projects", projectCtrl.getProjects);
@@ -81,6 +91,10 @@ router.get(
   projectCtrl.getProjectContentDetailsByType,
 );
 router.get(
+  "/project/:projectId/zones",
+  projectCtrl.getProjectZonesByProjectId,
+);
+router.get(
   "/project/:projectId/towers",
   projectCtrl.getProjectTowersByProjectId,
 );
@@ -88,6 +102,17 @@ router.get(
   "/project/:projectId/construction-updates",
   projectCtrl.getProjectConstructionUpdates,
 );
+
+router.get("/project/:projectId/faqs", projectCtrl.getProjectFaqsByProjectId);
+router.get(
+  "/project/:projectId/master-plan-pin",
+  projectCtrl.getProjectMasterPlanDataByProjectId,
+);
+router.get(
+  "/project-master-plan-pin/:pinId/gallery",
+  projectCtrl.getProjectMasterPlanPinGalleriesByPinId,
+);
+
 router.get("/project/:platterSlug/:slug", projectCtrl.getProjectDetailsBySlug);
 
 // filters routers
@@ -96,6 +121,11 @@ router.get("/filter/platter", websiteCtrl.getFilterPlatter);
 router.get("/filter/location", websiteCtrl.getFilterLocations);
 router.get("/filter/sub-typology", websiteCtrl.getFilterSubTypology);
 router.get("/filter/project-status", websiteCtrl.getFilterProjectStatus);
+router.get(
+  "/filter/master-plan-category",
+  websiteCtrl.getFilterMasterPlanCategories,
+);
+router.get("/filter/csr-category", websiteCtrl.getFilterCsrCategories);
 router.get("/filter/job", websiteCtrl.getFilterJobs);
 router.get("/filter/towers/:projectId", websiteCtrl.getFilterTowers);
 router.get("/filter/construction-years/:projectId", websiteCtrl.getFilterConstructionYears);
@@ -142,4 +172,30 @@ router.post(
   validate(createProjectEnquirySchema),
   websiteCtrl.createProjectEnquiry,
 );
+
+router.post(
+  "/enquiry/floorplan-tower",
+  validate(createFloorplanTowerEnquirySchema),
+  websiteCtrl.createFloorplanTowerEnquiry,
+);
+
+router.post(
+  "/enquiry/land-owner-connect",
+  validate(createLandOwnerConnectSchema),
+  websiteCtrl.createLandOwnerConnectEnquiry,
+);
+
+router.post(
+  "/enquiry/send-otp",
+  validate(sendOtpSchema),
+  websiteCtrl.sendSmsOtp,
+);
+
+router.post(
+  "/enquiry/verify-otp",
+  validate(verifyOtpSchema),
+  websiteCtrl.verifySmsOtp,
+);
+
 export { router as WebsiteRoutes };
+

@@ -5,6 +5,7 @@ export interface IEventsGalleryDTO {
   categoryId?: string;
   eventId?: string;
   files?: Record<string, string> | any;
+  link?: string;
   alt?: string;
   watermark?: string;
   createdBy?: string;
@@ -16,6 +17,7 @@ export interface IEventsGalleryUpdateDTO {
   categoryId?: string;
   eventId?: string;
   files?: Record<string, string> | any;
+  link?: string;
   alt?: string;
   watermark?: string;
   updatedBy?: string;

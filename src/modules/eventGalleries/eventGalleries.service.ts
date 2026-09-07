@@ -16,6 +16,7 @@ export async function createEventsGallery(data: IEventsGalleryDTO) {
     ...(data.categoryId && { category: { connect: { id: data.categoryId } } }),
     ...(data.eventId && { event: { connect: { id: data.eventId } } }),
     files: data.files,
+    link: data.link,
     alt: data.alt,
     watermark: data.watermark,
     ...(data.createdBy && {
@@ -67,6 +68,7 @@ export async function updateEventsGallery(
       ...(data.categoryId && { category: { connect: { id: data.categoryId } } }),
       ...(data.eventId && { event: { connect: { id: data.eventId } } }),
       files: data.files,
+      link: data.link,
       alt: data.alt,
       watermark: data.watermark,
       ...(data.updatedBy && {

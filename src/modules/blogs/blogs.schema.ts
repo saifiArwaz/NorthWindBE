@@ -12,7 +12,7 @@ export const createPageSchema = z.object({
         z.date().refine((d) => !isNaN(d.getTime()), {
           message: "Invalid date format",
         }),
-      ),
+      ).optional(),
       description: z.record(z.string(), z.unknown()).optional(),
       seoTags: z.record(z.string(), z.unknown()).optional(),
       alt: z.string().optional(),

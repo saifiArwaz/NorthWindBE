@@ -161,6 +161,7 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
       categoryId: normalizedCategoryId,
       eventId: req.body.eventId,
       files: filesByFieldname,
+      link: req.body.link,
       alt: req.body.alt,
       watermark: req.body.watermark,
       updatedBy: user.id,

@@ -6,7 +6,8 @@ export interface ProjectFilterParams {
   search?: string;
   platterIds?: string;
   cityIds?: string;
-  isHome?:boolean;
+  isHome?: boolean;
+  isPast?: boolean;
   subTypologyIds?: string;
   projectStatusIds?: string;
   isPage?: boolean;
@@ -21,6 +22,7 @@ export async function getProjects(params: ProjectFilterParams = {}) {
     platterIds,
     cityIds,
     isHome,
+    isPast,
     projectStatusIds,
     page = 1,
     limit = 10,
@@ -32,14 +34,19 @@ export async function getProjects(params: ProjectFilterParams = {}) {
   if (platterIds) {
     where.platter = { slug: platterIds };
   }
- if (isHome !== undefined) {
+  if (isHome !== undefined) {
     where.isHome = Boolean(isHome);
+  }
+  if (isPast !== undefined) {
+    where.isPast = Boolean(isPast);
   }
   if (cityIds) {
     where.city = { slug: cityIds };
   }
   if (projectStatusIds) {
     where.projectStatus = { slug: projectStatusIds };
+  } else if (!isPast) {
+    where.projectStatus = { slug: { not: "completed" } };
   }
 
   if (search?.trim()) {
@@ -81,7 +88,8 @@ export async function getProjects(params: ProjectFilterParams = {}) {
         otherDetails: true,
         isPage: true,
         isFeature: true,
-        isHome:true,
+        isHome: true,
+        isPast: true,
         status: true,
         seq: true,
         platter: {
@@ -202,17 +210,17 @@ export async function getProjectBySlug(platterSlug: string, slug: string) {
     },
   });
   if (project?.projectSection) {
-          if (project && Array.isArray(project.projectSection)) {
-               const sectionObject: { [type: string]: any } = {};
-               for (const section of project.projectSection) {
-                    if (section.type) {
-                         sectionObject[section.type] = section;
-                    }
-               }
-               (project as any).projectSectionByType = sectionObject;
-          }
-     }
-     return project;
+    if (project && Array.isArray(project.projectSection)) {
+      const sectionObject: { [type: string]: any } = {};
+      for (const section of project.projectSection) {
+        if (section.type) {
+          sectionObject[section.type] = section;
+        }
+      }
+      (project as any).projectSectionByType = sectionObject;
+    }
+  }
+  return project;
 }
 
 export async function getProjectGalleriesByProjectId(
@@ -231,7 +239,7 @@ export async function getProjectGalleriesByProjectId(
     orderBy: { seq: "asc" },
     select: {
       id: true,
-      title:true,
+      title: true,
       fileType: true,
       files: true,
       alt: true,
@@ -259,6 +267,29 @@ export async function getProjectAmenitiesByProjectId(projectId: string) {
       files: true,
       alt: true,
       watermark: true,
+      seq: true,
+      status: true,
+    },
+  });
+}
+
+export async function getProjectZonesByProjectId(projectId: string) {
+  return prisma.projectZone.findMany({
+    where: {
+      projectId,
+      status: true,
+      isDeleted: false,
+    },
+    orderBy: [{ seq: "asc" }, { createdAt: "asc" }],
+    select: {
+      id: true,
+      projectId: true,
+      name: true,
+      title: true,
+      files: true,
+      alt: true,
+      watermark: true,
+      list: true,
       seq: true,
       status: true,
     },
@@ -311,7 +342,7 @@ export async function getProjectLocationAdvantageByProjectId(
     select: {
       id: true,
       projectId: true,
-      name:true,
+      name: true,
       durationUnit: true,
       duration: true,
       status: true,
@@ -347,7 +378,6 @@ export async function getProjectContentDetailsByType(
 
 export async function getProjectConstructionUpdates(
   projectId: string,
-  towerId?: string,
   year?: number,
   month?: number
 ) {
@@ -365,95 +395,51 @@ export async function getProjectConstructionUpdates(
     name: project.projectName,
   };
 
-  if (towerId) {
-    const tower = await prisma.projectTower.findFirst({
-      where: {
-        id: towerId,
-        projectId,
-        status: true,
-        isDeleted: false,
-      },
-      select: {
-        id: true,
-        projectId: true,
-        name: true,
-      },
-    });
+  let dateFilter: any = undefined;
 
-    if (!tower) {
-      throw new Error("Tower not found or does not belong to this project");
+  if (year) {
+    if (month) {
+      // Use UTC dates to avoid any timezone shifts
+      const startDate = new Date(Date.UTC(year, month - 1, 1));
+      const endDate = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999));
+      dateFilter = { gte: startDate, lte: endDate };
+    } else {
+      const startDate = new Date(Date.UTC(year, 0, 1));
+      const endDate = new Date(Date.UTC(year, 11, 31, 23, 59, 59, 999));
+      dateFilter = { gte: startDate, lte: endDate };
     }
-
-    let dateFilter: any = undefined;
-
-    if (year) {
-      if (month) {
-        // Use UTC dates to avoid any timezone shifts
-        const startDate = new Date(Date.UTC(year, month - 1, 1));
-        const endDate = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999));
-        dateFilter = { gte: startDate, lte: endDate };
-      } else {
-        const startDate = new Date(Date.UTC(year, 0, 1));
-        const endDate = new Date(Date.UTC(year, 11, 31, 23, 59, 59, 999));
-        dateFilter = { gte: startDate, lte: endDate };
-      }
-    }
-
-    let galleries = await prisma.constructionGalleries.findMany({
-      where: {
-        projectId,
-        towerId,
-        status: true,
-        isDeleted: false,
-        ...(dateFilter ? { dateAt: dateFilter } : {}),
-      },
-      select: {
-        id: true,
-        title: true,
-        files: true,
-        alt: true,
-        watermark: true,
-        seq: true,
-        dateAt: true,
-      },
-      orderBy: { seq: "asc" },
-    });
-
-    if (!year && month) {
-      galleries = galleries.filter(g => {
-        if (!g.dateAt) return false;
-        return new Date(g.dateAt).getUTCMonth() + 1 === month;
-      });
-    }
-
-    return {
-      project: projectData,
-      tower,
-      galleries,
-    };
   }
 
-  const towers = await prisma.projectTower.findMany({
+  let galleries = await prisma.constructionGalleries.findMany({
     where: {
       projectId,
       status: true,
       isDeleted: false,
+      ...(dateFilter ? { dateAt: dateFilter } : {}),
     },
     select: {
       id: true,
-      name: true,
       title: true,
       files: true,
-      list: true,
+      alt: true,
+      link: true,
+      watermark: true,
+      seq: true,
+      dateAt: true,
     },
-    orderBy: {
-      seq: "asc",
-    },
+    orderBy: { seq: "asc" },
   });
+
+  if (!year && month) {
+    galleries = galleries.filter(g => {
+      if (!g.dateAt) return false;
+      return new Date(g.dateAt).getUTCMonth() + 1 === month;
+    });
+  }
 
   return {
     project: projectData,
-    towers,
+    galleries,
   };
 }
 
@@ -463,6 +449,70 @@ export async function getProjectTowersByProjectId(projectId: string) {
       projectId,
       isDeleted: false,
       status: true,
+    },
+    orderBy: { seq: "asc" },
+  });
+}
+
+
+export async function getProjectFaqsByProjectId(projectId: string) {
+  return prisma.projectFaq.findMany({
+    where: {
+      projectId,
+      status: true,
+      isDeleted: false,
+    },
+    orderBy: { seq: "asc" },
+    select: {
+      id: true,
+      projectId: true,
+      question: true,
+      answer: true,
+      seq: true,
+      status: true,
+    },
+  });
+}
+
+export async function getProjectMasterPlanData(
+  projectId: string,
+  categoryId?: string,
+) {
+  const categories = await prisma.projectMasterPlanCategory.findMany({
+    where: {
+      status: true,
+      isDeleted: false,
+      ...(categoryId ? { id: categoryId } : {}),
+      pins: {
+        some: {
+          projectId,
+          status: true,
+          isDeleted: false,
+        },
+      },
+    },
+    include: {
+      pins: {
+        where: {
+          projectId,
+          status: true,
+          isDeleted: false,
+        },
+        orderBy: { seq: "asc" },
+      },
+    },
+    orderBy: { seq: "asc" },
+  });
+
+  return { categories };
+}
+
+export async function getProjectMasterPlanPinGalleries(pinId: string) {
+  return prisma.projectMasterPlanPinGallery.findMany({
+    where: {
+      pinId,
+      status: true,
+      isDeleted: false,
     },
     orderBy: { seq: "asc" },
   });

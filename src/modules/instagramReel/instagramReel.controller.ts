@@ -13,17 +13,22 @@ const IG_USER_ID = process.env.IG_USER_ID;
 
 export const getAllReels = asyncHandler(async (req: Request, res: Response) => {
   const { after, before } = req.query;
+  const targetLimit = parseInt(req.query.limit as string) || 10;
 
   let token = await getValidInstagramToken();
 
-  const fetchPage = async (accessToken: string) => {
+  const fetchPage = async (
+    accessToken: string,
+    cursorAfter?: string,
+    cursorBefore?: string,
+  ) => {
     return axios.get(`https://graph.instagram.com/v24.0/${IG_USER_ID}/media`, {
       params: {
         fields:
           "id,media_type,media_product_type,media_url,thumbnail_url,permalink,caption,timestamp",
-        limit: 25,
-        ...(after && { after }),
-        ...(before && { before }),
+        limit: 50,
+        ...(cursorAfter && { after: cursorAfter }),
+        ...(cursorBefore && { before: cursorBefore }),
       },
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -32,20 +37,58 @@ export const getAllReels = asyncHandler(async (req: Request, res: Response) => {
   };
 
   const execute = async (accessToken: string) => {
-    const response = await fetchPage(accessToken);
-    const { data, paging } = response.data;
+    let currentAfter = after as string | undefined;
+    let currentBefore = before as string | undefined;
+    let accumulatedReels: any[] = [];
+    let initialBefore: string | null = null;
+    let lastAfter: string | null = null;
+    let hasNext = false;
+    let hasPrev = false;
 
-    const reels = data.filter(
-      (item: any) => item.media_product_type === "REELS",
-    );
+    while (accumulatedReels.length < targetLimit) {
+      const response = await fetchPage(
+        accessToken,
+        currentAfter,
+        currentBefore,
+      );
+      const { data, paging } = response.data;
+
+      if (!data || data.length === 0) {
+        hasNext = false;
+        break;
+      }
+
+      if (!initialBefore && paging?.cursors?.before) {
+        initialBefore = paging.cursors.before;
+      }
+
+      const reels = data.filter(
+        (item: any) => item.media_product_type === "REELS",
+      );
+
+      accumulatedReels.push(...reels);
+
+      lastAfter = paging?.cursors?.after ?? null;
+      hasNext = !!paging?.next;
+      hasPrev = !!paging?.previous;
+
+      if (accumulatedReels.length >= targetLimit || !hasNext || !lastAfter) {
+        break;
+      }
+
+      currentAfter = lastAfter;
+      currentBefore = undefined;
+    }
+
+    const finalReels = accumulatedReels.slice(0, targetLimit);
 
     return {
-      reels,
+      reels: finalReels,
       pagination: {
-        before: paging?.cursors?.before ?? null,
-        after: paging?.cursors?.after ?? null,
-        hasNextPage: !!paging?.next,
-        hasPreviousPage: !!paging?.previous,
+        before: initialBefore,
+        after: lastAfter,
+        hasNextPage: hasNext,
+        hasPreviousPage: hasPrev,
       },
     };
   };
@@ -86,6 +129,42 @@ export const getAll = asyncHandler(async (req: Request, res: Response) => {
 
   const records = await instagramReelService.getAllList(page, limit, search);
   successResponse(res, 200, "Instagram reels fetched successfully", records);
+});
+
+export const getOne = asyncHandler(async (req: Request, res: Response) => {
+  const id = req.params.id as string;
+  const record = await instagramReelService.getInstagramReelById(id);
+
+  if (!record) {
+    throw new ApiError(404, "Instagram reel record not found");
+  }
+
+  successResponse(res, 200, "Instagram reel fetched successfully", record);
+});
+
+export const update = asyncHandler(async (req: Request, res: Response) => {
+  const user = req.user as { id?: string };
+  const id = req.params.id as string;
+  const oldRecord = await instagramReelService.getInstagramReelById(id);
+
+  if (!oldRecord) {
+    throw new ApiError(404, "Instagram reel record not found");
+  }
+
+  const updatePayload = Object.fromEntries(
+    Object.entries({
+      reelId: req.body.reelId,
+      thumbnail_url: req.body.thumbnail_url,
+      updatedBy: user?.id,
+    }).filter(([_, v]) => v !== undefined),
+  );
+
+  const updatedRecord = await instagramReelService.updateInstagramReel(
+    id,
+    updatePayload,
+  );
+
+  successResponse(res, 200, "Instagram reel updated successfully", updatedRecord);
 });
 
 export const remove = asyncHandler(async (req: Request, res: Response) => {
@@ -219,12 +298,12 @@ export const changeStatus = asyncHandler(
       status = status === 1;
     }
 
-    const record = (instagramReelService as any).getById
-      ? await (instagramReelService as any).getById(id)
-      : null;
-    // We bypass getById check here if not universally named, the service updateStatus will throw if not found.
+    const record = await instagramReelService.getInstagramReelById(id);
+    if (!record) {
+      throw new ApiError(404, "Instagram reel not found");
+    }
 
-    const updatedRecord = await (instagramReelService as any).updateStatus(
+    const updatedRecord = await instagramReelService.updateStatus(
       id,
       status as boolean,
       user?.id,

@@ -557,3 +557,56 @@ export const chooseIsPageProject = asyncHandler(
     );
   },
 );
+
+export const chooseIsPast = asyncHandler(
+  async (req: Request<{ id: string }>, res: Response) => {
+    const user = req.user!;
+    const { id } = req.params;
+    let { isPast } = req.body;
+
+    if (
+      !(
+        typeof isPast === "boolean" ||
+        isPast === "true" ||
+        isPast === "false" ||
+        isPast === 1 ||
+        isPast === 0 ||
+        isPast === "1" ||
+        isPast === "0"
+      )
+    ) {
+      throw new ApiError(
+        400,
+        "isPast value must be a boolean (true or false), 1/0 or 'true'/'false'",
+      );
+    }
+
+    if (typeof isPast === "string") {
+      if (isPast === "true") isPast = true;
+      else if (isPast === "false") isPast = false;
+      else if (isPast === "1") isPast = true;
+      else if (isPast === "0") isPast = false;
+    } else if (typeof isPast === "number") {
+      isPast = isPast === 1;
+    }
+
+    const project = await projectService.getProjectById(id);
+    if (!project) {
+      throw new ApiError(404, "project not found");
+    }
+
+    const updatedproject = await projectService.updateProjectIsPast(
+      id,
+      isPast,
+      user.id,
+    );
+
+    successResponse(
+      res,
+      200,
+      "isPast column updated successfully",
+      serializeBigInt(updatedproject),
+    );
+  },
+);
+

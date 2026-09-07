@@ -79,3 +79,38 @@ export async function getJobApplicationById(id: string) {
     where: { id },
   });
 }
+
+export async function getFloorplanTowerEnquiry(page = 1, limit = 10, search = "") {
+  const where: any = {};
+  if (search) {
+    where.OR = [{ fullName: { contains: search, mode: "insensitive" } }];
+  }
+  return paginate(
+    prisma.floorplanTowerEnquiry,
+    {
+      where,
+      orderBy: { dateAt: "desc" },
+    },
+    { page, limit },
+  );
+}
+
+export async function getLandOwnerConnectEnquiry(page = 1, limit = 10, search = "") {
+  const where: any = {};
+  if (search) {
+    where.OR = [
+      { fullName: { contains: search, mode: "insensitive" } },
+      { emailAddress: { contains: search, mode: "insensitive" } },
+      { mobileNo: { contains: search, mode: "insensitive" } },
+      { landLocation: { contains: search, mode: "insensitive" } },
+    ];
+  }
+  return paginate(
+    prisma.landOwnerConnect,
+    {
+      where,
+      orderBy: { dateAt: "desc" },
+    },
+    { page, limit },
+  );
+}

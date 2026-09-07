@@ -5,8 +5,8 @@ async function main() {
 
   const projectStatuses = await prisma.projectStatus.createMany({
     data: [
-      { name: "On Going", slug: "on-going" },
-      { name: "Up Coming", slug: "up-coming" },
+      { name: "OnGoing", slug: "ongoing" },
+      { name: "UpComing", slug: "upcoming" },
       { name: "Completed", slug: "completed" },
     ],
     skipDuplicates: true,
@@ -21,11 +21,14 @@ async function main() {
       { name: "Overview", type: "overview" },
       { name: "Gallery", type: "gallery" },
       { name: "Tower", type: "tower" },
-      {name: "Construction", type: "construction" },
+      { name: "Construction", type: "construction" },
       { name: "Highlights", type: "highlights" },
       { name: "Amenities", type: "amenities" },
       { name: "FloorPlan", type: "floorPlan" },
       { name: "Location Advantage", type: "locationadvantage" },
+      { name: "Faq", type: "faq" },
+      { name: "Sustainability", type: "sustainability" },
+      { name: "Zone", type: "zone" },
     ],
     skipDuplicates: true,
   });

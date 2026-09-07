@@ -133,6 +133,7 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
   const updatePayload = Object.fromEntries(
     Object.entries({
       title: req.body.title,
+      publication: req.body.publication,
       description: req.body.description,
       files: filesByFieldname,
       alt: req.body.alt,
@@ -248,4 +249,52 @@ export const changeStatus = asyncHandler(
     successResponse(res, 200, "Status updated successfully", updatedRecord);
   },
 );
+
+export const changeIsHome = asyncHandler(
+  async (req: Request<{ id: string }>, res: Response) => {
+    const user = req.user as any;
+    const { id } = req.params;
+    let { isHome } = req.body;
+
+    if (
+      !(
+        typeof isHome === "boolean" ||
+        isHome === "true" ||
+        isHome === "false" ||
+        isHome === 1 ||
+        isHome === 0 ||
+        isHome === "1" ||
+        isHome === "0"
+      )
+    ) {
+      throw new ApiError(
+        400,
+        "isHome value must be a boolean (true or false), 1/0 or 'true'/'false'",
+      );
+    }
+
+    if (typeof isHome === "string") {
+      if (isHome === "true") isHome = true;
+      else if (isHome === "false") isHome = false;
+      else if (isHome === "1") isHome = true;
+      else if (isHome === "0") isHome = false;
+    } else if (typeof isHome === "number") {
+      isHome = isHome === 1;
+    }
+
+    const record = await awardService.getAwardById(id);
+    if (!record) {
+      throw new ApiError(404, "Award record not found");
+    }
+
+    const updatedRecord = await awardService.updateIsHome(
+      id,
+      isHome as boolean,
+      user?.id,
+    );
+
+    successResponse(res, 200, "isHome updated successfully", updatedRecord);
+  },
+);
+
 

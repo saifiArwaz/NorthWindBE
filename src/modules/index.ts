@@ -26,6 +26,7 @@ import { MediaKitRoutes } from "./mediaKit/mediaKit.route.js";
 import { AwardsRoutes } from "./awards/awards.route.js";
 import { UploadRoutes } from "./upload/upload.route.js";
 import { investorDocumentsRoutes } from "./investorDocument/investorDocument.route.js";
+import { InvestorAppreciationRoutes } from "./investorAppreciation/investorAppreciation.route.js";
 import { InstagramReelRoutes } from "./instagramReel/instagramReel.route.js";
 import { EnquiriesRoutes } from "./enquiry/enquiry.route.js";
 import { HomeLoanRoutes } from "./homeloan/homeloan.route.js";
@@ -42,6 +43,7 @@ import { projectLocationAdvRoutes } from "./projectLocationAdvantage/projectLoca
 import { menuItemRoutes } from "./menu/menu.route.js";
 import projectContentDetailsRoutes from "./projectContentDetails/projectContentDetails.route.js";
 import { ProjectTowerRoutes } from "./projectTower/projectTower.route.js";
+import { ProjectZoneRoutes } from "./projectZone/projectZone.route.js";
 
 // Website Routes
 import { WebsiteRoutes } from "./website/website.route.js";
@@ -57,7 +59,13 @@ import { ContentByTypeRoutes } from "./contentByType/contentByType.route.js";
 
 // new routes
 import {PartnersRoutes} from "./partner/partners.route.js";
-
+import { projectFaqRoutes } from "./projectFaq/projectFaq.route.js";
+import { projectMasterPlanCategoryRoutes } from "./projectMasterPlanCategory/projectMasterPlanCategory.route.js";
+import { projectMasterPlanPinRoutes } from "./projectMasterPlanPin/projectMasterPlanPin.route.js";
+import { projectMasterPlanPinGalleryRoutes } from "./projectMasterPlanPinGallery/projectMasterPlanPinGallery.route.js";
+import { CsrCategoryRoutes } from "./csrCategory/csrCategory.route.js";
+import { CsrGalleryRoutes } from "./csrGallery/csrGallery.route.js";
+import { LegacyProjectRoutes } from "./legacyProjects/legacyProjects.route.js";
 
 const router = Router();
 
@@ -107,16 +115,26 @@ router.use("/admin/project-location", authenticate, projectLocationAdvRoutes);
 router.use("/admin/project-status", authenticate, ProjectStatusRoutes);
 router.use("/admin/project-content-details", authenticate, projectContentDetailsRoutes);
 router.use("/admin/project-tower", authenticate, ProjectTowerRoutes);
+router.use("/admin/project-zone", authenticate, ProjectZoneRoutes);
+router.use("/admin/project-faq", authenticate, projectFaqRoutes);
+router.use("/admin/project-master-plan-category", authenticate, projectMasterPlanCategoryRoutes);
+router.use("/admin/project-master-plan-pin", authenticate, projectMasterPlanPinRoutes);
+router.use("/admin/project-master-plan-pin-gallery", authenticate, projectMasterPlanPinGalleryRoutes);
+router.use("/admin/csr-category", authenticate, CsrCategoryRoutes);
+router.use("/admin/csr-gallery", authenticate, CsrGalleryRoutes);
 
 // above new routes--------------------------------
 router.use("/admin/awards", authenticate, AwardsRoutes);
 router.use("/admin/investor-documents", authenticate, investorDocumentsRoutes);
+router.use("/admin/investor-appreciation", authenticate, InvestorAppreciationRoutes);
 router.use("/admin/instagram-reel", authenticate, InstagramReelRoutes);
 router.use("/admin/enquiry", authenticate, EnquiriesRoutes);
 router.use("/admin/menu", authenticate, menuItemRoutes);
 
 // new routes ---------------
-router.use("/admin/partner", authenticate, PartnersRoutes)
+router.use("/admin/partner", authenticate, PartnersRoutes);
+router.use("/admin/legacy-projects", authenticate, LegacyProjectRoutes);
+router.use("/admin/past-projects", authenticate, LegacyProjectRoutes);
 // Website Routes
 router.use("/website", WebsiteRoutes);
 router.use("/seo", SeoRoutes);

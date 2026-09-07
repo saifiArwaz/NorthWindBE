@@ -29,7 +29,7 @@ export const create = asyncHandler(async (req: Request, res: Response) => {
   const record = await blogService.createBlog({
     ...req.body,
     description,
-    dateAt: new Date(req.body.dateAt),
+    ...(req.body.dateAt ? { dateAt: new Date(req.body.dateAt) } : {}),
     files: filesByFieldname,
     createdBy: user?.id,
   });
@@ -150,7 +150,7 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
       alt: req.body.alt,
       watermark: req.body.watermark,
       seoTags: req.body.seoTags,
-      dateAt: new Date(req.body.dateAt),
+      dateAt: req.body.dateAt ? new Date(req.body.dateAt) : undefined,
       status: req.body.status,
       isFeature: req.body.isFeature,
       isHome: req.body.isHome,

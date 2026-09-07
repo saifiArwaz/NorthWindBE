@@ -17,6 +17,7 @@ enum FileType {
   video
   link
 }
+
 enum ProjectSectionTypes {
   overview
   gallery
@@ -26,19 +27,15 @@ enum ProjectSectionTypes {
   floorPlan
   locationadvantage
   tower
+  faq
+  sustainability
+  zone
 }
 
 enum ProjectFloorPlanTypes {
   floorplan
   masterplan
 }
-
-
-
-
-
-
-
 
 enum gallerieTypes {
   career_fun_culture
@@ -47,9 +44,6 @@ enum gallerieTypes {
   events
   testimonial
 }
-
-
-
 
 enum PressType {
   online
@@ -71,100 +65,128 @@ enum FaqTypes {
   tax_benefit
   emi
   investor
+  career
+  home
+  platter
+  homeloan
 }
 
+enum LegacyProjectCategory {
+  legacy
+  ongoing
+  old
+  upcoming
+}
 
 model User {
-  id                               String                     @id @default(cuid())
-  email                            String                     @unique
-  name                             String?
-  password                         String
-  role                             Role                       @default(USER)
-  createdAt                        DateTime                   @default(now())
-  updatedAt                        DateTime                   @updatedAt
-  RefreshToken                     RefreshToken[]
-  createdPages                     Pages[]                    @relation("CreatedPage")
-  updatedPages                     Pages[]                    @relation("UpdatedPage")
-  CreatedHomeLoanAssistance        HomeLoanAssistance[]       @relation("CreatedHomeLoanAssistance")
-  UpdatedHomeLoanAssistance        HomeLoanAssistance[]       @relation("UpdatedHomeLoanAssistance")
-  CreatedPageSections              PageSections[]             @relation("CreatedPageSections")
-  UpdatedPageSections              PageSections[]             @relation("UpdatedPageSections")
-  CreatedTeam                      Team[]                     @relation("CreatedTeam")
-  UpdatedTeam                      Team[]                     @relation("UpdatedTeam")
-  CreatedTimeline                  Timeline[]                 @relation("CreatedTimeline")
-  UpdatedTimeline                  Timeline[]                 @relation("UpdatedTimeline")
-  CreatedPlatter                   Platter[]                  @relation("CreatedPlatter")
-  UpdatedPlatter                   Platter[]                  @relation("UpdatedPlatter")
-  CreatedCity                      City[]                     @relation("CreatedCity")
-  UpdatedCity                      City[]                     @relation("UpdatedCity")
-  CreatedTypology                  Typology[]                 @relation("CreatedTypology")
-  UpdatedTypology                  Typology[]                 @relation("UpdatedTypology")
-  CreatedSubTypology               SubTypology[]              @relation("CreatedSubTypology")
-  UpdatedSubTypology               SubTypology[]              @relation("UpdatedSubTypology")
-  CreatedMappingTypologies         TypologySubTypology[]      @relation("CreatedMappingTypologies")
-  UpdatedMappingTypologies         TypologySubTypology[]      @relation("UpdatedMappingTypologies")
-  CreatedProjects                  Projects[]                 @relation("CreatedProjects")
-  UpdatedProjects                  Projects[]                 @relation("UpdatedProjects")
-  CreatedProjectSection            ProjectSection[]           @relation("CreatedProjectSection")
-  UpdatedProjectSection            ProjectSection[]           @relation("UpdatedProjectSection")
-  CreatedProjectContentDetails     ProjectContentDetails[]    @relation("CreatedProjectContentDetails")
-  UpdatedProjectContentDetails     ProjectContentDetails[]    @relation("UpdatedProjectContentDetails")
-  CreatedProjectsBanner            ProjectBanner[]            @relation("CreatedProjectsBanner")
-  UpdatedProjectsBanner            ProjectBanner[]            @relation("UpdatedProjectsBanner")
-  CreatedProjectsFloorplan         ProjectFloorPlan[]         @relation("CreatedProjectsFloorplan")
-  UpdatedProjectsFloorplan         ProjectFloorPlan[]         @relation("UpdatedProjectsFloorplan")
-  CreatedProjectsLocationAdvantage ProjectLocationAdvantage[] @relation("CreatedProjectsLocationAdvantage")
-  UpdatedProjectsLocationAdvantage ProjectLocationAdvantage[] @relation("UpdatedProjectsLocationAdvantage")
-  CreatedProjectsGallery           ProjectGallery[]           @relation("CreatedProjectsGallery")
-  UpdatedProjectsGallery           ProjectGallery[]           @relation("UpdatedProjectsGallery")
-  CreatedProjectsAmenities         ProjectAmenities[]         @relation("CreatedProjectsAmenities")
-  UpdatedProjectsAmenities         ProjectAmenities[]         @relation("UpdatedProjectsAmenities")
-  CreatedProjectStatus             ProjectStatus[]            @relation("CreatedProjectStatus")
-  UpdatedProjectStatus             ProjectStatus[]            @relation("UpdatedProjectStatus")
-  CreatedcsrActivity               csrActivity[]              @relation("CreatedcsrActivity")
-  UpdatedcsrActivity               csrActivity[]              @relation("UpdatedcsrActivity")
-  CreatedBlogs                     Blogs[]                    @relation("CreatedBlogs")
-  UpdatedBlogs                     Blogs[]                    @relation("UpdatedBlogs")
-  CreatedJobs                      Jobs[]                     @relation("CreatedJobs")
-  UpdatedJobs                      Jobs[]                     @relation("UpdatedJobs")
-  CreatedTestimonials              Testimonials[]             @relation("CreatedTestimonials")
-  UpdatedTestimonials              Testimonials[]             @relation("UpdatedTestimonials")
-  CreatedsocialLinks               socialLinks[]              @relation("CreatedsocialLinks")
-  UpdatedsocialLinks               socialLinks[]              @relation("UpdatedsocialLinks")
-  CreatedMediaCoverage             MediaCoverage[]            @relation("CreatedMediaCoverage")
-  UpdatedMediaCoverage             MediaCoverage[]            @relation("UpdatedMediaCoverage")
-  CreatedMediaKit                  MediaKit[]                 @relation("CreatedMediaKit")
-  UpdatedMediaKit                  MediaKit[]                 @relation("UpdatedMediaKit")
-  CreatedAwards                    Awards[]                   @relation("CreatedAwards")
-  UpdatedAwards                    Awards[]                   @relation("UpdatedAwards")
-  CreatedInvestorDocuments         InvestorDocuments[]        @relation("CreatedInvestorDocuments")
-  UpdatedInvestorDocuments         InvestorDocuments[]        @relation("UpdatedInvestorDocuments")
-  CreatedInstagramReel             InstagramReel[]            @relation("CreatedInstagramReel")
-  UpdatedInstagramReel             InstagramReel[]            @relation("UpdatedInstagramReel")
-  CreatedHomeLoan                  HomeLoan[]                 @relation("CreatedHomeLoan")
-  UpdatedHomeLoan                  HomeLoan[]                 @relation("UpdatedHomeLoan")
-  CreatedValues                    Values[]                   @relation("CreatedValues")
-  UpdatedValues                    Values[]                   @relation("UpdatedValues")
-  CreatedGalleriesList             GalleriesList[]            @relation("CreatedGalleriesList")
-  UpdatedGalleriesList             GalleriesList[]            @relation("UpdatedGalleriesList")
-  CreatedEventGalleries            EventGalleries[]           @relation("CreatedEventGalleries")
-  UpdatedEventGalleries            EventGalleries[]           @relation("UpdatedEventGalleries")
-  CreatedEventCategories           EventCategory[]            @relation("CreatedEventCategory")
-  UpdatedEventCategories           EventCategory[]            @relation("UpdatedEventCategory")
-  CreatedEvents                    Event[]                    @relation("CreatedEvents")
-  UpdatedEvents                    Event[]                    @relation("UpdatedEvents")
-  CreatedConstructionGalleries     ConstructionGalleries[]    @relation("CreatedConstructionGalleries")
-  UpdatedConstructionGalleries     ConstructionGalleries[]    @relation("UpdatedConstructionGalleries")
-  CreatedFaqs                      Faqs[]                     @relation("CreatedFaqs")
-  UpdatedFaqs                      Faqs[]                     @relation("UpdatedFaqs")
-  CreatedBrands                    Brands[]                   @relation("CreatedBrands")
-  UpdatedBrands                    Brands[]                   @relation("UpdatedBrands")
-  CreatedContentByTypes            ContentByTypes[]           @relation("CreatedContentByTypes")
-  UpdatedContentByTypes            ContentByTypes[]           @relation("UpdatedContentByTypes")
-  createdPartner                   Partner[]                  @relation("Createdpartner")
-  updatedPartner                   Partner[]                  @relation("Updatedpartner")
-  CreatedProjectTower              ProjectTower[]             @relation("CreatedProjectTower")
-  UpdatedProjectTower              ProjectTower[]             @relation("UpdatedProjectTower")
+  id                                 String                        @id @default(cuid())
+  email                              String                        @unique
+  name                               String?
+  password                           String
+  role                               Role                          @default(USER)
+  createdAt                          DateTime                      @default(now())
+  updatedAt                          DateTime                      @updatedAt
+  RefreshToken                       RefreshToken[]
+  createdPages                       Pages[]                       @relation("CreatedPage")
+  updatedPages                       Pages[]                       @relation("UpdatedPage")
+  CreatedHomeLoanAssistance          HomeLoanAssistance[]          @relation("CreatedHomeLoanAssistance")
+  UpdatedHomeLoanAssistance          HomeLoanAssistance[]          @relation("UpdatedHomeLoanAssistance")
+  CreatedPageSections                PageSections[]                @relation("CreatedPageSections")
+  UpdatedPageSections                PageSections[]                @relation("UpdatedPageSections")
+  CreatedTeam                        Team[]                        @relation("CreatedTeam")
+  UpdatedTeam                        Team[]                        @relation("UpdatedTeam")
+  CreatedTimeline                    Timeline[]                    @relation("CreatedTimeline")
+  UpdatedTimeline                    Timeline[]                    @relation("UpdatedTimeline")
+  CreatedPlatter                     Platter[]                     @relation("CreatedPlatter")
+  UpdatedPlatter                     Platter[]                     @relation("UpdatedPlatter")
+  CreatedCity                        City[]                        @relation("CreatedCity")
+  UpdatedCity                        City[]                        @relation("UpdatedCity")
+  CreatedTypology                    Typology[]                    @relation("CreatedTypology")
+  UpdatedTypology                    Typology[]                    @relation("UpdatedTypology")
+  CreatedSubTypology                 SubTypology[]                 @relation("CreatedSubTypology")
+  UpdatedSubTypology                 SubTypology[]                 @relation("UpdatedSubTypology")
+  CreatedMappingTypologies           TypologySubTypology[]         @relation("CreatedMappingTypologies")
+  UpdatedMappingTypologies           TypologySubTypology[]         @relation("UpdatedMappingTypologies")
+  CreatedProjects                    Projects[]                    @relation("CreatedProjects")
+  UpdatedProjects                    Projects[]                    @relation("UpdatedProjects")
+  CreatedProjectSection              ProjectSection[]              @relation("CreatedProjectSection")
+  UpdatedProjectSection              ProjectSection[]              @relation("UpdatedProjectSection")
+  CreatedProjectContentDetails       ProjectContentDetails[]       @relation("CreatedProjectContentDetails")
+  UpdatedProjectContentDetails       ProjectContentDetails[]       @relation("UpdatedProjectContentDetails")
+  CreatedProjectsBanner              ProjectBanner[]               @relation("CreatedProjectsBanner")
+  UpdatedProjectsBanner              ProjectBanner[]               @relation("UpdatedProjectsBanner")
+  CreatedProjectsFloorplan           ProjectFloorPlan[]            @relation("CreatedProjectsFloorplan")
+  UpdatedProjectsFloorplan           ProjectFloorPlan[]            @relation("UpdatedProjectsFloorplan")
+  CreatedProjectsLocationAdvantage   ProjectLocationAdvantage[]    @relation("CreatedProjectsLocationAdvantage")
+  UpdatedProjectsLocationAdvantage   ProjectLocationAdvantage[]    @relation("UpdatedProjectsLocationAdvantage")
+  CreatedProjectsGallery             ProjectGallery[]              @relation("CreatedProjectsGallery")
+  UpdatedProjectsGallery             ProjectGallery[]              @relation("UpdatedProjectsGallery")
+  CreatedProjectsAmenities           ProjectAmenities[]            @relation("CreatedProjectsAmenities")
+  UpdatedProjectsAmenities           ProjectAmenities[]            @relation("UpdatedProjectsAmenities")
+  CreatedProjectStatus               ProjectStatus[]               @relation("CreatedProjectStatus")
+  UpdatedProjectStatus               ProjectStatus[]               @relation("UpdatedProjectStatus")
+  CreatedcsrActivity                 csrActivity[]                 @relation("CreatedcsrActivity")
+  UpdatedcsrActivity                 csrActivity[]                 @relation("UpdatedcsrActivity")
+  CreatedBlogs                       Blogs[]                       @relation("CreatedBlogs")
+  UpdatedBlogs                       Blogs[]                       @relation("UpdatedBlogs")
+  CreatedJobs                        Jobs[]                        @relation("CreatedJobs")
+  UpdatedJobs                        Jobs[]                        @relation("UpdatedJobs")
+  CreatedTestimonials                Testimonials[]                @relation("CreatedTestimonials")
+  UpdatedTestimonials                Testimonials[]                @relation("UpdatedTestimonials")
+  CreatedsocialLinks                 socialLinks[]                 @relation("CreatedsocialLinks")
+  UpdatedsocialLinks                 socialLinks[]                 @relation("UpdatedsocialLinks")
+  CreatedMediaCoverage               MediaCoverage[]               @relation("CreatedMediaCoverage")
+  UpdatedMediaCoverage               MediaCoverage[]               @relation("UpdatedMediaCoverage")
+  CreatedMediaKit                    MediaKit[]                    @relation("CreatedMediaKit")
+  UpdatedMediaKit                    MediaKit[]                    @relation("UpdatedMediaKit")
+  CreatedAwards                      Awards[]                      @relation("CreatedAwards")
+  UpdatedAwards                      Awards[]                      @relation("UpdatedAwards")
+  CreatedInvestorDocuments           InvestorDocuments[]           @relation("CreatedInvestorDocuments")
+  UpdatedInvestorDocuments           InvestorDocuments[]           @relation("UpdatedInvestorDocuments")
+  CreatedInstagramReel               InstagramReel[]               @relation("CreatedInstagramReel")
+  UpdatedInstagramReel               InstagramReel[]               @relation("UpdatedInstagramReel")
+  CreatedHomeLoan                    HomeLoan[]                    @relation("CreatedHomeLoan")
+  UpdatedHomeLoan                    HomeLoan[]                    @relation("UpdatedHomeLoan")
+  CreatedValues                      Values[]                      @relation("CreatedValues")
+  UpdatedValues                      Values[]                      @relation("UpdatedValues")
+  CreatedGalleriesList               GalleriesList[]               @relation("CreatedGalleriesList")
+  UpdatedGalleriesList               GalleriesList[]               @relation("UpdatedGalleriesList")
+  CreatedEventGalleries              EventGalleries[]              @relation("CreatedEventGalleries")
+  UpdatedEventGalleries              EventGalleries[]              @relation("UpdatedEventGalleries")
+  CreatedEventCategories             EventCategory[]               @relation("CreatedEventCategory")
+  UpdatedEventCategories             EventCategory[]               @relation("UpdatedEventCategory")
+  CreatedEvents                      Event[]                       @relation("CreatedEvents")
+  UpdatedEvents                      Event[]                       @relation("UpdatedEvents")
+  CreatedConstructionGalleries       ConstructionGalleries[]       @relation("CreatedConstructionGalleries")
+  UpdatedConstructionGalleries       ConstructionGalleries[]       @relation("UpdatedConstructionGalleries")
+  CreatedFaqs                        Faqs[]                        @relation("CreatedFaqs")
+  UpdatedFaqs                        Faqs[]                        @relation("UpdatedFaqs")
+  CreatedBrands                      Brands[]                      @relation("CreatedBrands")
+  UpdatedBrands                      Brands[]                      @relation("UpdatedBrands")
+  CreatedContentByTypes              ContentByTypes[]              @relation("CreatedContentByTypes")
+  UpdatedContentByTypes              ContentByTypes[]              @relation("UpdatedContentByTypes")
+  createdPartner                     Partner[]                     @relation("Createdpartner")
+  updatedPartner                     Partner[]                     @relation("Updatedpartner")
+  CreatedProjectTower                ProjectTower[]                @relation("CreatedProjectTower")
+  UpdatedProjectTower                ProjectTower[]                @relation("UpdatedProjectTower")
+  CreatedProjectsFaq                 ProjectFaq[]                  @relation("CreatedProjectsFaq")
+  UpdatedProjectsFaq                 ProjectFaq[]                  @relation("UpdatedProjectsFaq")
+  CreatedProjectMasterPlanPin        ProjectMasterPlanPin[]        @relation("CreatedProjectMasterPlanPin")
+  UpdatedProjectMasterPlanPin        ProjectMasterPlanPin[]        @relation("UpdatedProjectMasterPlanPin")
+  CreatedProjectMasterPlanCategory   ProjectMasterPlanCategory[]   @relation("CreatedProjectMasterPlanCategory")
+  UpdatedProjectMasterPlanCategory   ProjectMasterPlanCategory[]   @relation("UpdatedProjectMasterPlanCategory")
+  CreatedProjectMasterPlanPinGallery ProjectMasterPlanPinGallery[] @relation("CreatedProjectMasterPlanPinGallery")
+  UpdatedProjectMasterPlanPinGallery ProjectMasterPlanPinGallery[] @relation("UpdatedProjectMasterPlanPinGallery")
+  CreatedCsrCategory                 CsrCategory[]                 @relation("CreatedCsrCategory")
+  UpdatedCsrCategory                 CsrCategory[]                 @relation("UpdatedCsrCategory")
+  CreatedCsrGallery                  CsrGallery[]                  @relation("CreatedCsrGallery")
+  UpdatedCsrGallery                  CsrGallery[]                  @relation("UpdatedCsrGallery")
+  CreatedProjectZone                 ProjectZone[]                 @relation("CreatedProjectZone")
+  UpdatedProjectZone                 ProjectZone[]                 @relation("UpdatedProjectZone")
+  CreatedLegacyProject               LegacyProject[]               @relation("CreatedLegacyProject")
+  UpdatedLegacyProject               LegacyProject[]               @relation("UpdatedLegacyProject")
+  CreatedInvestorAppreciation        InvestorAppreciation[]        @relation("CreatedInvestorAppreciation")
+  UpdatedInvestorAppreciation        InvestorAppreciation[]        @relation("UpdatedInvestorAppreciation")
 }
 
 model RefreshToken {
@@ -293,6 +315,7 @@ model ProjectStatus {
   slug        String
   status      Boolean    @default(true)
   projects    Projects[]
+  seq         Int        @default(0)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   createdBy   String?
@@ -392,11 +415,13 @@ model City {
 model Awards {
   id          String   @id @default(cuid())
   title       String
+  publication String?
   description String?
   files       Json?
   alt         String?
   watermark   String?
   status      Boolean  @default(true) //true->active, false->Inactive
+  isHome      Boolean  @default(false)
   seq         Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -414,7 +439,7 @@ model GalleriesList {
   files       Json?
   alt         String?
   watermark   String?
-  link        String?             @db.Text
+  link        String?       @db.Text
   seq         Int           @default(0)
   status      Boolean       @default(true)
   createdBy   String?
@@ -448,7 +473,7 @@ model Blogs {
   id          String    @id @default(cuid())
   title       String    @unique
   slug        String    @unique
-  dateAt      DateTime?
+  dateAt      DateTime? @default(now())
   description Json
   files       Json?
   alt         String?
@@ -484,14 +509,14 @@ model socialLinks {
 }
 
 model Projects {
-  id                       String                     @id @default(cuid())
-  slug                     String                     @unique
-  projectName              String                     @unique
+  id                       String                      @id @default(cuid())
+  slug                     String                      @unique
+  projectName              String                      @unique
   cityId                   String?
   platterId                String
-  type                     FileType                   @default(image)
+  type                     FileType                    @default(image)
   shortDescription         String?
-  typologyId               String
+  typologyId               String?
   projectStatusId          String
   location                 String?
   files                    Json?
@@ -500,18 +525,19 @@ model Projects {
   brochure                 String?
   seoTags                  Json?
   otherDetails             Json?
-  isPage                   Boolean                    @default(false)
-  isFeature                Boolean                    @default(false)
-  isHome                   Boolean                    @default(false)
-  status                   Boolean                    @default(true)
-  seq                      Int                        @default(0)
-  createdAt                DateTime                   @default(now())
-  updatedAt                DateTime                   @updatedAt
+  isPast                   Boolean                     @default(false)
+  isPage                   Boolean                     @default(false)
+  isFeature                Boolean                     @default(false)
+  isHome                   Boolean                     @default(false)
+  status                   Boolean                     @default(true)
+  seq                      Int                         @default(0)
+  createdAt                DateTime                    @default(now())
+  updatedAt                DateTime                    @updatedAt
   // mapping with other project sections one to many
-  city                     City?                      @relation(fields: [cityId], references: [id])
-  platter                  Platter                    @relation(fields: [platterId], references: [id])
-  typology                 Typology                   @relation(fields: [typologyId], references: [id])
-  projectStatus            ProjectStatus              @relation(fields: [projectStatusId], references: [id])
+  city                     City?                       @relation(fields: [cityId], references: [id])
+  platter                  Platter                     @relation(fields: [platterId], references: [id])
+  typology                 Typology?                   @relation(fields: [typologyId], references: [id])
+  projectStatus            ProjectStatus               @relation(fields: [projectStatusId], references: [id])
   projectSubTypology       ProjectSubTypology[]
   // project section realtion
   projectSection           ProjectSection[]
@@ -522,15 +548,18 @@ model Projects {
   projectGallery           ProjectGallery[]
   projectContentDetails    ProjectContentDetails[]
   createdBy                String?
-  creator                  User?                      @relation("CreatedProjects", fields: [createdBy], references: [id])
+  creator                  User?                       @relation("CreatedProjects", fields: [createdBy], references: [id])
   updatedBy                String?
-  updatedUser              User?                      @relation("UpdatedProjects", fields: [updatedBy], references: [id])
+  updatedUser              User?                       @relation("UpdatedProjects", fields: [updatedBy], references: [id])
   constructionGalleries    ConstructionGalleries[]
   projectTowers            ProjectTower[]
   projectEnquiry           projectEnquiry[]
-
-  seoFooterLinks SeoFooterLink[]
-  isDeleted      Boolean         @default(false)
+  floorplanTowerEnquiry    floorplanTowerEnquiry[]
+  projectFaqs              ProjectFaq[]
+  seoFooterLinks           SeoFooterLink[]
+  masterPlanPins           ProjectMasterPlanPin[]
+  projectZones             ProjectZone[]
+  isDeleted                Boolean                     @default(false)
 
   @@index([projectName, slug, cityId, typologyId])
 }
@@ -729,6 +758,7 @@ model EventGalleries {
   eventId     String?
   event       Event?         @relation("EventGalleryEvent", fields: [eventId], references: [id], onDelete: Cascade)
   files       Json?
+  link        String?
   alt         String?
   watermark   String?
   status      Boolean        @default(true)
@@ -765,15 +795,31 @@ model ProjectTower {
   updatedUser       User?                   @relation("UpdatedProjectTower", fields: [updatedBy], references: [id])
   isDeleted         Boolean                 @default(false)
   project           Projects                @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  galleries         ConstructionGalleries[]
   projectFloorplans ProjectFloorPlan[]
 }
 
-model ConstructionGalleries {
-  id          String        @id @default(cuid())
+model ProjectFaq {
+  id          String   @id @default(cuid())
   projectId   String
-  towerId     String?
-  title       String?
+  question    String
+  answer      String
+  link        String?  @db.Text
+  status      Boolean  @default(true)
+  seq         Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  project     Projects @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy   String?
+  creator     User?    @relation("CreatedProjectsFaq", fields: [createdBy], references: [id])
+  updatedBy   String?
+  updatedUser User?    @relation("UpdatedProjectsFaq", fields: [updatedBy], references: [id])
+  isDeleted   Boolean  @default(false)
+}
+
+model ConstructionGalleries {
+  id        String   @id @default(cuid())
+  projectId String
+  title     String?
   fileType    FileType
   files       Json?
   alt         String?
@@ -786,7 +832,6 @@ model ConstructionGalleries {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   createdBy   String?
-  tower       ProjectTower? @relation(fields: [towerId], references: [id], onDelete: Cascade)
   project     Projects      @relation(fields: [projectId], references: [id], onDelete: Cascade)
   creator     User?         @relation("CreatedConstructionGalleries", fields: [createdBy], references: [id])
   updatedBy   String?
@@ -1056,6 +1101,18 @@ model projectEnquiry {
   dateAt       DateTime  @default(now())
 }
 
+model floorplanTowerEnquiry {
+  id           String    @id @default(cuid())
+  projectId    String?
+  projects     Projects? @relation(fields: [projectId], references: [id])
+  fullName     String
+  emailAddress String
+  mobileNo     String
+  message      String?
+  isVerified   Boolean   @default(false)
+  dateAt       DateTime  @default(now())
+}
+
 // new schemas by jatin
 
 model Partner {
@@ -1127,3 +1184,178 @@ model EventCategory {
   isDeleted   Boolean          @default(false)
   events      EventGalleries[] @relation("EventGalleryCategory")
 }
+
+model OtpVerification {
+  id           String   @id @default(cuid())
+  emailAddress String?
+  mobileNo     String?
+  otp          String
+  expiresAt    DateTime
+  isVerified   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model ProjectMasterPlanCategory {
+  id        String   @id @default(cuid())
+  name      String
+  status    Boolean  @default(true)
+  seq       Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String?
+  updatedBy String?
+  isDeleted Boolean  @default(false)
+
+  pins        ProjectMasterPlanPin[]
+  creator     User?                  @relation("CreatedProjectMasterPlanCategory", fields: [createdBy], references: [id])
+  updatedUser User?                  @relation("UpdatedProjectMasterPlanCategory", fields: [updatedBy], references: [id])
+}
+
+model ProjectMasterPlanPin {
+  id          String   @id @default(cuid())
+  projectId   String
+  categoryId  String
+  title       String
+  coordinates Json?
+  status      Boolean  @default(true)
+  seq         Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String?
+  updatedBy   String?
+  isDeleted   Boolean  @default(false)
+
+  project     Projects                      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  category    ProjectMasterPlanCategory     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  galleries   ProjectMasterPlanPinGallery[]
+  creator     User?                         @relation("CreatedProjectMasterPlanPin", fields: [createdBy], references: [id])
+  updatedUser User?                         @relation("UpdatedProjectMasterPlanPin", fields: [updatedBy], references: [id])
+}
+
+model ProjectMasterPlanPinGallery {
+  id        String   @id @default(cuid())
+  pinId     String
+  title     String?
+  files     Json?
+  alt       String?
+  watermark String?
+  status    Boolean  @default(true)
+  seq       Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String?
+  updatedBy String?
+  isDeleted Boolean  @default(false)
+
+  pin         ProjectMasterPlanPin @relation(fields: [pinId], references: [id], onDelete: Cascade)
+  creator     User?                @relation("CreatedProjectMasterPlanPinGallery", fields: [createdBy], references: [id])
+  updatedUser User?                @relation("UpdatedProjectMasterPlanPinGallery", fields: [updatedBy], references: [id])
+}
+model landOwnerConnect {
+  id                String   @id @default(cuid())
+  fullName          String
+  mobileNo          String
+  emailAddress      String
+  landLocation      String
+  landArea          String
+  landType          String
+  ownershipStatus   String
+  additionalDetails String?
+  pageUrl           String?
+  dateAt            DateTime @default(now())
+}
+
+model CsrCategory {
+  id          String       @id @default(cuid())
+  name        String
+  slug        String?      @unique
+  status      Boolean      @default(true)
+  seq         Int          @default(0)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  createdBy   String?
+  updatedBy   String?
+  creator     User?        @relation("CreatedCsrCategory", fields: [createdBy], references: [id])
+  updatedUser User?        @relation("UpdatedCsrCategory", fields: [updatedBy], references: [id])
+  isDeleted   Boolean      @default(false)
+  galleries   CsrGallery[]
+}
+
+model CsrGallery {
+  id          String       @id @default(cuid())
+  title       String?
+  categoryId  String?
+  category    CsrCategory? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  files       Json?
+  link        String?
+  alt         String?
+  watermark   String?
+  status      Boolean      @default(true)
+  seq         Int          @default(0)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  createdBy   String?
+  updatedBy   String?
+  creator     User?        @relation("CreatedCsrGallery", fields: [createdBy], references: [id])
+  updatedUser User?        @relation("UpdatedCsrGallery", fields: [updatedBy], references: [id])
+  isDeleted   Boolean      @default(false)
+}
+
+model ProjectZone {
+  id          String   @id @default(cuid())
+  projectId   String
+  name        String
+  title       String?
+  files       Json?
+  alt         String?
+  watermark   String?
+  list        Json?
+  status      Boolean  @default(true)
+  seq         Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  project     Projects @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy   String?
+  creator     User?    @relation("CreatedProjectZone", fields: [createdBy], references: [id])
+  updatedBy   String?
+  updatedUser User?    @relation("UpdatedProjectZone", fields: [updatedBy], references: [id])
+  isDeleted   Boolean  @default(false)
+}
+
+model LegacyProject {
+  id          String                @id @default(cuid())
+  name        String
+  category    LegacyProjectCategory @default(upcoming)
+  location    String?
+  description Json?
+  files       Json?
+  alt         String?
+  watermark   String?
+  status      Boolean               @default(true)
+  seq         Int                   @default(0)
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  createdBy   String?
+  creator     User?                 @relation("CreatedLegacyProject", fields: [createdBy], references: [id])
+  updatedBy   String?
+  updatedUser User?                 @relation("UpdatedLegacyProject", fields: [updatedBy], references: [id])
+  isDeleted   Boolean               @default(false)
+}
+
+model InvestorAppreciation {
+  id           String    @id @default(cuid())
+  year         String
+  bsp          String
+  seq          Int       @default(0)
+  status       Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  createdBy    String?
+  creator      User?     @relation("CreatedInvestorAppreciation", fields: [createdBy], references: [id])
+  updatedBy    String?
+  updatedUser  User?     @relation("UpdatedInvestorAppreciation", fields: [updatedBy], references: [id])
+  isDeleted    Boolean   @default(false)
+}
+
+

@@ -104,10 +104,14 @@ export const getAwards = asyncHandler(async (req: Request, res: Response) => {
   const limit = parseInt(req.query.limit as string) || 10;
   const search =
     typeof req.query.search === "string" ? req.query.search : undefined;
+  const isHome = req.query.isHome;
   const filter: any = {};
 
   if (search) {
     filter.search = search;
+  }
+  if (isHome !== undefined) {
+    filter.isHome = isHome === "true" || isHome === "1";
   }
   const awards = await websiteServices.getAwards(page, limit, filter);
 
@@ -598,7 +602,7 @@ export const getEvents = asyncHandler(async (req: Request, res: Response) => {
 
   // Helper to process files for an event array
   const processFiles = async (event: any) => {
-    // 1. Process category cover images (if album)
+    // 1. Process category cover images & category galleries (if album)
     if (event.categories && Array.isArray(event.categories)) {
       await Promise.all(
         event.categories.map(async (category: any) => {
@@ -607,6 +611,22 @@ export const getEvents = asyncHandler(async (req: Request, res: Response) => {
               Object.keys(category.files).map(async (key) => {
                 if (category.files[key]) {
                   category.files[key] = await getFileUrl(category.files[key]);
+                }
+              })
+            );
+          }
+
+          if (category.galleries && Array.isArray(category.galleries)) {
+            await Promise.all(
+              category.galleries.map(async (gallery: any) => {
+                if (gallery.files && typeof gallery.files === "object") {
+                  await Promise.all(
+                    Object.keys(gallery.files).map(async (key) => {
+                      if (gallery.files[key]) {
+                        gallery.files[key] = await getFileUrl(gallery.files[key]);
+                      }
+                    })
+                  );
                 }
               })
             );
@@ -766,6 +786,18 @@ export const getInvestorDocuments = asyncHandler(
   },
 );
 
+export const getInvestorAppreciations = asyncHandler(
+  async (req: Request, res: Response) => {
+    const record = await websiteServices.getInvestorAppreciations();
+    successResponse(
+      res,
+      200,
+      "Investor Appreciations fetched successfully",
+      record,
+    );
+  },
+);
+
 // -----------------START MICROSITE ----------------------
 
 export const getPlatter = asyncHandler(async (req: Request, res: Response) => {
@@ -869,6 +901,57 @@ export const getFilterProjectStatus = asyncHandler(
   async (req: Request, res: Response) => {
     const projectstatus = await websiteServices.getFilterProjectStatus();
     successResponse(res, 200, "Project Status Successfully", projectstatus);
+  },
+);
+
+export const getFilterMasterPlanCategories = asyncHandler(
+  async (req: Request, res: Response) => {
+    const categories = await websiteServices.getFilterMasterPlanCategories();
+    successResponse(
+      res,
+      200,
+      "Master plan categories fetched successfully",
+      categories,
+    );
+  },
+);
+
+export const getFilterCsrCategories = asyncHandler(
+  async (req: Request, res: Response) => {
+    const categories = await websiteServices.getFilterCsrCategories();
+    successResponse(
+      res,
+      200,
+      "CSR categories fetched successfully",
+      categories,
+    );
+  },
+);
+
+export const getCsrGallery = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { categoryId, page, limit } = req.query;
+
+    const galleries = await websiteServices.getCsrGalleryData(
+      categoryId as string | undefined,
+      page ? Number(page) : 1,
+      limit ? Number(limit) : 12,
+    );
+    if (galleries.data && Array.isArray(galleries.data)) {
+      await Promise.all(
+        galleries.data.map(async (item: any) => {
+          if (item.files && typeof item.files === "object") {
+            for (const [key, value] of Object.entries(item.files)) {
+              if (typeof value === "string" && value) {
+                item.files[key] = await getFileUrl(value);
+              }
+            }
+          }
+        }),
+      );
+    }
+
+    successResponse(res, 200, "CSR Gallery fetched successfully", galleries);
   },
 );
 
@@ -1398,6 +1481,118 @@ export const createProjectEnquiry = asyncHandler(
       201,
       "Project enquiry submitted successfully",
       enquiry,
+    );
+  },
+);
+
+export const createFloorplanTowerEnquiry = asyncHandler(
+  async (req: Request, res: Response) => {
+    const {
+      projectId,
+      fullName,
+      emailAddress,
+      mobileNo,
+      message,
+    } = req.body;
+
+    const enquiry = await websiteServices.createFloorplanTowerEnquiry({
+      projectId,
+      fullName,
+      emailAddress,
+      mobileNo,
+      message,
+    });
+    
+    successResponse(
+      res,
+      201,
+      "Form submitted successfully.",
+      enquiry,
+    );
+  },
+);
+
+export const verifySmsOtp = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { mobileNo, otp } = req.body;
+    
+    await websiteServices.verifySmsOtp({
+      mobileNo,
+      otp,
+    });
+    
+    successResponse(
+      res,
+      200,
+      "OTP verified successfully.",
+    );
+  }
+);
+
+export const sendFloorplanTowerOtp = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { emailAddress } = req.body;
+    await websiteServices.sendFloorplanTowerOtp(emailAddress);
+    successResponse(
+      res,
+      200,
+      "OTP sent successfully",
+      null,
+    );
+  },
+);
+
+
+export const createLandOwnerConnectEnquiry = asyncHandler(
+  async (req: Request, res: Response) => {
+    const data = req.body;
+    const result = await websiteServices.createLandOwnerConnectEnquiry(data);
+    successResponse(res, 201, "Land owner connect details submitted successfully", result);
+  }
+);
+
+export const sendSmsOtp = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { mobileNo } = req.body;
+    await websiteServices.sendSmsOtp(mobileNo);
+    successResponse(res, 200, "OTP sent successfully via SMS.");
+  }
+);
+
+export const getLegacyProjects = asyncHandler(
+  async (req: Request, res: Response) => {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const search = (req.query.search as string) || "";
+    const category = req.query.category as any;
+
+    const records = await websiteServices.getLegacyProjects(
+      page,
+      limit,
+      search,
+      category,
+    );
+
+    await Promise.all(
+      records.data.map(async (data: any) => {
+        if (data.files && typeof data.files === "object") {
+          const filesObj = data.files as any;
+          await Promise.all(
+            Object.keys(filesObj).map(async (key) => {
+              if (filesObj[key]) {
+                filesObj[key] = await getFileUrl(filesObj[key]);
+              }
+            }),
+          );
+        }
+      }),
+    );
+
+    successResponse(
+      res,
+      200,
+      "Legacy projects fetched successfully",
+      records,
     );
   },
 );

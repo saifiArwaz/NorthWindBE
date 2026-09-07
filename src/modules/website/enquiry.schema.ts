@@ -60,4 +60,56 @@ export const createProjectEnquirySchema = z.object({
   }),
 });
 
+export const createFloorplanTowerEnquirySchema = z.object({
+  body: z.object({
+    projectId: z
+      .string()
+      .min(1, "projectId is required")
+      .refine(
+        async (projectId) => {
+          const project = await prisma.projects.findUnique({
+            where: { id: projectId },
+          });
+
+          return !!project;
+        },
+        {
+          message: "Invalid projectId",
+        },
+      )
+      .optional(),
+    fullName: z.string().min(1, "fullName is required"),
+    emailAddress: z.string().email("Invalid emailAddress"),
+    mobileNo: z.string().min(10, "mobileNo is required"),
+    message: z.string().optional(),
+  }),
+});
+
+export const sendOtpSchema = z.object({
+  body: z.object({
+    mobileNo: z.string().min(1, "mobileNo is required"),
+  }),
+});
+
+export const verifyOtpSchema = z.object({
+  body: z.object({
+    mobileNo: z.string().min(1, "mobileNo is required"),
+    otp: z.string().length(6, "OTP must be exactly 6 digits"),
+  }),
+});
+
+export const createLandOwnerConnectSchema = z.object({
+  body: z.object({
+    fullName: z.string().min(1, "fullName is required"),
+    mobileNo: z.string().min(1, "mobileNo is required"),
+    emailAddress: z.string().email("Invalid emailAddress").min(1, "emailAddress is required"),
+    landLocation: z.string().min(1, "landLocation is required"),
+    landArea: z.string().min(1, "landArea is required"),
+    landType: z.string().min(1, "landType is required"),
+    ownershipStatus: z.string().min(1, "ownershipStatus is required"),
+    additionalDetails: z.string().optional(),
+    pageUrl: z.string().optional(),
+  }),
+});
+
 

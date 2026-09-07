@@ -31,7 +31,13 @@ router.patch(
   uploadMiddleware("awards").none(),
   awardsCtrl.changeStatus,
 );
+router.patch(
+  "/:id/isHome",
+  uploadMiddleware("awards").none(),
+  awardsCtrl.changeIsHome,
+);
 router.delete("/:id", awardsCtrl.remove);
 
 export { router as AwardsRoutes };
+
 

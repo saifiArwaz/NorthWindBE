@@ -1,6 +1,9 @@
 import { Router } from "express";
 import * as instagramReelCtrl from "./instagramReel.controller.js";
-import { createInstagramReelSchema } from "./instagramReel.schema.js";
+import {
+  createInstagramReelSchema,
+  updateInstagramReelSchema,
+} from "./instagramReel.schema.js";
 import { validate } from "../../middlewares/validate.js";
 import { uploadMiddleware } from "../../middlewares/multer-s3.middleware.js";
 
@@ -17,6 +20,13 @@ router.post(
   noneUpload,
   validate(createInstagramReelSchema),
   instagramReelCtrl.create,
+);
+router.get("/:id", instagramReelCtrl.getOne);
+router.patch(
+  "/:id",
+  noneUpload,
+  validate(updateInstagramReelSchema),
+  instagramReelCtrl.update,
 );
 router.patch("/:id/seq", noneUpload, instagramReelCtrl.changeSeq);
 router.patch(
