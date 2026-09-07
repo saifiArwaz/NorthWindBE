@@ -786,6 +786,18 @@ export const getInvestorDocuments = asyncHandler(
   },
 );
 
+export const getInvestorAppreciations = asyncHandler(
+  async (req: Request, res: Response) => {
+    const record = await websiteServices.getInvestorAppreciations();
+    successResponse(
+      res,
+      200,
+      "Investor Appreciations fetched successfully",
+      record,
+    );
+  },
+);
+
 // -----------------START MICROSITE ----------------------
 
 export const getPlatter = asyncHandler(async (req: Request, res: Response) => {

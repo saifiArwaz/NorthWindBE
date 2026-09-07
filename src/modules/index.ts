@@ -26,6 +26,7 @@ import { MediaKitRoutes } from "./mediaKit/mediaKit.route.js";
 import { AwardsRoutes } from "./awards/awards.route.js";
 import { UploadRoutes } from "./upload/upload.route.js";
 import { investorDocumentsRoutes } from "./investorDocument/investorDocument.route.js";
+import { InvestorAppreciationRoutes } from "./investorAppreciation/investorAppreciation.route.js";
 import { InstagramReelRoutes } from "./instagramReel/instagramReel.route.js";
 import { EnquiriesRoutes } from "./enquiry/enquiry.route.js";
 import { HomeLoanRoutes } from "./homeloan/homeloan.route.js";
@@ -125,6 +126,7 @@ router.use("/admin/csr-gallery", authenticate, CsrGalleryRoutes);
 // above new routes--------------------------------
 router.use("/admin/awards", authenticate, AwardsRoutes);
 router.use("/admin/investor-documents", authenticate, investorDocumentsRoutes);
+router.use("/admin/investor-appreciation", authenticate, InvestorAppreciationRoutes);
 router.use("/admin/instagram-reel", authenticate, InstagramReelRoutes);
 router.use("/admin/enquiry", authenticate, EnquiriesRoutes);
 router.use("/admin/menu", authenticate, menuItemRoutes);

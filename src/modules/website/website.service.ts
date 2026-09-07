@@ -710,6 +710,29 @@ export async function getInvestorDocuments() {
   });
 }
 
+export async function getInvestorAppreciations() {
+  const where: any = {
+    status: true,
+    isDeleted: false,
+  };
+
+  return prisma.investorAppreciation.findMany({
+    where,
+    orderBy: {
+      seq: "asc",
+    },
+    select: {
+      id: true,
+      year: true,
+      bsp: true,
+      status: true,
+      seq: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+}
+
 export async function getJobs(
   page: number = 1,
   limit: number = 10,

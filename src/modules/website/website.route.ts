@@ -56,6 +56,10 @@ router.get(
   "/investor-documents",
   websiteCtrl.getInvestorDocuments,
 );
+router.get(
+  "/investor-appreciation",
+  websiteCtrl.getInvestorAppreciations,
+);
 router.get("/city/:citySlug", websiteCtrl.getCityBySlug);
 
 router.get("/jobs", websiteCtrl.getJobs);

@@ -185,6 +185,8 @@ model User {
   UpdatedProjectZone                 ProjectZone[]                 @relation("UpdatedProjectZone")
   CreatedLegacyProject               LegacyProject[]               @relation("CreatedLegacyProject")
   UpdatedLegacyProject               LegacyProject[]               @relation("UpdatedLegacyProject")
+  CreatedInvestorAppreciation        InvestorAppreciation[]        @relation("CreatedInvestorAppreciation")
+  UpdatedInvestorAppreciation        InvestorAppreciation[]        @relation("UpdatedInvestorAppreciation")
 }
 
 model RefreshToken {
@@ -1339,6 +1341,21 @@ model LegacyProject {
   updatedBy   String?
   updatedUser User?                 @relation("UpdatedLegacyProject", fields: [updatedBy], references: [id])
   isDeleted   Boolean               @default(false)
+}
+
+model InvestorAppreciation {
+  id           String    @id @default(cuid())
+  year         String
+  bsp          String
+  seq          Int       @default(0)
+  status       Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  createdBy    String?
+  creator      User?     @relation("CreatedInvestorAppreciation", fields: [createdBy], references: [id])
+  updatedBy    String?
+  updatedUser  User?     @relation("UpdatedInvestorAppreciation", fields: [updatedBy], references: [id])
+  isDeleted    Boolean   @default(false)
 }
 
 
