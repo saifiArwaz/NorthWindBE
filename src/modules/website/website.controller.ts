@@ -906,6 +906,44 @@ export const getCitiesByState = asyncHandler(
   },
 );
 
+export const getLocationWiseProjects = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { cityId, citySlug } = req.query;
+
+    const filters: any = {};
+    if (cityId) filters.cityId = cityId
+    if (citySlug) filters.citySlug = citySlug
+
+    const projects = await websiteServices.getLocationWiseProjects(filters);
+
+    if (projects && projects.length > 0) {
+      await Promise.all(
+        projects.map(async (project: any) => {
+          if (
+            project.files &&
+            typeof project.files === "object"
+          ) {
+            const fileKeys = Object.keys(project.files);
+            for (const key of fileKeys) {
+              const val = project.files[key];
+              if (val && typeof val === "string") {
+                project.files[key] = await getFileUrl(val);
+              }
+            }
+          }
+        }),
+      );
+    }
+
+    successResponse(
+      res,
+      200,
+      "Projects fetched successfully",
+      projects,
+    );
+  },
+);
+
 export const getFilterSubTypology = asyncHandler(
   async (req: Request, res: Response) => {
     const subTypologies = await websiteServices.getFilterSubTypology();

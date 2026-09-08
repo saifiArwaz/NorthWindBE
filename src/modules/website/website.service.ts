@@ -1818,4 +1818,46 @@ export async function getLegacyProjects(
   );
 }
 
+export async function getLocationWiseProjects(
+  filters: {
+    cityId?: string;
+    citySlug?: string;
+  } = {},
+) {
+  const where: any = {
+    status: true,
+    isDeleted: false,
+  };
+
+  if (filters.cityId) {
+    where.cityId = filters.cityId;
+  }
+  if (filters.citySlug) {
+    where.city = { slug: filters.citySlug };
+  }
+
+  const projects = await prisma.projects.findMany({
+    where,
+    orderBy: [{ seq: "asc" }, { createdAt: "desc" }],
+    select: {
+      id: true,
+      projectName: true,
+      slug: true,
+      cityId: true,
+      shortDescription: true,
+      files: true,
+      alt: true,
+      watermark: true,
+      seoTags: true,
+      location: true,
+      otherDetails: true,
+      seq: true,
+      status: true,
+    },
+  });
+
+  return projects;
+}
+
+
 

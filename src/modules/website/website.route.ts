@@ -67,6 +67,7 @@ router.get("/csr-gallery", websiteCtrl.getCsrGallery);
 router.get("/legacy-projects", websiteCtrl.getLegacyProjects);
 
 // projects routes-------------------
+router.get("/cities-projects", websiteCtrl.getLocationWiseProjects);
 router.get("/projects", projectCtrl.getProjects);
 router.get(
   "/project/:projectId/galleries",
