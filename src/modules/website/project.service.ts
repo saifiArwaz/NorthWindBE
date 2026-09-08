@@ -5,6 +5,7 @@ import { paginate } from "../../utils/pagination.utils.js";
 export interface ProjectFilterParams {
   search?: string;
   platterIds?: string;
+  cityId?: string;
   cityIds?: string;
   isHome?: boolean;
   isPast?: boolean;
@@ -41,8 +42,9 @@ export async function getProjects(params: ProjectFilterParams = {}) {
     where.isPast = Boolean(isPast);
   }
   if (cityIds) {
-    where.city = { slug: cityIds };
+    where.cityId = cityIds;
   }
+
   if (projectStatusIds) {
     where.projectStatus = { slug: projectStatusIds };
   } else if (!isPast) {
@@ -104,6 +106,13 @@ export async function getProjects(params: ProjectFilterParams = {}) {
             id: true,
             name: true,
             slug: true,
+            state: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+              },
+            },
           },
         },
         typology: {
