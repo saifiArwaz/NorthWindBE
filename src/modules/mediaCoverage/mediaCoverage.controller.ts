@@ -220,7 +220,7 @@ export const changeSeq = asyncHandler(
   },
 );
 
-export const chooseFeature = asyncHandler(
+export const chooseIsHome = asyncHandler(
   async (req: Request<{ id: string }>, res: Response) => {
     const user = req.user!;
     const { id } = req.params;
@@ -257,7 +257,7 @@ export const chooseFeature = asyncHandler(
       throw new ApiError(404, "Media Coverage not found");
     }
 
-    const updatedproject = await mediaCoverageService.updateFeature(
+    const updatedproject = await mediaCoverageService.updateIsHome(
       id,
       isHome,
       user?.id,
@@ -266,7 +266,7 @@ export const chooseFeature = asyncHandler(
     successResponse(
       res,
       200,
-      "Feature column updated successfully",
+      "IsHome column updated successfully",
       updatedproject,
     );
   },

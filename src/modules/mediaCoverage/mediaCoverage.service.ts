@@ -96,7 +96,7 @@ export async function updateProjectSeq(id: string, payload: any) {
   });
 }
 
-export async function updateFeature(
+export async function updateIsHome(
   id: string,
   isHome: boolean,
   updatedBy: string,

@@ -40,9 +40,9 @@ router.patch(
 );
 router.delete("/:id", mediaCoverageCtrl.destroy);
 router.patch(
-  "/:id/feature",
+  "/:id/isHome",
   uploadMiddleware("mediaCoverage").none(),
-  mediaCoverageCtrl.chooseFeature,
+  mediaCoverageCtrl.chooseIsHome,
 );
 
 export { router as MediaCoverageRoutes };
