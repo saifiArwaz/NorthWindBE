@@ -187,6 +187,8 @@ model User {
   UpdatedLegacyProject               LegacyProject[]               @relation("UpdatedLegacyProject")
   CreatedInvestorAppreciation        InvestorAppreciation[]        @relation("CreatedInvestorAppreciation")
   UpdatedInvestorAppreciation        InvestorAppreciation[]        @relation("UpdatedInvestorAppreciation")
+  CreatedState                       State[]                       @relation("CreatedState")
+  UpdatedState                       State[]                       @relation("UpdatedState")
 }
 
 model RefreshToken {
@@ -393,15 +395,33 @@ model TypologySubTypology {
   updatedUser   User?       @relation("UpdatedMappingTypologies", fields: [updatedBy], references: [id])
 }
 
+model State {
+  id          String     @id @default(cuid())
+  name        String     @unique
+  slug        String     @unique
+  status      Boolean    @default(true)
+  seq         Int        @default(0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  cities      City[]
+  createdBy   String?
+  creator     User?      @relation("CreatedState", fields: [createdBy], references: [id])
+  updatedBy   String?
+  updatedUser User?      @relation("UpdatedState", fields: [updatedBy], references: [id])
+  isDeleted   Boolean    @default(false)
+}
+
 model City {
   id          String     @id @default(cuid())
   name        String
   slug        String
+  stateId     String?
   seoTags     Json?
   status      Boolean    @default(true)
   seq         Int        @default(0)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+  state       State?     @relation(fields: [stateId], references: [id], onDelete: Cascade)
   projects    Projects[]
   createdBy   String?
   creator     User?      @relation("CreatedCity", fields: [createdBy], references: [id])
@@ -410,6 +430,7 @@ model City {
   isDeleted   Boolean    @default(false)
 
   @@unique([name])
+  @@index([stateId])
 }
 
 model Awards {

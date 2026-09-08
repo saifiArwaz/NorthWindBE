@@ -958,14 +958,82 @@ export async function getLocations() {
       status: true,
       isDeleted: false,
     },
-    orderBy: { seq: "asc" },
+    orderBy: [{ seq: "asc" }, { name: "asc" }],
     select: {
       id: true,
       name: true,
       slug: true,
       seq: true,
+      stateId: true,
+      state: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+        },
+      },
     },
   });
+}
+
+export async function getStateWiseCities() {
+  return prisma.state.findMany({
+    where: {
+      status: true,
+      isDeleted: false,
+    },
+    orderBy: [{ seq: "asc" }, { name: "asc" }],
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      seq: true,
+      cities: {
+        where: {
+          status: true,
+          isDeleted: false,
+        },
+        orderBy: [{ seq: "asc" }, { name: "asc" }],
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          seq: true,
+        },
+      },
+    },
+  });
+}
+
+export async function getCitiesByState(stateSlug: string) {
+  const state = await prisma.state.findFirst({
+    where: {
+      slug: stateSlug,
+      status: true,
+      isDeleted: false,
+    },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      cities: {
+        where: {
+          status: true,
+          isDeleted: false,
+        },
+        orderBy: [{ seq: "asc" }, { name: "asc" }],
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          seq: true,
+          seoTags: true,
+        },
+      },
+    },
+  });
+
+  return state;
 }
 
 export async function getFilterSubTypology() {

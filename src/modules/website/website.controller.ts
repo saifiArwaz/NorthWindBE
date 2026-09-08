@@ -885,6 +885,27 @@ export const getFilterLocations = asyncHandler(
   },
 );
 
+export const getStateWiseCities = asyncHandler(
+  async (_req: Request, res: Response) => {
+    const records = await websiteServices.getStateWiseCities();
+    successResponse(res, 200, "State-wise cities fetched successfully", records);
+  },
+);
+
+export const getCitiesByState = asyncHandler(
+  async (req: Request<{ stateSlug: string }>, res: Response) => {
+    const { stateSlug } = req.params;
+    if (!stateSlug) {
+      throw new ApiError(400, "stateSlug parameter is required");
+    }
+    const state = await websiteServices.getCitiesByState(stateSlug);
+    if (!state) {
+      throw new ApiError(404, "State not found");
+    }
+    successResponse(res, 200, "Cities fetched successfully", state);
+  },
+);
+
 export const getFilterSubTypology = asyncHandler(
   async (req: Request, res: Response) => {
     const subTypologies = await websiteServices.getFilterSubTypology();

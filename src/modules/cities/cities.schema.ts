@@ -4,12 +4,13 @@ import { prisma } from "../../config/prisma.config.js";
 export const createCitiesSchema = z.object({
   body: z
     .object({
-      name: z.string().min(3, "Name field is required"),
+      name: z.string().min(2, "Name field is required"),
+      stateId: z.string().min(1, "State ID is required"),
       seoTags: z.record(z.string(), z.unknown()).optional(),
     })
     .superRefine(async (data, ctx) => {
       const city = await prisma.city.findFirst({
-        where: { name: data.name },
+        where: { name: data.name, isDeleted: false },
       });
 
       if (city) {
@@ -19,12 +20,48 @@ export const createCitiesSchema = z.object({
           message: "City already exists",
         });
       }
+
+      if (data.stateId) {
+        const state = await prisma.state.findFirst({
+          where: { id: data.stateId, isDeleted: false },
+        });
+
+        if (!state) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["stateId"],
+            message: "Selected state does not exist",
+          });
+        }
+      }
     }),
 });
 
 export const updateCitiesSchema = z.object({
-  body: z.object({
-    name: z.string().min(3, "Name field is required"),
-    seoTags: z.record(z.string(), z.unknown()).optional(),
-  }),
+  params: z
+    .object({
+      id: z.string(),
+    })
+    .optional(),
+  body: z
+    .object({
+      name: z.string().min(2, "Name field is required").optional(),
+      stateId: z.string().min(1, "State ID must not be empty").optional(),
+      seoTags: z.record(z.string(), z.unknown()).optional(),
+    })
+    .superRefine(async (data, ctx) => {
+      if (data.stateId) {
+        const state = await prisma.state.findFirst({
+          where: { id: data.stateId, isDeleted: false },
+        });
+
+        if (!state) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["stateId"],
+            message: "Selected state does not exist",
+          });
+        }
+      }
+    }),
 });

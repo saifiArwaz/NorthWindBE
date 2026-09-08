@@ -67,7 +67,9 @@ export async function createProject(data: IProjectsCreateDTO) {
     data: prismaData,
     include: {
       typology: true,
-      city: true,
+      city: {
+        include: { state: true },
+      },
       projectStatus: true,
       platter: true,
       projectSubTypology: {
@@ -114,7 +116,9 @@ export async function getAllProject(
       where,
       orderBy: [{ seq: "asc" }, { id: "asc" }],
       include: {
-        city: true,
+        city: {
+        include: { state: true },
+      },
         platter: true,
         typology: true,
         projectSubTypology: {
@@ -130,7 +134,9 @@ export async function getProjectById(id: string) {
   return prisma.projects.findUnique({
     where: { id },
     include: {
-      city: true,
+      city: {
+        include: { state: true },
+      },
       platter: true,
       typology: true,
       projectSubTypology: {
@@ -197,7 +203,9 @@ export async function updateProject(id: string, data: IProjectsUpdateDTO) {
     where: { id },
     data: prismaData,
     include: {
-      city: true,
+      city: {
+        include: { state: true },
+      },
       platter: true,
       typology: true,
       projectSubTypology: {

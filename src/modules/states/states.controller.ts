@@ -1,81 +1,69 @@
 import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
-import * as citiesService from "./cities.service.js";
+import * as statesService from "./states.service.js";
 import { successResponse } from "../../utils/responseHandler.utils.js";
 import { ApiError } from "../../utils/apiError.utils.js";
 
-export const createCities = asyncHandler(
-  async (req: Request, res: Response) => {
-    const user = req.user as { id?: string };
+export const createState = asyncHandler(async (req: Request, res: Response) => {
+  const user = req.user as { id?: string };
 
-    const seoTags = req.body?.seoTags ?? {};
+  const record = await statesService.createState({
+    ...req.body,
+    createdBy: user?.id,
+  });
 
-    const record = await citiesService.createCity({
-      ...req.body,
-      seoTags: seoTags,
-      createdBy: user?.id,
-    });
-
-    successResponse(res, 201, "City created successfully", record);
-  },
-);
+  successResponse(res, 201, "State created successfully", record);
+});
 
 export const getList = asyncHandler(async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;
   const search = (req.query.search as string) || "";
-  const stateId = (req.query.stateId as string) || "";
 
-  const records = await citiesService.getAllList(page, limit, search, stateId);
-  successResponse(res, 200, "City records fetched successfully", records);
+  const records = await statesService.getAllStates(page, limit, search);
+  successResponse(res, 200, "State records fetched successfully", records);
 });
 
-export const getCitiesById = asyncHandler(
-  async (req: Request, res: Response) => {
-    const id = req.params.id as string;
-    const record = await citiesService.getCityById(id);
+export const getStateById = asyncHandler(async (req: Request, res: Response) => {
+  const id = req.params.id as string;
+  const record = await statesService.getStateById(id);
 
-    if (!record) {
-      throw new ApiError(404, "Record not found");
-    }
+  if (!record) {
+    throw new ApiError(404, "State record not found");
+  }
 
-    successResponse(res, 200, "Get edit City record", record);
-  },
-);
+  successResponse(res, 200, "Get State record", record);
+});
 
-export const updateCitiesById = asyncHandler(
+export const updateStateById = asyncHandler(
   async (req: Request, res: Response) => {
     const user = req.user as { id?: string };
     const id = req.params.id as string;
-    const oldRecord = await citiesService.getCityById(id);
 
+    const oldRecord = await statesService.getStateById(id);
     if (!oldRecord) {
-      throw new ApiError(404, "Record not found");
+      throw new ApiError(404, "State record not found");
     }
 
-    const seoTags = req.body?.seoTags ?? {};
-    const updatePayload: any = {
+    const updatedRecord = await statesService.updateState(id, {
       ...req.body,
-      seoTags: seoTags,
-      updatedBy: user.id,
-    };
+      updatedBy: user?.id,
+    });
 
-    const updatedRecord = await citiesService.updateCity(id, updatePayload);
-
-    successResponse(res, 200, "City updated successfully", updatedRecord);
+    successResponse(res, 200, "State updated successfully", updatedRecord);
   },
 );
 
 export const deleteById = asyncHandler(async (req: Request, res: Response) => {
   const id = req.params.id as string;
-  const item = await citiesService.getCityById(id);
+  const item = await statesService.getStateById(id);
 
   if (!item) {
-    throw new ApiError(404, "City record not found");
+    throw new ApiError(404, "State record not found");
   }
 
-  await citiesService.deleteCityById(id);
-  successResponse(res, 200, "City record deleted successfully");
+  await statesService.deleteStateById(id);
+  successResponse(res, 200, "State record deleted successfully");
 });
 
 export const changeSeq = asyncHandler(
@@ -88,12 +76,16 @@ export const changeSeq = asyncHandler(
       throw new ApiError(400, "Seq value must be a number");
     }
 
-    const record = await citiesService.getCityById(id);
+    const record = await statesService.getStateById(id);
     if (!record) {
-      throw new ApiError(404, "City record not found");
+      throw new ApiError(404, "State record not found");
     }
 
-    const updatedRecord = await citiesService.updateSeq(id, Number(seq), user?.id);
+    const updatedRecord = await statesService.updateSeq(
+      id,
+      Number(seq),
+      user?.id,
+    );
     successResponse(res, 200, "Seq updated successfully", updatedRecord);
   },
 );
@@ -130,12 +122,7 @@ export const changeStatus = asyncHandler(
       status = status === 1;
     }
 
-    const record = await citiesService.getCityById(id);
-    if (!record) {
-      throw new ApiError(404, "City record not found");
-    }
-
-    const updatedRecord = await citiesService.updateStatus(
+    const updatedRecord = await statesService.updateStatus(
       id,
       status as boolean,
       user?.id,
@@ -144,3 +131,4 @@ export const changeStatus = asyncHandler(
     successResponse(res, 200, "Status updated successfully", updatedRecord);
   },
 );
+

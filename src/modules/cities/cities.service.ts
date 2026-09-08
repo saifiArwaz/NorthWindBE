@@ -6,29 +6,47 @@ import slugifyPkg from "slugify";
 const slugify = (slugifyPkg as any).default ?? slugifyPkg;
 
 export async function createCity(data: ICitiesDTO) {
-  console.log(data)
-  const slug = slugify(data.name, { lower: true });
-  const existing = await prisma.city.findFirst({ where: { slug } });
-  if (existing) throw new ApiError(400, "Slug already exists");
+  const slug = slugify(data.name, { lower: true, strict: true });
+  const existing = await prisma.city.findFirst({
+    where: { slug, isDeleted: false },
+  });
+  if (existing) throw new ApiError(400, "City with this slug already exists");
 
   let prismaData: any = {
     name: data.name,
     slug: slug,
     seoTags: data.seoTags,
+    ...(data.stateId ? { state: { connect: { id: data.stateId } } } : {}),
     ...(data.createdBy ? { creator: { connect: { id: data.createdBy } } } : {}),
   };
-  return prisma.city.create({ data: prismaData });
+  return prisma.city.create({
+    data: prismaData,
+    include: {
+      state: {
+        select: { id: true, name: true, slug: true },
+      },
+    },
+  });
 }
 
-export async function getAllList(page = 1, limit = 10, search = "") {
-  const where = search
-    ? {
-        OR: [{ name: { contains: search, mode: "insensitive" } }],
-      }
-    : {};
-  if (typeof where !== "undefined" && where && typeof where === "object") {
-    (where as any).isDeleted = false;
+export async function getAllList(
+  page = 1,
+  limit = 10,
+  search = "",
+  stateId = "",
+) {
+  const where: any = {
+    isDeleted: false,
+  };
+
+  if (search) {
+    where.name = { contains: search, mode: "insensitive" };
   }
+
+  if (stateId) {
+    where.stateId = stateId;
+  }
+
   return paginate(
     prisma.city,
     {
@@ -40,17 +58,26 @@ export async function getAllList(page = 1, limit = 10, search = "") {
 }
 
 export async function updateCity(id: string, data: ICitiesUpdateDTO) {
-  const slug = slugify(data.name, { lower: true });
-  const existing = await prisma.city.findFirst({
-    where: { slug, NOT: { id } },
-  });
-  if (existing) {
-    throw new ApiError(400, "city Already exists");
+  let slug: string | undefined;
+  if (data.name) {
+    slug = slugify(data.name, { lower: true, strict: true });
+    const existing = await prisma.city.findFirst({
+      where: { slug, isDeleted: false, NOT: { id } },
+    });
+    if (existing) {
+      throw new ApiError(400, "City with this slug already exists");
+    }
   }
+
   let prismaData: any = {
-    name: data.name,
-    slug: slug,
-    seoTags: data.seoTags,
+    ...(data.name ? { name: data.name } : {}),
+    ...(slug ? { slug } : {}),
+    ...(data.seoTags !== undefined ? { seoTags: data.seoTags } : {}),
+    ...(data.stateId !== undefined
+      ? data.stateId
+        ? { state: { connect: { id: data.stateId } } }
+        : { state: { disconnect: true } }
+      : {}),
     ...(data.updatedBy
       ? { updatedUser: { connect: { id: data.updatedBy } } }
       : {}),
@@ -63,8 +90,8 @@ export async function updateCity(id: string, data: ICitiesUpdateDTO) {
 }
 
 export async function getCityById(id: string) {
-  return prisma.city.findUnique({
-    where: { id },
+  return prisma.city.findFirst({
+    where: { id, isDeleted: false },
   });
 }
 

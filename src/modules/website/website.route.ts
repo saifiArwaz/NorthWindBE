@@ -61,7 +61,6 @@ router.get(
   websiteCtrl.getInvestorAppreciations,
 );
 router.get("/city/:citySlug", websiteCtrl.getCityBySlug);
-
 router.get("/jobs", websiteCtrl.getJobs);
 router.get("/content-list/:type", websiteCtrl.getContetByType);
 router.get("/csr-gallery", websiteCtrl.getCsrGallery);
@@ -119,6 +118,7 @@ router.get("/project/:platterSlug/:slug", projectCtrl.getProjectDetailsBySlug);
 router.get("/filter/project", websiteCtrl.getFilterProjectsWithGallery);
 router.get("/filter/platter", websiteCtrl.getFilterPlatter);
 router.get("/filter/location", websiteCtrl.getFilterLocations);
+router.get("/filter/state-cities", websiteCtrl.getStateWiseCities);
 router.get("/filter/sub-typology", websiteCtrl.getFilterSubTypology);
 router.get("/filter/project-status", websiteCtrl.getFilterProjectStatus);
 router.get(
