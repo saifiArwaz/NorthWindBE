@@ -18,6 +18,7 @@ const uploaded = uploadMiddleware("projects").fields([
   { name: "brochure", maxCount: 1 },
   { name: "elevationDesktopImage", maxCount: 1 },
   { name: "elevationMobileImage", maxCount: 1 },
+  { name: "asideImage", maxCount: 1 },
 ]);
 
 router.get("/filter-list", projectCtrl.getFilterList);

@@ -31,6 +31,7 @@ export const getAll = asyncHandler(
     const platterId = req.query.platter as string | undefined;
     const projectStatusId = req.query.projectstatus as string | undefined;
     const feature = req.query.feature as string | undefined;
+    const stateId = req.query.stateId as string | undefined;
 
     const record = await projectService.getAllProject(
       page,
@@ -39,6 +40,7 @@ export const getAll = asyncHandler(
       platterId,
       projectStatusId,
       feature,
+      stateId,
     );
 
     await Promise.all(
@@ -198,6 +200,7 @@ export const update = asyncHandler(
       Object.entries({
         projectName: req.body.projectName,
         slug,
+        stateId: req.body.stateId,
         cityId: req.body.cityId,
         platterId: req.body.platterId,
         typologyId: req.body.typologyId,

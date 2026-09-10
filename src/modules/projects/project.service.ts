@@ -33,6 +33,7 @@ export async function createProject(data: IProjectsCreateDTO) {
   const prismaData: any = {
     projectName: data.projectName,
     slug: slug,
+    state: { connect: { id: data.stateId } },
     ...(data.cityId ? { city: { connect: { id: data.cityId } } } : {}),
     platter: { connect: { id: data.platterId } },
     ...(data.typologyId && data.typologyId.trim() !== ""
@@ -86,6 +87,7 @@ export async function getAllProject(
   platterId?: string,
   projectStatusId?: string,
   feature?: string,
+  stateId?: string,
 ) {
   const where: any = {};
 
@@ -95,6 +97,10 @@ export async function getAllProject(
 
   if (platterId) {
     where.platterId = platterId;
+  }
+
+  if (stateId) {
+    where.stateId = stateId;
   }
 
   if (projectStatusId) {
@@ -117,8 +123,8 @@ export async function getAllProject(
       orderBy: [{ seq: "asc" }, { id: "asc" }],
       include: {
         city: {
-        include: { state: true },
-      },
+          include: { state: true },
+        },
         platter: true,
         typology: true,
         projectSubTypology: {
@@ -134,6 +140,7 @@ export async function getProjectById(id: string) {
   return prisma.projects.findUnique({
     where: { id },
     include: {
+      state: true,
       city: {
         include: { state: true },
       },
@@ -157,6 +164,9 @@ export async function updateProject(id: string, data: IProjectsUpdateDTO) {
       slug: data.slug,
       type: data.type,
       shortDescription: data.shortDescription,
+      ...(data.stateId && {
+        state: { connect: { id: data.stateId } },
+      }),
       ...(data.cityId && {
         city: { connect: { id: data.cityId } },
       }),
@@ -203,6 +213,7 @@ export async function updateProject(id: string, data: IProjectsUpdateDTO) {
     where: { id },
     data: prismaData,
     include: {
+      state: true,
       city: {
         include: { state: true },
       },

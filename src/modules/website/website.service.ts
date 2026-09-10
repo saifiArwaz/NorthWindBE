@@ -1822,6 +1822,8 @@ export async function getLocationWiseProjects(
   filters: {
     cityId?: string;
     citySlug?: string;
+    stateId?: string;
+    stateSlug?: string;
   } = {},
 ) {
   const where: any = {
@@ -1829,6 +1831,12 @@ export async function getLocationWiseProjects(
     isDeleted: false,
   };
 
+  if (filters.stateId) {
+    where.stateId = filters.stateId;
+  }
+  if (filters.stateSlug) {
+    where.state = { slug: filters.stateSlug };
+  }
   if (filters.cityId) {
     where.cityId = filters.cityId;
   }

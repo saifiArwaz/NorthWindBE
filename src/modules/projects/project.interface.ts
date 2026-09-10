@@ -2,6 +2,7 @@ export interface IProjectsCreateDTO {
   projectName: string;
   slug: string;
   platterId: string;
+  stateId: string;
   typologyId?: string;
   subTypologyId?: string[];
   projectStatusId: string;
@@ -23,6 +24,7 @@ export interface IProjectsUpdateDTO {
   projectName?: string;
   slug?: string;
   platterId?: string;
+  stateId?: string;
   typologyId?: string;
   subTypologyId?: string[];
   projectStatusId?: string;

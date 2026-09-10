@@ -7,6 +7,7 @@ export interface ProjectFilterParams {
   platterIds?: string;
   cityId?: string;
   cityIds?: string;
+  stateId?: string;
   isHome?: boolean;
   isPast?: boolean;
   subTypologyIds?: string;
@@ -22,6 +23,7 @@ export async function getProjects(params: ProjectFilterParams = {}) {
     search,
     platterIds,
     cityIds,
+    stateId,
     isHome,
     isPast,
     projectStatusIds,
@@ -40,6 +42,9 @@ export async function getProjects(params: ProjectFilterParams = {}) {
   }
   if (isPast !== undefined) {
     where.isPast = Boolean(isPast);
+  }
+  if (stateId) {
+    where.stateId = stateId;
   }
   if (cityIds) {
     where.cityId = cityIds;

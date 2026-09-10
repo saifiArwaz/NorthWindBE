@@ -8,9 +8,9 @@ const slugify = (slugifyPkg as any).default ?? slugifyPkg;
 export async function createCity(data: ICitiesDTO) {
   const slug = slugify(data.name, { lower: true, strict: true });
   const existing = await prisma.city.findFirst({
-    where: { slug, isDeleted: false },
+    where: { slug, stateId: data.stateId ?? null, isDeleted: false },
   });
-  if (existing) throw new ApiError(400, "City with this slug already exists");
+  if (existing) throw new ApiError(400, "City with this slug already exists in this state");
 
   let prismaData: any = {
     name: data.name,
@@ -61,11 +61,14 @@ export async function updateCity(id: string, data: ICitiesUpdateDTO) {
   let slug: string | undefined;
   if (data.name) {
     slug = slugify(data.name, { lower: true, strict: true });
+    // fetch current city to know its stateId if not being updated
+    const current = await prisma.city.findUnique({ where: { id } });
+    const checkStateId = data.stateId ?? current?.stateId ?? null;
     const existing = await prisma.city.findFirst({
-      where: { slug, isDeleted: false, NOT: { id } },
+      where: { slug, stateId: checkStateId, isDeleted: false, NOT: { id } },
     });
     if (existing) {
-      throw new ApiError(400, "City with this slug already exists");
+      throw new ApiError(400, "City with this slug already exists in this state");
     }
   }
 

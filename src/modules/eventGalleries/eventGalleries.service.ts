@@ -47,7 +47,7 @@ export async function getAllList(page = 1, limit = 10, search = "", categoryId?:
     prisma.eventGalleries,
     {
       where,
-      orderBy: { createdAt: "desc" },
+      orderBy: { seq: "asc" },
       include: { category: { include: { event: { select: { id: true, title: true} } } } },
     },
     { page, limit },

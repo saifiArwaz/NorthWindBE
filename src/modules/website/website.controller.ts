@@ -908,11 +908,13 @@ export const getCitiesByState = asyncHandler(
 
 export const getLocationWiseProjects = asyncHandler(
   async (req: Request, res: Response) => {
-    const { cityId, citySlug } = req.query;
+    const { cityId, citySlug, stateId, stateSlug } = req.query;
 
     const filters: any = {};
-    if (cityId) filters.cityId = cityId
-    if (citySlug) filters.citySlug = citySlug
+    if (stateId) filters.stateId = stateId;
+    if (stateSlug) filters.stateSlug = stateSlug;
+    if (cityId) filters.cityId = cityId;
+    if (citySlug) filters.citySlug = citySlug;
 
     const projects = await websiteServices.getLocationWiseProjects(filters);
 

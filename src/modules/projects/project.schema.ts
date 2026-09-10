@@ -6,6 +6,7 @@ export const createProjectSchema = z
     body: z.object({
       projectName: z.string(),
       platterId: z.string(),
+      stateId: z.string().min(1, "State ID is required"),
       typologyId: z.string().optional().nullable(),
       subTypologyId: z.union([z.array(z.string()), z.string()]).optional().nullable(),
       projectStatusId: z.string(),
@@ -26,6 +27,20 @@ export const createProjectSchema = z
   })
   .superRefine(async (data, ctx) => {
     const body = data.body;
+    // Check if State exists
+    if (body.stateId) {
+      const state = await prisma.state.findUnique({
+        where: { id: body.stateId },
+      });
+      if (!state) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Invalid stateId",
+          path: ["body", "stateId"],
+        });
+      }
+    }
+
     if (body.cityId) {
       const city = await prisma.city.findUnique({
         where: { id: body.cityId },
@@ -34,6 +49,13 @@ export const createProjectSchema = z
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Invalid cityId",
+          path: ["body", "cityId"],
+        });
+      } else if (body.stateId && city.stateId !== body.stateId) {
+        // City does not belong to the given state
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "The selected city does not belong to the selected state",
           path: ["body", "cityId"],
         });
       }
@@ -104,21 +126,46 @@ export const createProjectSchema = z
     }
   });
 
-export const updateProjectSchema = z.object({
-  body: z.object({
-    projectName: z.string().optional(),
-    platterId: z.string().optional(),
-    typologyId: z.string().optional().nullable(),
-    subTypologyId: z.union([z.array(z.string()), z.string()]).optional().nullable(),
-    projectStatusId: z.string().optional(),
-    cityId: z.string().optional(),
-    brochure: z.string().optional(),
-    type: z.string().optional(),
-    shortDescription: z.string().optional(),
-    alt: z.string().optional(),
-    watermark: z.string().optional(),
-    location: z.string().optional(),
-    seoTags: z.record(z.string(), z.unknown()).optional(),
-    otherDetails: z.record(z.string(), z.unknown()).optional(),
-  }),
-});
+export const updateProjectSchema = z
+  .object({
+    body: z.object({
+      projectName: z.string().optional(),
+      platterId: z.string().optional(),
+      stateId: z.string().optional(),
+      typologyId: z.string().optional().nullable(),
+      subTypologyId: z.union([z.array(z.string()), z.string()]).optional().nullable(),
+      projectStatusId: z.string().optional(),
+      cityId: z.string().optional(),
+      brochure: z.string().optional(),
+      type: z.string().optional(),
+      shortDescription: z.string().optional(),
+      alt: z.string().optional(),
+      watermark: z.string().optional(),
+      location: z.string().optional(),
+      seoTags: z.record(z.string(), z.unknown()).optional(),
+      otherDetails: z.record(z.string(), z.unknown()).optional(),
+    }),
+  })
+  .superRefine(async (data, ctx) => {
+    const body = data.body;
+
+    // If both stateId and cityId are provided, verify city belongs to the state
+    if (body.stateId && body.cityId) {
+      const city = await prisma.city.findUnique({
+        where: { id: body.cityId },
+      });
+      if (!city) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Invalid cityId",
+          path: ["body", "cityId"],
+        });
+      } else if (city.stateId !== body.stateId) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "The selected city does not belong to the selected state",
+          path: ["body", "cityId"],
+        });
+      }
+    }
+  });

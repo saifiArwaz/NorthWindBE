@@ -404,6 +404,7 @@ model State {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   cities      City[]
+  projects    Projects[]
   createdBy   String?
   creator     User?      @relation("CreatedState", fields: [createdBy], references: [id])
   updatedBy   String?
@@ -429,7 +430,7 @@ model City {
   updatedUser User?      @relation("UpdatedCity", fields: [updatedBy], references: [id])
   isDeleted   Boolean    @default(false)
 
-  @@unique([name])
+  @@unique([name, stateId])
   @@index([stateId])
 }
 
@@ -533,6 +534,7 @@ model Projects {
   id                       String                      @id @default(cuid())
   slug                     String                      @unique
   projectName              String                      @unique
+  stateId                  String?
   cityId                   String?
   platterId                String
   type                     FileType                    @default(image)
@@ -555,6 +557,7 @@ model Projects {
   createdAt                DateTime                    @default(now())
   updatedAt                DateTime                    @updatedAt
   // mapping with other project sections one to many
+  state                    State?                      @relation(fields: [stateId], references: [id])
   city                     City?                       @relation(fields: [cityId], references: [id])
   platter                  Platter                     @relation(fields: [platterId], references: [id])
   typology                 Typology?                   @relation(fields: [typologyId], references: [id])
@@ -582,7 +585,7 @@ model Projects {
   projectZones             ProjectZone[]
   isDeleted                Boolean                     @default(false)
 
-  @@index([projectName, slug, cityId, typologyId])
+  @@index([projectName, slug, stateId, cityId, typologyId])
 }
 
 model ProjectSubTypology {

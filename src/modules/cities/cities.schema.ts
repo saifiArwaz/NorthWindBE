@@ -9,18 +9,6 @@ export const createCitiesSchema = z.object({
       seoTags: z.record(z.string(), z.unknown()).optional(),
     })
     .superRefine(async (data, ctx) => {
-      const city = await prisma.city.findFirst({
-        where: { name: data.name, isDeleted: false },
-      });
-
-      if (city) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["name"],
-          message: "City already exists",
-        });
-      }
-
       if (data.stateId) {
         const state = await prisma.state.findFirst({
           where: { id: data.stateId, isDeleted: false },
@@ -32,7 +20,25 @@ export const createCitiesSchema = z.object({
             path: ["stateId"],
             message: "Selected state does not exist",
           });
+          return; // no point checking city name if state is invalid
         }
+      }
+
+      // Check uniqueness only within the same state
+      const city = await prisma.city.findFirst({
+        where: {
+          name: { equals: data.name, mode: "insensitive" },
+          stateId: data.stateId,
+          isDeleted: false,
+        },
+      });
+
+      if (city) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["name"],
+          message: "City with this name already exists in the selected state",
+        });
       }
     }),
 });
