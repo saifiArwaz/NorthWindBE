@@ -1746,6 +1746,15 @@ export async function createProjectEnquiry(data: {
       mobileNo: data.mobileNo,
       query: data.query || null,
     },
+    include: {
+      projects: {
+        select: {
+          id: true,
+          projectName: true,
+          slug: true,
+        },
+      },
+    },
   });
   return projectEnquiry;
 }
@@ -1788,11 +1797,11 @@ export async function getLegacyProjects(
     ...(category ? { category } : {}),
     ...(search
       ? {
-          OR: [
-            { name: { contains: search, mode: "insensitive" } },
-            { location: { contains: search, mode: "insensitive" } },
-          ],
-        }
+        OR: [
+          { name: { contains: search, mode: "insensitive" } },
+          { location: { contains: search, mode: "insensitive" } },
+        ],
+      }
       : {}),
   };
 

@@ -17,6 +17,7 @@ import {
 } from "../instagramReel/instagramToken.service.js";
 import axios from "axios";
 import { sendEmail } from "../../utils/email.utils.js";
+import { sendParamantraLead } from "../../utils/paramantra.utils.js";
 
 // new controller start here
 export const getPageBySlug = asyncHandler(
@@ -218,7 +219,7 @@ export const getBlogs = asyncHandler(async (req: Request, res: Response) => {
 
 export const getMediaCoverage = asyncHandler(
   async (req: Request, res: Response) => {
-    const { mediaType, isHome,  } = req.query;
+    const { mediaType, isHome, } = req.query;
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const filter: any = {};
@@ -509,7 +510,7 @@ export const getTestimonials = asyncHandler(
         : undefined;
 
     const filter: any = {};
-   if (fileType) {
+    if (fileType) {
       filter.fileType = fileType;
     }
     if (isFeature !== undefined) {
@@ -560,13 +561,13 @@ export const getHomeLoan = asyncHandler(async (req: Request, res: Response) => {
   successResponse(res, 200, "Home Loan fetched successfully", homeLoan);
 });
 
-export const getHomeLoanAssistance = asyncHandler(async (req: Request, res: Response)=>{
+export const getHomeLoanAssistance = asyncHandler(async (req: Request, res: Response) => {
   const homeLoanAssistance = await websiteServices.getHomeLoanAssistance();
   await Promise.all(
-    homeLoanAssistance.map(async (item: any)=>{
-      if(item.files && typeof item.files === "object"){
-        for(const [key, value] of Object.entries(item.files)){
-          if(typeof value === "string" && value){
+    homeLoanAssistance.map(async (item: any) => {
+      if (item.files && typeof item.files === "object") {
+        for (const [key, value] of Object.entries(item.files)) {
+          if (typeof value === "string" && value) {
             (item.files as any)[key] = await getFileUrl(value);
           }
         }
@@ -1055,7 +1056,7 @@ export const getFilterConstructionYears = asyncHandler(
 export const getJobs = asyncHandler(async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;
-  const {  jobType, search } = req.query;
+  const { jobType, search } = req.query;
 
   const filters = {
     jobType: typeof jobType === "string" ? jobType : undefined,
@@ -1502,7 +1503,7 @@ export const createContactEnquiry = asyncHandler(
             "Full Name": fullName,
             "Email Address": emailAddress,
             "Mobile No": mobileNo,
-            "Location":location,
+            "Location": location,
             "Message": query,
             "Page URL": pageUrl || "N/A"
           }
@@ -1537,6 +1538,21 @@ export const createProjectEnquiry = asyncHandler(
       mobileNo,
       query,
     });
+
+    try {
+      await sendParamantraLead({
+        fullName,
+        emailAddress,
+        mobileNo,
+        query,
+        projectId,
+        project: enquiry.projects?.projectName,
+        projectName: enquiry.projects?.projectName,
+      });
+    } catch (crmError) {
+      logger.error("Failed to sync project enquiry with Paramantra CRM:", crmError);
+    }
+
     successResponse(
       res,
       201,
@@ -1563,7 +1579,7 @@ export const createFloorplanTowerEnquiry = asyncHandler(
       mobileNo,
       message,
     });
-    
+
     successResponse(
       res,
       201,
@@ -1576,12 +1592,12 @@ export const createFloorplanTowerEnquiry = asyncHandler(
 export const verifySmsOtp = asyncHandler(
   async (req: Request, res: Response) => {
     const { mobileNo, otp } = req.body;
-    
+
     await websiteServices.verifySmsOtp({
       mobileNo,
       otp,
     });
-    
+
     successResponse(
       res,
       200,
