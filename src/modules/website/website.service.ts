@@ -1698,9 +1698,15 @@ export async function createFloorplanTowerEnquiry(data: {
       message: data.message || null,
       isVerified: false,
     },
-    include: {
-      projects: true
-    }
+      include: {
+      projects: {
+        select: {
+          id: true,
+          projectName: true,
+          slug: true,
+        },
+      },
+    },
   });
 
   return enquiry;

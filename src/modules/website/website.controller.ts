@@ -1580,6 +1580,21 @@ export const createFloorplanTowerEnquiry = asyncHandler(
       message,
     });
 
+    try {
+      await sendParamantraLead({
+        fullName,
+        emailAddress,
+        mobileNo,
+        query: message,
+        message,
+        projectId,
+        project: enquiry.projects?.projectName,
+        projectName: enquiry.projects?.projectName,
+      });
+    } catch (crmError) {
+      logger.error("Failed to sync floorplan tower enquiry with Paramantra CRM:", crmError);
+    }
+
     successResponse(
       res,
       201,
