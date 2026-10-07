@@ -29,6 +29,7 @@ async function main() {
       { name: "Faq", type: "faq" },
       { name: "Sustainability", type: "sustainability" },
       { name: "Zone", type: "zone" },
+      { name: "Rera", type: "rera" },
     ],
     skipDuplicates: true,
   });

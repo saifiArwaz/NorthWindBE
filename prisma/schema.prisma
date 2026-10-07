@@ -30,6 +30,7 @@ enum ProjectSectionTypes {
   faq
   sustainability
   zone
+  rera
 }
 
 enum ProjectFloorPlanTypes {
