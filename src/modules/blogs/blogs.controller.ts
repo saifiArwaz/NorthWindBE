@@ -6,6 +6,9 @@ import { ApiError } from "../../utils/apiError.utils.js";
 import { deleteFromS3 } from "../../utils/fileHandling.utils.js";
 import { getFileUrl } from "../../utils/fileHandling.utils.js";
 import type { S3UploadedFile } from "../../middlewares/multer-s3.middleware.js";
+import slugifyPkg from "slugify";
+const slugify = (slugifyPkg as any).default ?? slugifyPkg;
+
 
 export const create = asyncHandler(async (req: Request, res: Response) => {
   const user = req.user as { id?: string };
@@ -107,6 +110,19 @@ export const update = asyncHandler(async (req: Request, res: Response) => {
     throw new ApiError(404, "Record not found");
   }
 
+
+  let slug = oldRecord.slug;
+  if (req.body.title) {
+    slug = slugify(req.body.slug || req.body.title, {
+      lower: true,
+      strict: true,
+    });
+    const exists = await blogService.findFirst(id, slug);
+    if (exists) {
+      throw new ApiError(400, "Blog name already exists");
+    }
+  }
+
   /** 1. Normalize uploaded files */
   const allFiles: any[] = Array.isArray(req.files)
     ? req.files
@@ -185,18 +201,18 @@ export const deleteById = asyncHandler(async (req: Request, res: Response) => {
   if (!page) {
     throw new ApiError(404, "Blog not found");
   }
-  // const fileFields = [];
-  // if (page.files && typeof page.files === 'object') {
-  //      const filesObj = page.files as any;
-  //      for (const key of Object.keys(filesObj)) {
-  //           if (filesObj[key]) {
-  //                fileFields.push(filesObj[key]);
-  //           }
-  //      }
-  // }
-  // for (const file of fileFields) {
-  //      file && await deleteFromS3(file);
-  // }
+  const fileFields = [];
+  if (page.files && typeof page.files === 'object') {
+       const filesObj = page.files as any;
+       for (const key of Object.keys(filesObj)) {
+            if (filesObj[key]) {
+                 fileFields.push(filesObj[key]);
+            }
+       }
+  }
+  for (const file of fileFields) {
+       file && await deleteFromS3(file);
+  }
 
   await blogService.deleteBlogById(id);
   successResponse(res, 200, "Blog deleted successfully");
@@ -412,5 +428,47 @@ export const changeisHome = asyncHandler(
     );
 
     successResponse(res, 200, "isHome updated successfully", updatedRecord);
+  },
+);
+
+export const destroySinglefile = asyncHandler(
+  async (req: Request, res: Response) => {
+    const id = req.params.id as string;
+    const keyToDelete = req.body.key as string;
+
+    if (!keyToDelete) {
+      throw new ApiError(400, "File key to delete is required");
+    }
+
+    const pageSection = await blogService.getBlogById(id);
+    if (!pageSection) {
+      throw new ApiError(404, "Page section not found");
+    }
+
+    let filesObj: Record<string, any> = {};
+
+    if (pageSection.files && typeof pageSection.files === "object") {
+      filesObj = { ...(pageSection.files as any) };
+    } else {
+      throw new ApiError(400, "Files object is not present or invalid");
+    }
+
+    const fileKeyValue = filesObj[keyToDelete];
+    if (!fileKeyValue) {
+      throw new ApiError(404, "File key not found in files object");
+    }
+
+    await deleteFromS3(fileKeyValue);
+    delete filesObj[keyToDelete];
+
+    const updatedRecord = await blogService.updateBlog(id, {
+      files: filesObj,
+    });
+
+    successResponse(
+      res,
+      200,
+      "File deleted and files object updated successfully",
+    );
   },
 );

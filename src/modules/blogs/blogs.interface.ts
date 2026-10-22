@@ -20,7 +20,7 @@ export interface IBlogUpdateDTO {
   description?: string;
   alt?: string;
   watermark?: string;
-  files?: string;
+  files?:  Record<string, any>;
   status?: boolean;
   seoTags?: any | null;
   isFeature?: boolean;

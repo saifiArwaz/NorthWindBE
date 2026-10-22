@@ -75,32 +75,32 @@ export async function getAllBlog(
 
 export async function updateBlog(id: string, data: IBlogUpdateDTO) {
   // added for slug generate
-  let slug = data.slug;
+  // let slug = data.slug;
 
-  if (data.slug) {
-    slug = slugify(data.slug, { lower: true });
-    const existing = await prisma.blogs.findFirst({
-      where: { slug: data.slug, NOT: { id } },
-    });
-    if (existing) throw new ApiError(400, "Slug already exists");
-  }
-  if(!data.slug){
-    slug = slugify(data.title, { lower: true });
-    const existing = await prisma.blogs.findFirst({ where: { slug } });
-    if (existing) throw new ApiError(400, "Slug already exists");
-  }
+  // if (data.slug) {
+  //   slug = slugify(data.slug, { lower: true });
+  //   const existing = await prisma.blogs.findFirst({
+  //     where: { slug: data.slug, NOT: { id } },
+  //   });
+  //   if (existing) throw new ApiError(400, "Slug already exists");
+  // }
+  // if(!data.slug){
+  //   slug = slugify(data.title, { lower: true });
+  //   const existing = await prisma.blogs.findFirst({ where: { slug } });
+  //   if (existing) throw new ApiError(400, "Slug already exists");
+  // }
 
-  if (data.title) {
-    const existing = await prisma.blogs.findFirst({
-      where: {
-        title: data.title,
-        NOT: { id },
-      },
-    });
-    if (existing) {
-      throw new ApiError(400, "Title already exists");
-    }
-  }
+  // if (data.title) {
+  //   const existing = await prisma.blogs.findFirst({
+  //     where: {
+  //       title: data.title,
+  //       NOT: { id },
+  //     },
+  //   });
+  //   if (existing) {
+  //     throw new ApiError(400, "Title already exists");
+  //   }
+  // }
   const prismaData = Object.fromEntries(
     Object.entries({
       title: data.title,
@@ -198,6 +198,15 @@ export async function updateIsHome(id: string, isHome: boolean, updatedBy?: stri
       ...(updatedBy && {
         updatedUser: { connect: { id: updatedBy } },
       }),
+    },
+  });
+}
+
+export async function findFirst(id: string, slug: string) {
+  return prisma.blogs.findFirst({
+    where: {
+      slug,
+      NOT: { id },
     },
   });
 }

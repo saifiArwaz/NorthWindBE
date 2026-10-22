@@ -41,5 +41,6 @@ router.patch(
   blogCtrl.changeSeq,
 );
 router.delete("/:id", blogCtrl.deleteById);
+router.delete("/:id/file", uploaded, blogCtrl.destroySinglefile);
 
 export { router as BlogRoutes };
